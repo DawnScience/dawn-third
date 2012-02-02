@@ -54,7 +54,7 @@ public class XYGraph extends Figure{
 	};
 	
 	private int traceNum = 0;
-	private boolean transparent = true;
+	protected boolean transparent = true;
 	private boolean showLegend = true;
 	
 	private Map<Axis, Legend> legendMap;
@@ -69,7 +69,7 @@ public class XYGraph extends Figure{
 	
 	private List<Axis> xAxisList;
 	private List<Axis> yAxisList;
-	private PlotArea plotArea;
+	protected PlotArea plotArea;
 	
 	// TODO Clients can set these to null. Should these be 'final'? Or provider getter?
 	public Axis primaryXAxis;
@@ -91,7 +91,7 @@ public class XYGraph extends Figure{
 		//titleLabel.setVisible(false);
 		xAxisList = new ArrayList<Axis>();
 		yAxisList = new ArrayList<Axis>();
-		plotArea = new PlotArea(this);
+		plotArea =  createPlotArea();
 		getPlotArea().setOpaque(!transparent);
 
 		add(titleLabel);		
@@ -111,6 +111,10 @@ public class XYGraph extends Figure{
 		this.showLegend = Activator.getDefault().getPreferenceStore().getBoolean(XYConstants.XY_SHOWLEGEND);
 	}
 	
+	protected PlotArea createPlotArea() {
+		return new PlotArea(this);
+	}
+
 	@Override
 	public boolean isOpaque() {
 		return false;

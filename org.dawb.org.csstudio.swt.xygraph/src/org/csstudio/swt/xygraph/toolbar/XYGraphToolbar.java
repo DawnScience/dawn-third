@@ -57,9 +57,9 @@ public class XYGraphToolbar extends Figure {
 	
     private final static int BUTTON_SIZE = 25;
 
-    final private XYGraph xyGraph;
+    final protected XYGraph xyGraph;
 	
-	final private ButtonGroup zoomGroup;
+	final protected ButtonGroup zoomGroup;
 	
 	public XYGraphToolbar(final XYGraph xyGraph) {		
 	    this(xyGraph, XYGraphFlags.COMBINED_ZOOM);
@@ -292,10 +292,10 @@ public class XYGraphToolbar extends Figure {
      *  @see XYGraphFlags#COMBINED_ZOOM
      *  @see XYGraphFlags#SEPARATE_ZOOM
 	 */
-	private void createZoomButtons(final int flags) {
+	protected void createZoomButtons(final int flags) {
 		for(final ZoomType zoomType : ZoomType.values()){
-		    if (! zoomType.useWithFlags(flags))
-		        continue;
+		    if (! zoomType.useWithFlags(flags)) continue;
+		    
 			final ImageFigure imageFigure =  new ImageFigure(zoomType.getIconImage());
 			final Label tip = new Label(zoomType.getDescription());
 			final ToggleButton button = new ToggleButton(imageFigure);
@@ -332,7 +332,7 @@ public class XYGraphToolbar extends Figure {
 		add(separator);
 	}
 	
-	private static final class ToolbarSeparator extends Figure{
+	protected static final class ToolbarSeparator extends Figure{
 		
 		private final Color GRAY_COLOR = XYGraphMediaFactory.getInstance().getColor(
 				new RGB(130, 130, 130));
@@ -352,9 +352,7 @@ public class XYGraphToolbar extends Figure {
 	 * @param xyGraph
 	 * @param man
 	 */
-	public static void createGraphActions(final XYGraph xyGraph, final IContributionManager tool, final IContributionManager men) {
-
-        final XYGraphToolbar fig = new XYGraphToolbar(xyGraph);
+	public static void createGraphActions(final XYGraphToolbar fig, final IContributionManager tool, final IContributionManager men) {
         
         final CheckableActionGroup zoomG = new CheckableActionGroup();
         
