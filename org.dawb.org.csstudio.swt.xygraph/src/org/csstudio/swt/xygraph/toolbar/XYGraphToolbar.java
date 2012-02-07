@@ -99,7 +99,7 @@ public class XYGraphToolbar extends Figure {
 		showLegend.setSelected(showLeg);
 		xyGraph.setDefaultShowLegend(showLeg);
 		
-		addSeparator();	
+		addSeparator("org.csstudio.swt.xygraph.toolbar.showLegend");	
 		final Button addAnnotationButton = new Button(createImage("icons/Add_Annotation.png"));
 		addAnnotationButton.setToolTip(new Label("Add Annotation..."));		
 		addButton(addAnnotationButton);
@@ -130,10 +130,9 @@ public class XYGraphToolbar extends Figure {
 			}
 		});
 		
-		addSeparator();	
-		
-		createExtraActions();
-		
+		addSeparator("org.csstudio.swt.xygraph.toolbar.annotation");	
+		addSeparator("org.csstudio.swt.xygraph.toolbar.extra");	
+				
 		if ((flags & XYGraphFlags.STAGGER) > 0)
 		{	//stagger axes button
     		final Button staggerButton = new Button(createImage("icons/stagger.png"));
@@ -161,16 +160,12 @@ public class XYGraphToolbar extends Figure {
 		zoomGroup = new ButtonGroup();
 		createZoomButtons(flags);
 	
-		addSeparator();		
+		addSeparator("org.csstudio.swt.xygraph.toolbar.undoredo");		
 		addUndoRedoButtons();
 		
-		addSeparator();
+		addSeparator("org.csstudio.swt.xygraph.toolbar.snapshot");		
 		addSnapshotButton();
 	}
-
-    protected void createExtraActions() {
-    	// Do nothing by default
-    }
 	
 	private static Image createImage(String path) {			
 		Image image = XYGraphMediaFactory.getInstance().getImageFromPlugin(Activator.getDefault(),
@@ -328,13 +323,18 @@ public class XYGraphToolbar extends Figure {
 		add(button);
 	}
 	
-	public void addSeparator() {
-		ToolbarSeparator separator = new ToolbarSeparator();
+	public void addSeparator(final String id) {
+		ToolbarSeparator separator = new ToolbarSeparator(id);
 		separator.setPreferredSize(BUTTON_SIZE/2, BUTTON_SIZE);
 		add(separator);
 	}
 	
 	protected static final class ToolbarSeparator extends Figure{
+		
+		protected String id;
+		ToolbarSeparator(String id) {
+			this.id = id;
+		}
 		
 		private final Color GRAY_COLOR = XYGraphMediaFactory.getInstance().getColor(
 				new RGB(130, 130, 130));
@@ -346,6 +346,10 @@ public class XYGraphToolbar extends Figure {
 			graphics.setLineWidth(1);
 			graphics.drawLine(bounds.x + bounds.width/2, bounds.y, 
 					bounds.x + bounds.width/2, bounds.y + bounds.height);
+		}
+		
+		public String getId() {
+			return id;
 		}
 	}
 
@@ -420,8 +424,8 @@ public class XYGraphToolbar extends Figure {
         	    
         	} else if (c instanceof ToolbarSeparator) {
         		
-           		tool.add(new Separator(ToolbarSeparator.class.getName()+Math.random()));
-           		men.add(new Separator(ToolbarSeparator.class.getName()+Math.random()));
+           		tool.add(new Separator(((ToolbarSeparator)c).getId()));
+           		men.add(new Separator(((ToolbarSeparator)c).getId()));
         	}
 		}
 	}
