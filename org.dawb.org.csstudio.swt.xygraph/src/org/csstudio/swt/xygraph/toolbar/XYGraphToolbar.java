@@ -131,6 +131,9 @@ public class XYGraphToolbar extends Figure {
 		});
 		
 		addSeparator();	
+		
+		createExtraActions();
+		
 		if ((flags & XYGraphFlags.STAGGER) > 0)
 		{	//stagger axes button
     		final Button staggerButton = new Button(createImage("icons/stagger.png"));
@@ -165,10 +168,9 @@ public class XYGraphToolbar extends Figure {
 		addSnapshotButton();
 	}
 
-//	@Override
-//	public boolean isOpaque() {
-//		return true;
-//	}
+    protected void createExtraActions() {
+    	// Do nothing by default
+    }
 	
 	private static Image createImage(String path) {			
 		Image image = XYGraphMediaFactory.getInstance().getImageFromPlugin(Activator.getDefault(),
@@ -352,11 +354,11 @@ public class XYGraphToolbar extends Figure {
 	 * @param xyGraph
 	 * @param man
 	 */
-	public static void createGraphActions(final XYGraphToolbar fig, final IContributionManager tool, final IContributionManager men) {
+	public void createGraphActions(final IContributionManager tool, final IContributionManager men) {
         
         final CheckableActionGroup zoomG = new CheckableActionGroup();
         
-        for (Object child : fig.getChildren()) {
+        for (Object child : getChildren()) {
 			
         	if (!(child instanceof Figure)) continue;
         	final Figure c = (Figure)child;
@@ -411,7 +413,7 @@ public class XYGraphToolbar extends Figure {
 				
 				tool.add(action);
 				men.add(action);
-        	    final List models = fig.zoomGroup.getElements();
+        	    final List models = zoomGroup.getElements();
         	    if (models.contains(button.getModel())) {
         	    	zoomG.add(action);
         	    }

@@ -1,5 +1,6 @@
 Manifest-Version: 1.0
-Export-Package: org.csstudio.swt.xygraph.dataprovider,
+Export-Package: org.csstudio.swt.xygraph,
+ org.csstudio.swt.xygraph.dataprovider,
  org.csstudio.swt.xygraph.figures,
  org.csstudio.swt.xygraph.linearscale,
  org.csstudio.swt.xygraph.toolbar,

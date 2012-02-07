@@ -28,7 +28,7 @@ import org.eclipse.ui.PlatformUI;
  * @author Kay Kasemir - Axis zoom/pan tweaks
  */
 public class PlotArea extends Figure {
-    final private XYGraph xyGraph;
+    final protected XYGraph xyGraph;
 	final private List<Trace> traceList = new ArrayList<Trace>();
 	final private List<Grid> gridList = new ArrayList<Grid>();
 	final private List<Annotation> annotationList = new ArrayList<Annotation>();
