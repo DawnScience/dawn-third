@@ -80,9 +80,7 @@ public class XYGraphToolbar extends Figure {
 		addButton(configButton);
 		configButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent event) {
-				XYGraphConfigDialog dialog = new XYGraphConfigDialog(
-						Display.getCurrent().getActiveShell(), xyGraph);
-				dialog.open();
+				openConfigurationDialog();
 			}
 		});
 		
@@ -316,6 +314,12 @@ public class XYGraphToolbar extends Figure {
 			if(zoomType == ZoomType.NONE)
 				zoomGroup.setDefault(model);
 		}
+	}
+	
+	protected void openConfigurationDialog() {
+		XYGraphConfigDialog dialog = new XYGraphConfigDialog(
+				Display.getCurrent().getActiveShell(), xyGraph);
+		dialog.open();
 	}
 	
 	public void addButton(Clickable button){

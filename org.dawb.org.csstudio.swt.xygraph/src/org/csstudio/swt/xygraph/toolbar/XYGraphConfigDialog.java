@@ -37,11 +37,11 @@ public class XYGraphConfigDialog extends Dialog {
 	private List<AnnotationConfigPage> annotationConfigPageList;
 	private List<AxisConfigPage> axisConfigPageList;
 	private List<TraceConfigPage> traceConfigPageList;
-	private XYGraph xyGraph;
+	protected XYGraph xyGraph;
 	private XYGraphConfigCommand command;
 	private boolean changed = false;
 	
-	protected XYGraphConfigDialog(Shell parentShell, XYGraph xyGraph) {
+	public XYGraphConfigDialog(Shell parentShell, XYGraph xyGraph) {
 		super(parentShell);	
 		this.xyGraph = xyGraph;
 		graphConfigPage = new GraphConfigPage(xyGraph);
@@ -245,7 +245,7 @@ public class XYGraphConfigDialog extends Dialog {
 		super.okPressed();
 	}
 	
-	private void applyChanges(){	
+	protected void applyChanges(){	
 		changed = true;
 		graphConfigPage.applyChanges();
 		for(AxisConfigPage axisConfigPage : axisConfigPageList)
