@@ -11,14 +11,19 @@ import org.csstudio.swt.xygraph.figures.XYGraph;
  */
 public class XYGraphConfigCommand implements IUndoableCommand {
 
-	private XYGraph xyGraph;
-	private XYGraphMemento previousXYGraphMem, afterXYGraphMem;
+	protected XYGraph xyGraph;
+	protected XYGraphMemento previousXYGraphMem, afterXYGraphMem;
 	
 	public XYGraphConfigCommand(XYGraph xyGraph) {
 		this.xyGraph = xyGraph;
 		previousXYGraphMem = new XYGraphMemento();		
 		afterXYGraphMem = new XYGraphMemento();
 		
+		createDefaultSettings();
+		
+	}
+
+	protected void createDefaultSettings() {
 		for(int i =0; i< xyGraph.getPlotArea().getAnnotationList().size(); i++){
 			previousXYGraphMem.addAnnotationMemento(new AnnotationMemento());
 			afterXYGraphMem.addAnnotationMemento(new AnnotationMemento());
@@ -33,7 +38,6 @@ public class XYGraphConfigCommand implements IUndoableCommand {
 			previousXYGraphMem.addTraceMemento(new TraceMemento());
 			afterXYGraphMem.addTraceMemento(new TraceMemento());
 		}
-		
 	}
 
 	public void redo() {
@@ -57,7 +61,7 @@ public class XYGraphConfigCommand implements IUndoableCommand {
 		return "Configure XYGraph Settings";
 	}
 	
-	private void saveXYGraphPropsToMemento(XYGraph xyGraph, XYGraphMemento memento){
+	protected void saveXYGraphPropsToMemento(XYGraph xyGraph, XYGraphMemento memento){
 		memento.setTitle(xyGraph.getTitle());
 		memento.setTitleFont(xyGraph.getTitleFont());
 		memento.setTitleColor(xyGraph.getTitleColor());
@@ -81,7 +85,7 @@ public class XYGraphConfigCommand implements IUndoableCommand {
 			saveTracePropsToMemento(trace, memento.getTraceMementoList().get(i++));
 	}
 	
-	private void restoreXYGraphPropsFromMemento(XYGraph xyGraph, XYGraphMemento memento){
+	protected void restoreXYGraphPropsFromMemento(XYGraph xyGraph, XYGraphMemento memento){
 		xyGraph.setTitle(memento.getTitle());
 		xyGraph.setTitleFont(memento.getTitleFont());
 		xyGraph.setTitleColor(memento.getTitleColor());

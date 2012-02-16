@@ -38,7 +38,7 @@ public class XYGraphConfigDialog extends Dialog {
 	private List<AxisConfigPage> axisConfigPageList;
 	private List<TraceConfigPage> traceConfigPageList;
 	protected XYGraph xyGraph;
-	private XYGraphConfigCommand command;
+	protected XYGraphConfigCommand command;
 	private boolean changed = false;
 	
 	public XYGraphConfigDialog(Shell parentShell, XYGraph xyGraph) {
