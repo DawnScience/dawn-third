@@ -484,6 +484,10 @@ public class Annotation extends Figure implements IAxisListener, IDataProviderLi
 	public void setAnnotationFont(Font annotationFont) {
 		infoLabel.setFont(annotationFont);
 	}
+	
+	public Font getAnnotationFont() {
+		return infoLabel.getFont();
+	}
 
 	/**
 	 * @param cursorLineStyle the cursorLineStyle to set
