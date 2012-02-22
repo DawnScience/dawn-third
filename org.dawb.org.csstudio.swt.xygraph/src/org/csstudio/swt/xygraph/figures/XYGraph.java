@@ -108,7 +108,11 @@ public class XYGraph extends Figure{
 		addAxis(primaryXAxis);
 		
 		operationsManager = new OperationsManager();
-		this.showLegend = Activator.getDefault().getPreferenceStore().getBoolean(XYConstants.XY_SHOWLEGEND);
+		try {
+		    this.showLegend = Activator.getDefault().getPreferenceStore().getBoolean(XYConstants.XY_SHOWLEGEND);
+		} catch (NullPointerException ne) {
+			this.showLegend = true;
+		}
 	}
 	
 	protected PlotArea createPlotArea() {

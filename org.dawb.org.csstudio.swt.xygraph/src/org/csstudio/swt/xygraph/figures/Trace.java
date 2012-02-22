@@ -392,7 +392,8 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
 	public void drawLine(Graphics graphics, Point p1, Point p2){
 		
 		if (traceType == TraceType.STEP_HORIZONTALLY  ||
-            traceType == TraceType.STEP_VERTICALLY) {
+            traceType == TraceType.STEP_VERTICALLY    ||
+            traceType == TraceType.BAR) {
             
 
 		    switch (traceType) {
@@ -414,6 +415,15 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
 		    	graphics.drawLine(pv, p2);
 		    	graphics.popState();
 		    	return;	
+		    	
+			case BAR:
+			    graphics.pushState();
+				if (use_advanced_graphics)
+					graphics.setAlpha(areaAlpha);
+				graphics.setLineStyle(SWT.LINE_SOLID);
+				graphics.drawLine(p1, p2);
+				graphics.popState();
+				return;	
 		    }
 		}
 
@@ -434,12 +444,6 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
 		
 		switch (traceType) {
 		case SOLID_LINE:
-			graphics.setLineStyle(SWT.LINE_SOLID);
-			graphics.drawPolyline(points);
-			break;
-		case BAR:
-		    if (use_advanced_graphics)
-		        graphics.setAlpha(areaAlpha);
 			graphics.setLineStyle(SWT.LINE_SOLID);
 			graphics.drawPolyline(points);
 			break;
@@ -622,7 +626,8 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
     						drawYErrorArea(graphics, predp, dp, predpPos, dpPos);
     					
     					if (traceType == TraceType.STEP_HORIZONTALLY  ||
-                            traceType == TraceType.STEP_VERTICALLY) {
+                            traceType == TraceType.STEP_VERTICALLY    ||
+                            traceType == TraceType.BAR) {
                             drawLine(graphics, predpPos, dpPos);  	
                         } else {
     					    pointList.addPoint(predpPos);

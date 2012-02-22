@@ -93,7 +93,12 @@ public class XYGraphToolbar extends Figure {
 				Activator.getDefault().getPreferenceStore().setValue(XYConstants.XY_SHOWLEGEND, xyGraph.isShowLegend());
 			}
 		});
-		final boolean showLeg = Activator.getDefault().getPreferenceStore().getBoolean(XYConstants.XY_SHOWLEGEND);
+		boolean showLeg = true;
+		try {
+			showLeg = Activator.getDefault().getPreferenceStore().getBoolean(XYConstants.XY_SHOWLEGEND);
+		} catch (NullPointerException ne) {
+			showLeg = true;
+		}
 		showLegend.setSelected(showLeg);
 		xyGraph.setDefaultShowLegend(showLeg);
 		
