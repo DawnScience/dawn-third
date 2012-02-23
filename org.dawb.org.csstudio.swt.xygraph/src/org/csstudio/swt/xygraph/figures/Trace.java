@@ -8,8 +8,8 @@ import org.csstudio.swt.xygraph.dataprovider.IDataProvider;
 import org.csstudio.swt.xygraph.dataprovider.IDataProviderListener;
 import org.csstudio.swt.xygraph.dataprovider.ISample;
 import org.csstudio.swt.xygraph.dataprovider.Sample;
-import org.csstudio.swt.xygraph.linearscale.Range;
 import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
+import org.csstudio.swt.xygraph.linearscale.Range;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Point;
@@ -144,7 +144,7 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
 		PLUS,		
 		MINUS,
 		BOTH;
-		
+	
 		public static String[] stringValues(){
 			String[] sv = new String[values().length];
 			int i=0;
@@ -156,6 +156,11 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
 
 	
 	private String name;
+	
+	/**
+	 * Not used for label in UI.
+	 */
+	private String internalName;
 	
 	private IDataProvider traceDataProvider;
 	
@@ -1250,6 +1255,16 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
 
 	public boolean isDisposed() {
 		return xyGraph==null;
+	}
+
+
+	public String getInternalName() {
+		return internalName;
+	}
+
+
+	public void setInternalName(String internalName) {
+		this.internalName = internalName;
 	}
 
 
