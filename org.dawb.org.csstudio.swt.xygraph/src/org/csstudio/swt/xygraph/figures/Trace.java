@@ -1259,7 +1259,8 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
 
 
 	public String getInternalName() {
-		return internalName;
+		if (internalName!=null) return internalName;
+		return getName();
 	}
 
 
