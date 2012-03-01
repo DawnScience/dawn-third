@@ -581,6 +581,11 @@ public class Annotation extends Figure implements IAxisListener, IDataProviderLi
 	}
 
 
+	public void setLocation(double x, double y) {
+		this.xValue = x;
+		this.yValue = y;
+		repaint();
+	}
 
 /**
 	 * @return the xAxis
@@ -765,6 +770,7 @@ class Pointer extends Figure{
 				
 	}
 }
+
 
 
 }
