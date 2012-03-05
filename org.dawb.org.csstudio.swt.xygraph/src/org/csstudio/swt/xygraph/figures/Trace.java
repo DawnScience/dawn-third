@@ -539,8 +539,10 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
     					hotSampleist.add(nanSample);
     				}
     				// Is data point in the plot area?
-                    boolean dpInRange = dpInXRange &&
-                                        yAxis.getRange().inRange(dp.getYValue());
+                    boolean dpInRange = dpInXRange || yAxis.getRange().inRange(dp.getYValue());
+                    // NOTE Use || here not && as if a point is in either range, it should be
+                    // included or the plot will draw funny things when zoomed in.                  
+                    
     				//draw point
     				if(dpInRange){
     					dpPos = new Point(xAxis.getValuePosition(dp.getXValue(), false),
