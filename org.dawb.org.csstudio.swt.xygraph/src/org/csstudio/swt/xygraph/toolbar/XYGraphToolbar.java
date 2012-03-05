@@ -170,13 +170,13 @@ public class XYGraphToolbar extends Figure {
 		addSnapshotButton();
 	}
 	
-	private static Image createImage(String path) {			
+	protected static Image createImage(String path) {			
 		Image image = XYGraphMediaFactory.getInstance().getImageFromPlugin(Activator.getDefault(),
 				Activator.PLUGIN_ID, path);				
 		return image;
 	}
 	
-	private void addSnapshotButton() {
+	protected void addSnapshotButton() {
 		Button snapShotButton = new Button(createImage("icons/camera.gif"));
 		snapShotButton.setToolTip(new Label("Print scaled image to printer"));
 		addButton(snapShotButton);
