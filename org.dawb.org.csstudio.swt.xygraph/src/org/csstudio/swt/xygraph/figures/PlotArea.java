@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * Copyright (c) 2010 Oak Ridge National Laboratory.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ ******************************************************************************/
 package org.csstudio.swt.xygraph.figures;
 
 import java.util.ArrayList;
@@ -7,6 +14,7 @@ import org.csstudio.swt.xygraph.linearscale.Range;
 import org.csstudio.swt.xygraph.undo.SaveStateCommand;
 import org.csstudio.swt.xygraph.undo.ZoomCommand;
 import org.csstudio.swt.xygraph.undo.ZoomType;
+import org.csstudio.swt.xygraph.util.SWTConstants;
 import org.csstudio.swt.xygraph.util.XYGraphMediaFactory;
 import org.csstudio.swt.xygraph.util.XYGraphMediaFactory.CURSOR_TYPE;
 import org.eclipse.draw2d.Figure;
@@ -16,42 +24,41 @@ import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
 
 /**The plot area figure.
  * @author Xihui Chen
  * @author Kay Kasemir - Axis zoom/pan tweaks
  */
 public class PlotArea extends Figure {
-    final protected XYGraph xyGraph;
+    public static final String BACKGROUND_COLOR = "background_color"; //$NON-NLS-1$
+	final protected XYGraph xyGraph;
 	final private List<Trace> traceList = new ArrayList<Trace>();
 	final private List<Grid> gridList = new ArrayList<Grid>();
 	final private List<Annotation> annotationList = new ArrayList<Annotation>();
-	
+
 	final private Cursor grabbing;
 
-	private boolean showBorder;	
-	
+	private boolean showBorder;
+
 	private ZoomType zoomType;
-	
+
 	private Point start;
 	private Point end;
 	private boolean armed;
-	
-	private Color revertBackColor;
-	
+
+	private Color revertBackColor;	
+
 	public PlotArea(final XYGraph xyGraph) {
 		this.xyGraph = xyGraph;
-		setBackgroundColor(XYGraph.WHITE_COLOR);
-		setForegroundColor(XYGraph.BLACK_COLOR);		
+		setBackgroundColor(XYGraphMediaFactory.getInstance().getColor(255,255,255));
+		setForegroundColor(XYGraphMediaFactory.getInstance().getColor(0,0,0));
 		setOpaque(true);
 		RGB backRGB = getBackgroundColor().getRGB();
-		revertBackColor = XYGraphMediaFactory.getInstance().getColor(255- backRGB.red, 
+		revertBackColor = XYGraphMediaFactory.getInstance().getColor(255- backRGB.red,
 				255 - backRGB.green, 255 - backRGB.blue);
 		PlotMouseListener zoomer = new PlotMouseListener();
 		addMouseListener(zoomer);
@@ -59,16 +66,18 @@ public class PlotArea extends Figure {
 		grabbing = XYGraphMediaFactory.getCursor(CURSOR_TYPE.GRABBING);
 		zoomType = ZoomType.NONE;
 	}
-	
+
 	@Override
 	public void setBackgroundColor(final Color bg) {
 		RGB backRGB = bg.getRGB();
-		revertBackColor = XYGraphMediaFactory.getInstance().getColor(255- backRGB.red, 
-				255 - backRGB.green, 255 - backRGB.blue);
+		revertBackColor = XYGraphMediaFactory.getInstance().getColor(255- backRGB.red,
+				255 - backRGB.green, 255 - backRGB.blue);	
+		Color oldColor = getBackgroundColor();
 		super.setBackgroundColor(bg);
-		
+		firePropertyChange(BACKGROUND_COLOR, oldColor, bg);
+
 	}
-	
+
 	/**Add a trace to the plot area.
 	 * @param trace the trace to be added.
 	 */
@@ -76,12 +85,13 @@ public class PlotArea extends Figure {
 		traceList.add(trace);
 		add(trace);
 		revalidate();
-	}
+	}	
 	
+
 	/**Remove a trace from the plot area.
 	 * @param trace
 	 * @return true if this plot area contained the specified trace
-	 */	
+	 */
 	public boolean removeTrace(final Trace trace){
 		boolean result = traceList.remove(trace);
 		if(result){
@@ -90,7 +100,7 @@ public class PlotArea extends Figure {
 		}
 		return result;
 	}
-	
+
 	/**Add a grid to the plot area.
 	 * @param grid the grid to be added.
 	 */
@@ -99,11 +109,11 @@ public class PlotArea extends Figure {
 		add(grid);
 		revalidate();
 	}
-	
+
 	/**Remove a grid from the plot area.
 	 * @param grid the grid to be removed.
 	 * @return true if this plot area contained the specified grid
-	 */	
+	 */
 	public boolean removeGrid(final Grid grid){
 	    final boolean result = gridList.remove(grid);
 		if(result){
@@ -112,9 +122,9 @@ public class PlotArea extends Figure {
 		}
 		return result;
 	}
-	
-	
-	
+
+
+
 	/**Add an annotation to the plot area.
 	 * @param annotation the annotation to be added.
 	 */
@@ -124,11 +134,11 @@ public class PlotArea extends Figure {
 		add(annotation);
 		revalidate();
 	}
-	
+
 	/**Remove a annotation from the plot area.
 	 * @param annotation the annotation to be removed.
 	 * @return true if this plot area contained the specified annotation
-	 */	
+	 */
 	public boolean removeAnnotation(final Annotation annotation){
 	    final boolean result = annotationList.remove(annotation);
 		if(!annotation.isFree())
@@ -139,9 +149,9 @@ public class PlotArea extends Figure {
 		}
 		return result;
 	}
-	
-	
-	
+
+
+
 	@Override
 	protected void layout() {
 	    final Rectangle clientArea = getClientArea();
@@ -149,27 +159,27 @@ public class PlotArea extends Figure {
 			if(trace != null && trace.isVisible())
 				//Shrink will make the trace has no intersection with axes,
 				//which will make it only repaints the trace area.
-				trace.setBounds(clientArea);//.getCopy().shrink(1, 1));				
-		}		
+				trace.setBounds(clientArea);//.getCopy().shrink(1, 1));
+		}
 		for(Grid grid : gridList){
 			if(grid != null && grid.isVisible())
 				grid.setBounds(clientArea);
 		}
-		
+
 		for(Annotation annotation : annotationList){
 			if(annotation != null && annotation.isVisible())
 				annotation.setBounds(clientArea);//.getCopy().shrink(1, 1));
 		}
 		super.layout();
 	}
-	
+
 	@Override
 	protected void paintClientArea(final Graphics graphics) {
 		super.paintClientArea(graphics);
 		if(showBorder){
 			graphics.setLineWidth(2);
 			graphics.drawLine(bounds.x, bounds.y, bounds.x + bounds.width, bounds.y);
-			graphics.drawLine(bounds.x + bounds.width, bounds.y, 
+			graphics.drawLine(bounds.x + bounds.width, bounds.y,
 				bounds.x + bounds.width, bounds.y + bounds.height );
 		}
 		// Show the start/end cursor or the 'rubberband' of a zoom operation?
@@ -178,23 +188,24 @@ public class PlotArea extends Figure {
 			case RUBBERBAND_ZOOM:
 			case HORIZONTAL_ZOOM:
 			case VERTICAL_ZOOM:
-				graphics.setLineStyle(SWT.LINE_DOT);
-				graphics.setLineWidth(1);				
+				graphics.setLineStyle(SWTConstants.LINE_DOT);
+				graphics.setLineWidth(1);
 				graphics.setForegroundColor(revertBackColor);
 				graphics.drawRectangle(start.x, start.y, end.x - start.x, end.y - start.y);
 				break;
-	
+
 			default:
 				break;
 			}
 		}
 	}
-	
+
 	/**
 	 * @param showBorder the showBorder to set
 	 */
 	public void setShowBorder(final boolean showBorder) {
 		this.showBorder = showBorder;
+		repaint();
 	}
 
 	/**
@@ -211,7 +222,7 @@ public class PlotArea extends Figure {
 		this.zoomType = zoomType;
 		setCursor(zoomType.getCursor());
 	}
-	
+
     /** Zoom 'in' or 'out' by a fixed factor
      *  @param horizontally along x axes?
      *  @param vertically along y axes?
@@ -225,15 +236,15 @@ public class PlotArea extends Figure {
     		{
     			final double center = axis.getPositionValue(start.x, false);
     			axis.zoomInOut(center, factor);
-    		}	
+    		}
         if (vertically)
     		for(Axis axis : xyGraph.getYAxisList())
     		{
     		    final double center = axis.getPositionValue(start.y, false);
                 axis.zoomInOut(center, factor);
-    		}		
+    		}
 	}
-	
+
 	/**
 	 * @return the traceList
 	 */
@@ -253,14 +264,14 @@ public class PlotArea extends Figure {
      *  how easy/useful it would be to base them on the same code.
      */
 	class PlotMouseListener extends MouseMotionListener.Stub implements MouseListener
-	{	
+	{
 	    final private List<Range> xAxisStartRangeList = new ArrayList<Range>();
 	    final private List<Range> yAxisStartRangeList = new ArrayList<Range>();
-	        
+
 		private SaveStateCommand command;
-		
-		public void mousePressed(final MouseEvent me)
-        {	
+
+        public void mousePressed(final MouseEvent me)
+        {
             // Only react to 'main' mouse button, only react to 'real' zoom
             if (me.button != 1  ||  zoomType == ZoomType.NONE)
         		return;
@@ -302,8 +313,8 @@ public class PlotArea extends Figure {
         		// Start timer that will zoom while mouse button is pressed
         		Display.getCurrent().timerExec(Axis.ZOOM_SPEED, new Runnable()
         		{
-        			public void run()
-        			{	
+                    public void run()
+        			{
         				if (!armed)
         				    return;
         			    performInOutZoom();
@@ -314,11 +325,11 @@ public class PlotArea extends Figure {
         	default:
         		break;
         	}
-        	
+
         	//add command for undo operation
-        	command = new ZoomCommand(zoomType.getDescription(), 
+        	command = new ZoomCommand(zoomType.getDescription(),
         			xyGraph.getXAxisList(), xyGraph.getYAxisList());
-        	me.consume();			
+        	me.consume();
         }
 
         public void mouseDoubleClicked(final MouseEvent me) { /* Ignored */ }
@@ -330,7 +341,7 @@ public class PlotArea extends Figure {
 				return;
 			switch (zoomType) {
 			case RUBBERBAND_ZOOM:
-				end = me.getLocation();				
+				end = me.getLocation();
 				break;
 			case HORIZONTAL_ZOOM:
 				end = new Point(me.getLocation().x, bounds.y + bounds.height);
@@ -347,7 +358,7 @@ public class PlotArea extends Figure {
 			}
 			PlotArea.this.repaint();
 		}
-		
+
 		@Override
 		public void mouseExited(final MouseEvent me)
 		{
@@ -364,8 +375,8 @@ public class PlotArea extends Figure {
 		    default:
             }
 		}
-		
-		public void mouseReleased(final MouseEvent me)
+
+        public void mouseReleased(final MouseEvent me)
 		{
             if (! armed)
                 return;
@@ -374,18 +385,44 @@ public class PlotArea extends Figure {
 				setCursor(zoomType.getCursor());
 			if(end == null || start == null)
 				return;
-			
+
 			switch (zoomType)
 			{
 			case RUBBERBAND_ZOOM:
+		        for(Axis axis : xyGraph.getXAxisList())
+		        {
+		            final double t1 = axis.getPositionValue(start.x, false);
+		            final double t2 = axis.getPositionValue(end.x, false);
+		            Range range = getNewRange(axis, t1, t2);
+		            axis.setRange(range);
+		        }
+		        for(Axis axis : xyGraph.getYAxisList())
+		        {
+		            final double t1 = axis.getPositionValue(start.y, false);
+		            final double t2 = axis.getPositionValue(end.y, false);
+		            axis.setRange(getNewRange(axis, t1, t2));
+		        }
+		        break;
 			case HORIZONTAL_ZOOM:
+		        for(Axis axis : xyGraph.getXAxisList())
+		        {
+		            final double t1 = axis.getPositionValue(start.x, false);
+		            final double t2 = axis.getPositionValue(end.x, false);
+		            axis.setRange(getNewRange(axis, t1, t2));
+		        }
+		        break;
 			case VERTICAL_ZOOM:
-				performStartEndZoom();
+		        for(Axis axis : xyGraph.getYAxisList())
+		        {
+		            final double t1 = axis.getPositionValue(start.y, false);
+		            final double t2 = axis.getPositionValue(end.y, false);
+		            axis.setRange(getNewRange(axis, t1, t2));
+		        }
 				break;
 			case PANNING:
-				pan();					
+				pan();
 				break;
-			case ZOOM_IN:  
+			case ZOOM_IN:
             case ZOOM_IN_HORIZONTALLY:
             case ZOOM_IN_VERTICALLY:
             case ZOOM_OUT:
@@ -396,18 +433,33 @@ public class PlotArea extends Figure {
 			default:
 				break;
 			}
-			
+
 			if (zoomType != ZoomType.NONE && command != null)
 			{
 				command.saveState();
-				xyGraph.getOperationsManager().addCommand(command);		
+				xyGraph.getOperationsManager().addCommand(command);
 				command = null;
-			}		
-			start = null;			
-            end = null; 
+			}
+			start = null;
+            end = null;
 			PlotArea.this.repaint();
 		}
-		
+
+		/**Get the new Range which will honor its original range direction.
+		 * @param axis the axis whose range should be honored
+		 * @param t1 start	
+		 * @param t2 end
+		 * @return the new range
+		 */
+		private Range getNewRange(Axis axis, final double t1, final double t2) {
+			Range range;
+			if(axis.getRange().isMinBigger()){
+				range = new Range(t1>t2? t1:t2, t1>t2?t2:t1);
+			}else
+				range = new Range(t1>t2? t2:t1, t1>t2?t1:t2);
+			return range;
+		}
+
 	    /** Pan axis according to start/end from mouse listener */
 	    private void pan()
 	    {
@@ -428,25 +480,6 @@ public class PlotArea extends Figure {
 	                     axis.getPositionValue(end.y, false));
 	        }
 	    }
-	    
-	    /** Perform rubberband or horiz/vertical zoom based on
-	     *  mouse pointer start/end coordinates
-	     */
-	    private void performStartEndZoom()
-	    {
-	        for(Axis axis : xyGraph.getXAxisList())
-	        {
-	            final double t1 = axis.getPositionValue(start.x, false);
-	            final double t2 = axis.getPositionValue(end.x, false);
-	            axis.setRange(t1, t2);          
-	        }
-	        for(Axis axis : xyGraph.getYAxisList())
-	        {
-	            final double t1 = axis.getPositionValue(start.y, false);
-	            final double t2 = axis.getPositionValue(end.y, false);
-	            axis.setRange(t1, t2);          
-	        }
-	    }
 
 		/** Perform the in or out zoom according to zoomType */
         private void performInOutZoom()
@@ -462,18 +495,5 @@ public class PlotArea extends Figure {
             default:                   // NOP
             }
         }
-	}
-
-	public void clearTraces() {
-		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-			public void run() {
-				for (Trace trace : traceList) {
-					remove(trace);
-					trace.dispose();
-				}
-			}
-		});
-		traceList.clear();
-		revalidate();
 	}
 }

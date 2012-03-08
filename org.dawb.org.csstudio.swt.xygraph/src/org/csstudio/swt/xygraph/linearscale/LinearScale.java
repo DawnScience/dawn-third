@@ -1,14 +1,6 @@
-/*******************************************************************************
- * Copyright (c) 2008-2009 SWTChart project. All rights reserved. 
- * 
- * This code is distributed under the terms of the Eclipse Public License v1.0
- * which is available at http://www.eclipse.org/legal/epl-v10.html
- *******************************************************************************/
-
 package org.csstudio.swt.xygraph.linearscale;
 
 
-import org.csstudio.swt.xygraph.util.XYGraphMediaFactory;
 import org.eclipse.draw2d.FigureUtilities;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Rectangle;
@@ -29,7 +21,6 @@ import org.eclipse.swt.graphics.Font;
  * 
  * |Margin|______|______|______|______|______|______|Margin| <br>
  * 
- * Part of code of this class is from SWTChart which is available at http://www.swtchart.org/
  *
  * @author Xihui Chen
  *  
@@ -46,7 +37,7 @@ public class LinearScale extends AbstractScale {
         VERTICAL
     }
 
-	private static final int SPACE_BTW_MARK_LABEL = 3;
+	private static final int SPACE_BTW_MARK_LABEL = 2;
     
     /** scale direction, no meaning for round scale */
     private Orientation orientation = Orientation.HORIZONTAL;
@@ -62,8 +53,7 @@ public class LinearScale extends AbstractScale {
     
     private int margin;
     
-    private final static Font DEFAULT_FONT = XYGraphMediaFactory.getInstance().getFont(
-    		XYGraphMediaFactory.FONT_ARIAL);
+ 
     
     /**
      * Constructor.
@@ -74,7 +64,8 @@ public class LinearScale extends AbstractScale {
         tickMarks = new LinearScaleTickMarks(this);                  
         add(tickMarks);        
         add(tickLabels);    
-        setFont(DEFAULT_FONT);
+//        setFont(XYGraphMediaFactory.getInstance().getFont(
+//        		XYGraphMediaFactory.FONT_ARIAL));
  
     }
 	
@@ -162,12 +153,12 @@ public class LinearScale extends AbstractScale {
 
     /**
 	 * Get the position of the value based on scale. 
-	 * @param value the value to find its position. It would be coerced to the range of scale.
+	 * @param value the value to find its position. Support value out of range.
 	 * @param relative return the position relative to the left/bottom bound of the scale if true. 
 	 * If false, return the absolute position which has the scale bounds counted.
 	 * @return position in pixels
 	 */
-	public int getValuePosition(double value, boolean relative) {
+	public int getValuePosition(double value, boolean relative) {		
 		if(dirty)
 			updateTick();
 		//coerce to range		

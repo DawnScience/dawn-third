@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * Copyright (c) 2010 Oak Ridge National Laboratory.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ ******************************************************************************/
 package org.csstudio.swt.xygraph.util;
 
 /** Helper for log10-related computations.
@@ -6,7 +13,7 @@ package org.csstudio.swt.xygraph.util;
 public class Log10
 {
     final static double HUGE_NEGATIVE=-1e100;
-    
+
     /** Adjusted log10 to handle values less or equal to zero.
      *  <p>
      *  The logarithm does not result in real numbers for arguments
@@ -16,11 +23,11 @@ public class Log10
      *  just for the sake of plotting.
      *  <p>
      *  Note that LogarithmicAxis.java in the JFreeChart has another interesting
-     *  idea for modifying the log10 of values &le; 10, resuling in a smooth
+     *  idea for modifying the log10 of values &le; 10, resulting in a smooth
      *  plot for the full real argument range.
-     *  Unfortunately that clobbers values like 1e-7, which might be a 
+     *  Unfortunately that clobbers values like 1e-7, which might be a
      *  very real vacuum reading.
-     *   
+     *
      *  @param val  value for which log<sub>10</sub> should be calculated.
      *
      *  @return an adjusted log<sub>10</sub>(val).
@@ -31,7 +38,7 @@ public class Log10
             return Math.log10(val);
         return HUGE_NEGATIVE;
     }
-    
+
     /** @return pow(10, value) */
     public static double pow10(double value)
     {

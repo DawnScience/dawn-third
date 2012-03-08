@@ -1,7 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2010 Oak Ridge National Laboratory.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ ******************************************************************************/
 package org.csstudio.swt.xygraph;
 
-import org.csstudio.swt.xygraph.undo.ZoomType;
-import org.csstudio.swt.xygraph.util.XYGraphMediaFactory;
+import java.util.logging.Logger;
+
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -18,13 +26,10 @@ public class Activator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static Activator plugin;
-	
-	/**
-	 * The constructor
-	 */
-	public Activator() {
-	}
 
+	final private static Logger logger = Logger.getLogger(PLUGIN_ID);
+
+	
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
@@ -41,10 +46,7 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	@Override
     public void stop(BundleContext context) throws Exception {
-		XYGraphMediaFactory.disposeResources();			
-		for(ZoomType z : ZoomType.values())
-			z.getCursor().dispose();
-		plugin = null;	
+		plugin = null;
 		super.stop(context);
 	}
 
@@ -55,6 +57,14 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public static Activator getDefault() {
 		return plugin;
+	}
+	
+	public static Logger getLogger() {
+		return logger;
+	}
+	
+	public static ImageDescriptor getImageDescriptor(String imageFilePath) {
+		return imageDescriptorFromPlugin(PLUGIN_ID, imageFilePath);
 	}
 
 }

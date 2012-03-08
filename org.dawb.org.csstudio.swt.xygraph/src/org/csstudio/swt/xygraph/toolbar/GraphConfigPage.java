@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * Copyright (c) 2010 Oak Ridge National Laboratory.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ ******************************************************************************/
 package org.csstudio.swt.xygraph.toolbar;
 
 import org.csstudio.swt.xygraph.figures.XYGraph;
@@ -53,7 +60,6 @@ public class GraphConfigPage {
 		titleText = new Text(composite, SWT.BORDER | SWT.SINGLE);
 		titleText.setText(xyGraph.getTitle());
 		gd = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
-		gd.widthHint=300;
 		titleText.setLayoutData(gd);
 		
 		final Label fontLabel = new Label(composite, 0);

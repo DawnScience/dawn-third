@@ -1,9 +1,16 @@
+/*******************************************************************************
+ * Copyright (c) 2010 Oak Ridge National Laboratory.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ ******************************************************************************/
 package org.csstudio.swt.xygraph.figures;
 
 import org.csstudio.swt.xygraph.linearscale.Range;
+import org.csstudio.swt.xygraph.util.SWTConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
-import org.eclipse.swt.SWT;
 
 /**The grid in the plot area.
  * @author Xihui Chen
@@ -12,20 +19,20 @@ import org.eclipse.swt.SWT;
 public class Grid extends Figure implements IAxisListener{
 
 	private Axis axis;
-	
+
 	public Grid(Axis axis) {
 		axis.addListener(this);
 		this.axis = axis;
 		axis.setGrid(this);
-		
+
 	}
-	
+
 	@Override
-	protected void paintFigure(Graphics graphics) {		
+	protected void paintFigure(Graphics graphics) {
 		super.paintFigure(graphics);
 		graphics.pushState();
 		if(axis.isShowMajorGrid()){
-			graphics.setLineStyle(axis.isDashGridLine()? SWT.LINE_DASH : SWT.LINE_SOLID);
+			graphics.setLineStyle(axis.isDashGridLine()? SWTConstants.LINE_DASH : SWTConstants.LINE_SOLID);
 			graphics.setForegroundColor(axis.getMajorGridColor());
 			graphics.setLineWidth(1);
 			for(int pos: axis.getScaleTickLabels().getTickLabelPositions()){
@@ -40,12 +47,12 @@ public class Grid extends Figure implements IAxisListener{
 		graphics.popState();
 	}
 
-	public void axisRevalidated(Axis axis) {
+    public void axisRevalidated(Axis axis) {
 		if(axis.isShowMajorGrid())
-			repaint();	
+			repaint();
 	}
-	
-	public void axisRangeChanged(Axis axis, Range old_range, Range new_range) {
+
+    public void axisRangeChanged(Axis axis, Range old_range, Range new_range) {
 		//do nothing
 	}
 }

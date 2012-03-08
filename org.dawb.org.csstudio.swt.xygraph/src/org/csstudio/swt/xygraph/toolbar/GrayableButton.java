@@ -1,5 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2010 Oak Ridge National Laboratory.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ ******************************************************************************/
 package org.csstudio.swt.xygraph.toolbar;
 
+import org.csstudio.swt.xygraph.util.SWTConstants;
 import org.csstudio.swt.xygraph.util.XYGraphMediaFactory;
 import org.eclipse.draw2d.Button;
 import org.eclipse.draw2d.ImageFigure;
@@ -17,13 +25,24 @@ public class GrayableButton extends Button {
 	private static final String GRAY_IMAGE = "GrayableButton.GrayImage";
 	
 	public GrayableButton(Image image) {
+		this(image, null);
+	}
+	
+	public GrayableButton(Image image, Image grayImage){
 		super(image);
 		this.image = image;
-		grayImage = XYGraphMediaFactory.getInstance().getRegisteredImage(GRAY_IMAGE + image.toString());
-		if( grayImage == null){
-			grayImage = new Image(null, image, SWT.IMAGE_GRAY);
-			XYGraphMediaFactory.getInstance().registerImage(GRAY_IMAGE + image.toString(), grayImage);
-		}
+		this.grayImage = XYGraphMediaFactory.getInstance().getRegisteredImage(GRAY_IMAGE + image.toString());
+		if( this.grayImage == null){
+			if(SWT.getPlatform().startsWith("rap")) { //$NON-NLS-1$
+				if( grayImage != null)
+					this.grayImage = grayImage;
+				else
+					this.grayImage = image;
+			}
+			else
+				this.grayImage = new Image(null, image, SWTConstants.IMAGE_GRAY);
+			XYGraphMediaFactory.getInstance().registerImage(GRAY_IMAGE + image.toString(), this.grayImage);
+		}		
 	}
 	
 	@Override

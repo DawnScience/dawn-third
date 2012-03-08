@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * Copyright (c) 2010 Oak Ridge National Laboratory.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ ******************************************************************************/
 package org.csstudio.swt.xygraph.figures;
 
 import org.csstudio.swt.xygraph.Preferences;
@@ -171,8 +178,8 @@ public class Annotation extends Figure implements IAxisListener, IDataProviderLi
 		updateX0Y0Fromdxdy(size);	
 		//System.out.println(x0 +": " +y0 + " ");
 
-		Rectangle infoBounds = new Rectangle(currentPosition.x + (int)x0 - size.width/2, 
-				(int) (currentPosition.y +y0 - size.height/2), size.width, size.height);
+		Rectangle infoBounds = new Rectangle((int) (currentPosition.x + x0 - size.width/2.0), 
+				(int) (currentPosition.y +y0 - size.height/2.0), size.width, size.height);
 		
 		infoLabel.setBounds(infoBounds);		
 		
@@ -257,31 +264,31 @@ public class Annotation extends Figure implements IAxisListener, IDataProviderLi
 			int w = size.width;
 			if(dy != 0){
 				//assume this is the intersection
-				y0 = dy-h/2;
+				y0 = dy-h/2.0;
 				x0 = (dx/dy)*y0;
 				if(new Range(0, x0).inRange(dx) && new Range(0, y0).inRange(dy) && 
-						new Range(x0-w/2, x0 + w/2).inRange(dx))
+						new Range(x0-w/2.0, x0 + w/2.0).inRange(dx))
 					return;
 				
-				y0 = dy+h/2;
+				y0 = dy+h/2.0;
 				x0 = (dx/dy)*y0;
 				if(new Range(0, x0).inRange(dx) && new Range(0, y0).inRange(dy) && 
-						new Range(x0-w/2, x0 + w/2).inRange(dx))
+						new Range(x0-w/2.0, x0 + w/2.0).inRange(dx))
 					return;
 			}else{
 				
 			}
 			if(dx!=0){
-				x0 = dx+w/2;
+				x0 = dx+w/2.0;
 				y0 = (dy/dx)*x0;
 				if(new Range(0, x0).inRange(dx) && new Range(0, y0).inRange(dy) && 
-						new Range(y0-h/2, y0+h/2).inRange(dy))
+						new Range(y0-h/2.0, y0+h/2.0).inRange(dy))
 					return;
 				
-				x0 = dx-w/2;
+				x0 = dx-w/2.0;
 				y0 = (dy/dx)*x0;
 				if(new Range(0, x0).inRange(dx) && new Range(0, y0).inRange(dy) && 
-						new Range(y0-h/2, y0+h/2).inRange(dy))
+						new Range(y0-h/2.0, y0+h/2.0).inRange(dy))
 					return;
 			}
 		}else		
@@ -297,31 +304,31 @@ public class Annotation extends Figure implements IAxisListener, IDataProviderLi
 		int h = size.height;
 		int w = size.width;
 		if(y0 != 0){
-			dy = y0+h/2;
+			dy = y0+h/2.0;
 			dx = x0*dy/y0;
 			if(new Range(0, x0).inRange(dx) && new Range(0, y0).inRange(dy) && 
-					new Range(x0-w/2, x0 + w/2).inRange(dx))
+					new Range(x0-w/2.0, x0 + w/2.0).inRange(dx))
 				return;
 			
-			dy = y0-h/2;
+			dy = y0-h/2.0;
 			dx = x0*dy/y0;
 			if(new Range(0, x0).inRange(dx) && new Range(0, y0).inRange(dy) &&
-					new Range(x0-w/2, x0 + w/2).inRange(dx))
+					new Range(x0-w/2.0, x0 + w/2.0).inRange(dx))
 				return;
 		}
 		else
 			dy=0;
 		if(x0 != 0){
-			dx = x0-size.width/2;
+			dx = x0-size.width/2.0;
 			dy = y0*dx/x0;
 			if(new Range(0, x0).inRange(dx) && new Range(0, y0).inRange(dy) && 
-					new Range(y0-h/2, y0+h/2).inRange(dy))
+					new Range(y0-h/2.0, y0+h/2.0).inRange(dy))
 				return;
 			
-			dx = x0+size.width/2;
+			dx = x0+size.width/2.0;
 			dy = y0*dx/x0;
 			if(new Range(0, x0).inRange(dx) && new Range(0, y0).inRange(dy) &&
-					new Range(y0-h/2, y0+h/2).inRange(dy))
+					new Range(y0-h/2.0, y0+h/2.0).inRange(dy))
 				return;	
 		}else
 			dx=0;
@@ -357,6 +364,22 @@ public class Annotation extends Figure implements IAxisListener, IDataProviderLi
 		updateInfoLableText(true);
 	}
 
+	/** Set the position of the annotation based on plot values
+	 *  @param x Position as value on the X axis
+	 *  @param y Position as value on the Y axis
+	 *  @see #setCurrentPosition(Point, boolean) for setting the position based on screen coordinates
+	 */
+	public void setValues(final double x, final double y)
+	{
+		xValue = x;
+		yValue = y;
+
+		currentPosition = new Point(xAxis.getValuePosition(xValue, false),
+				yAxis.getValuePosition(yValue, false));	
+		
+		updateInfoLableText(true);
+	}
+	
 	/**
 	 * 
 	 */
@@ -484,7 +507,6 @@ public class Annotation extends Figure implements IAxisListener, IDataProviderLi
 	public void setAnnotationFont(Font annotationFont) {
 		infoLabel.setFont(annotationFont);
 	}
-	
 	public Font getAnnotationFont() {
 		return infoLabel.getFont();
 	}
@@ -580,7 +602,6 @@ public class Annotation extends Figure implements IAxisListener, IDataProviderLi
 		repaint();
 	}
 
-
 	public void setLocation(double x, double y) {
 		this.xValue = x;
 		this.yValue = y;
@@ -608,6 +629,16 @@ public class Annotation extends Figure implements IAxisListener, IDataProviderLi
 		return name;
 	}
 
+	/** @return X value, i.e. value of this annotation on the X Axis */
+	public double getXValue() {
+		return xValue;
+	}
+
+	/** @return Y value, i.e. value of this annotation on the Y Axis */
+	public double getYValue() {
+		return yValue;
+	}
+	
 	/**
 	 * @return the cursorLineStyle
 	 */
@@ -770,7 +801,6 @@ class Pointer extends Figure{
 				
 	}
 }
-
 
 
 }

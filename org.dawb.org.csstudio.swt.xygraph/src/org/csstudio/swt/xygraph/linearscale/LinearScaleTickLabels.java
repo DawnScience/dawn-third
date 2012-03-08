@@ -1,10 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2008-2009 SWTChart project. All rights reserved. 
- * 
- * This code is distributed under the terms of the Eclipse Public License v1.0
- * which is available at http://www.eclipse.org/legal/epl-v10.html
- *******************************************************************************/
-
 package org.csstudio.swt.xygraph.linearscale;
 
 import java.math.BigDecimal;
@@ -17,7 +10,7 @@ import org.eclipse.draw2d.FigureUtilities;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Dimension;
 /**
- * Linear Scale tick labels. Part of code of this class is from SWTChart which is available at http://www.swtchart.org/
+ * Linear Scale tick labels.
  * @author Xihui Chen
  */
 public class LinearScaleTickLabels extends Figure {
@@ -86,7 +79,6 @@ public class LinearScaleTickLabels extends Figure {
         updateTickLabelMaxLengthAndHeight();
     }
 
-
     /**
      * Updates tick label for log scale.
      * 
@@ -99,9 +91,10 @@ public class LinearScaleTickLabels extends Figure {
         if(min <= 0 || max <= 0)
         	throw new IllegalArgumentException(
         			"the range for log scale must be in positive range");
-        if (min >= max) {        	
-        	throw new IllegalArgumentException("min must be less than max.");
-        }
+        boolean minBigger = max < min;
+//        if (min >= max) {        	
+//        	throw new IllegalArgumentException("min must be less than max.");
+//        }
         
         int digitMin = (int) Math.ceil(Math.log10(min));
         int digitMax = (int) Math.ceil(Math.log10(max));
@@ -110,14 +103,19 @@ public class LinearScaleTickLabels extends Figure {
         BigDecimal tickStep = pow(10, digitMin - 1);
         BigDecimal firstPosition;
 
+        
         if (MIN.remainder(tickStep).doubleValue() <= 0) {
             firstPosition = MIN.subtract(MIN.remainder(tickStep));
         } else {
-            firstPosition = MIN.subtract(MIN.remainder(tickStep)).add(tickStep);
+        	if(minBigger)
+        		firstPosition = MIN.subtract(MIN.remainder(tickStep));
+        	else
+        		firstPosition = MIN.subtract(MIN.remainder(tickStep)).add(tickStep);
         }
         
       //add min
-        if(MIN.compareTo(firstPosition) == -1 ) {
+       
+        if(MIN.compareTo(firstPosition) == (minBigger? 1:-1) ) {
         	tickLabelValues.add(min);
         	if (scale.isDateEnabled()) {
                 Date date = new Date((long) MIN.doubleValue());
@@ -128,34 +126,53 @@ public class LinearScaleTickLabels extends Figure {
         	tickLabelPositions.add(scale.getMargin());        	
         }
        
-        for (int i = digitMin; i <= digitMax; i++) {
-            for (BigDecimal j = firstPosition; j.doubleValue() <= pow(10, i)
-                    .doubleValue(); j = j.add(tickStep)) {
-                if (j.doubleValue() > max) {
-                    break;
-                }
-
-                if (scale.isDateEnabled()) {
-                    Date date = new Date((long) j.doubleValue());
-                    tickLabels.add(scale.format(date));
-                } else {
-                    tickLabels.add(scale.format(j.doubleValue()));
-                }
-                tickLabelValues.add(j.doubleValue());
-
-                int tickLabelPosition = (int) ((Math.log10(j.doubleValue()) - Math
-                        .log10(min))
-                        / (Math.log10(max) - Math.log10(min)) * length)
-                        + scale.getMargin();
-                tickLabelPositions.add(tickLabelPosition);               
-            }
-            tickStep = tickStep.multiply(pow(10, 1));
-            firstPosition = tickStep.add(pow(10, i));
-            
+        for (int i = digitMin; minBigger? i>=digitMax : i <= digitMax; i+=minBigger?-1:1) {        	
+        	 if(Math.abs(digitMax - digitMin) > 20){//if the range is too big, skip minor ticks.
+        		 BigDecimal v = pow(10,i);
+        		 if(v.doubleValue() > max)
+        			 break;
+        		 if (scale.isDateEnabled()) {
+	                    Date date = new Date((long) v.doubleValue());
+	                    tickLabels.add(scale.format(date));
+	                } else {
+	                    tickLabels.add(scale.format(v.doubleValue()));
+	                }
+	                tickLabelValues.add(v.doubleValue());
+	
+	                int tickLabelPosition = (int) ((Math.log10(v.doubleValue()) - Math
+	                        .log10(min))
+	                        / (Math.log10(max) - Math.log10(min)) * length)
+	                        + scale.getMargin();
+	                tickLabelPositions.add(tickLabelPosition);     
+        	 }else{
+	         	for (BigDecimal j = firstPosition; minBigger? j.doubleValue() >= pow(10, i-1)
+	                    .doubleValue() : j.doubleValue() <= pow(10, i).doubleValue(); j = minBigger? j.subtract(tickStep) : j.add(tickStep)) {
+	                if (minBigger? j.doubleValue() < max : j.doubleValue() > max) {
+	                    break;
+	                }
+	
+	                if (scale.isDateEnabled()) {
+	                    Date date = new Date((long) j.doubleValue());
+	                    tickLabels.add(scale.format(date));
+	                } else {
+	                    tickLabels.add(scale.format(j.doubleValue()));
+	                }
+	                tickLabelValues.add(j.doubleValue());
+	
+	                int tickLabelPosition = (int) ((Math.log10(j.doubleValue()) - Math
+	                        .log10(min))
+	                        / (Math.log10(max) - Math.log10(min)) * length)
+	                        + scale.getMargin();
+	                tickLabelPositions.add(tickLabelPosition);               
+	            }
+	         	tickStep = minBigger? tickStep.divide(pow(10,1)) : tickStep.multiply(pow(10, 1));
+	            firstPosition = minBigger? pow(10,i-1) : tickStep.add(pow(10, i));
+         	}           
         }
         
         //add max
-        if(max > tickLabelValues.get(tickLabelValues.size()-1)) {
+        if(minBigger? max < tickLabelValues.get(tickLabelValues.size()-1) 
+        		: max > tickLabelValues.get(tickLabelValues.size()-1)) {
         	tickLabelValues.add(max);
         	if (scale.isDateEnabled()) {
                 Date date = new Date((long) max);
@@ -167,7 +184,9 @@ public class LinearScaleTickLabels extends Figure {
         }
     }
 
-    /**
+   
+
+     /**
      * Updates tick label for normal scale.
      * 
      * @param length
@@ -193,6 +212,8 @@ public class LinearScaleTickLabels extends Figure {
         double min = scale.getRange().getLower();
         double max = scale.getRange().getUpper();
 
+        boolean minBigger = max < min;
+        
         final BigDecimal MIN = new BigDecimal(new Double(min).toString());
         BigDecimal firstPosition;
 
@@ -216,7 +237,8 @@ public class LinearScaleTickLabels extends Figure {
         }
         
         //add min
-        if(MIN.compareTo(firstPosition) == -1 ) {
+        int r = minBigger? 1 : -1;
+        if(MIN.compareTo(firstPosition) == r ) {
         	tickLabelValues.add(min);
         	if (scale.isDateEnabled()) {
                 Date date = new Date((long) MIN.doubleValue());
@@ -227,7 +249,7 @@ public class LinearScaleTickLabels extends Figure {
         	tickLabelPositions.add(scale.getMargin());        	
         }
         	
-        for (BigDecimal b = firstPosition; b.doubleValue() <= max; b = b
+        for (BigDecimal b = firstPosition; max >= min ? b.doubleValue() <= max : b.doubleValue() >= max; b = b
                 .add(tickStep)) {
             if (scale.isDateEnabled()) {
                 Date date = new Date((long) b.doubleValue());
@@ -244,7 +266,8 @@ public class LinearScaleTickLabels extends Figure {
         }
         
         //add max
-        if(max > tickLabelValues.get(tickLabelValues.size()-1)) {
+        if((minBigger ? max < tickLabelValues.get(tickLabelValues.size()-1) :
+        	max > tickLabelValues.get(tickLabelValues.size()-1) )) {
         	tickLabelValues.add(max);
         	if (scale.isDateEnabled()) {
                 Date date = new Date((long) max);
@@ -425,24 +448,37 @@ public class LinearScaleTickLabels extends Figure {
         if (lengthInPixels <= 0) {
             lengthInPixels = 1;
         }
+        boolean minBigger = false;
         if (min >= max) {        	
         	if(max == min)
         		max ++;
-        	else 
-        		throw new IllegalArgumentException("min must be less than max.");
+        	else{
+        		minBigger = true;
+        		double swap = min;
+        		min = max;
+        		max= swap;
+        	}
+//        		throw new IllegalArgumentException("min must be less than max.");
         }
 
         double length = Math.abs(max - min);
+        double majorTickMarkStepHint = scale.getMajorTickMarkStepHint();
+        if(majorTickMarkStepHint > lengthInPixels)
+        	majorTickMarkStepHint = lengthInPixels;
+//        if(min > max)
+//        	majorTickMarkStepHint = -majorTickMarkStepHint;        
         double gridStepHint = length / lengthInPixels
-                * scale.getMajorTickMarkStepHint();
+                * majorTickMarkStepHint;
         
         
         if(scale.isDateEnabled()) {
         	//by default, make the least step to be minutes
         	
         	long timeStep;
-        	if(max - min < 60000) // < 1 min, step = 1 sec
-        		timeStep= 1000l;
+        	if(max - min < 10000) // < 10 sec, step = 1 sec
+        		timeStep = 1000l;
+        	else if(max - min < 60000) // < 1 min, step = 10 sec
+        		timeStep= 10000l;
         	else if (max -min < 43200000) // < 12 hour, step = 1 min
         		timeStep = 60000l;
         	else if (max - min < 604800000) // < 7 days, step = 1 hour
@@ -468,15 +504,14 @@ public class LinearScaleTickLabels extends Figure {
         }
         	
         
-        // gridStepHint --> mantissa * 10 ** exponent
-        // e.g. 724.1 --> 7.241 * 10 ** 2
         double mantissa = gridStepHint;
         int exponent = 0;
         if (mantissa < 1) {
-            while (mantissa < 1) {
-                mantissa *= 10.0;
-                exponent--;
-            }
+        	if(mantissa != 0)
+	            while (mantissa < 1) {
+	                mantissa *= 10.0;
+	                exponent--;
+	            }
         } else {
             while (mantissa >= 10) {
                 mantissa /= 10.0;
@@ -484,23 +519,20 @@ public class LinearScaleTickLabels extends Figure {
             }
         }
 
-        // calculate the grid step with hint.
         BigDecimal gridStep;
-        if (mantissa > 7.5) {
-            // gridStep = 10.0 * 10 ** exponent
-            gridStep = BigDecimal.TEN.multiply(pow(10, exponent));
-        } else if (mantissa > 3.5) {
-            // gridStep = 5.0 * 10 ** exponent
-            gridStep = new BigDecimal(new Double(5).toString()).multiply(pow(
+        if (mantissa > 7.5) {            
+            gridStep = BigDecimal.TEN.multiply(pow(10, exponent)); // 10.0 * 10 ** exponent 
+        } else if (mantissa > 3.5) {           
+            gridStep = new BigDecimal(new Double(5).toString()).multiply(pow(  // 5.0 * 10 ** exponent
                     10, exponent));
-        } else if (mantissa > 1.5) {
-            // gridStep = 2.0 * 10 ** exponent
-            gridStep = new BigDecimal(new Double(2).toString()).multiply(pow(
+        } else if (mantissa > 1.5) {            
+            gridStep = new BigDecimal(new Double(2).toString()).multiply(pow( // 2.0 * 10 ** exponent
                     10, exponent));
-        } else {
-            // gridStep = 1.0 * 10 ** exponent
-            gridStep = pow(10, exponent);
+        } else {            
+            gridStep = pow(10, exponent); // 1.0 * 10 ** exponent
         }
+        if(minBigger)
+        	gridStep = gridStep.negate();
         return gridStep;
     }
 

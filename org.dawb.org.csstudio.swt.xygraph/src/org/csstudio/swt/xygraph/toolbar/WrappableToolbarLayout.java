@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * Copyright (c) 2010 Oak Ridge National Laboratory.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ ******************************************************************************/
 package org.csstudio.swt.xygraph.toolbar;
 
 import org.eclipse.draw2d.AbstractLayout;
@@ -40,12 +47,12 @@ public class WrappableToolbarLayout extends AbstractLayout {
 				height = h;			
 			return new Dimension(width, height);
 		}else{
-			int w =0;
+//			int w =0;
 			int maxH = 0;
 			for(Object child : container.getChildren()){
 				IFigure figure = (IFigure)child;
 				Dimension preferSize = figure.getPreferredSize();
-				w += preferSize.width;
+//				w += preferSize.width;
 				if(maxH < preferSize.height){
 						maxH = preferSize.height;
 				}				

@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * Copyright (c) 2010 Oak Ridge National Laboratory.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ ******************************************************************************/
 package org.csstudio.swt.xygraph.linearscale;
 
 
@@ -340,7 +347,7 @@ public class LinearScaledMarker extends Figure {
 		
 		if(scale.isHorizontal()) {
 			size.width = scale.getSize().width;
-			size.height = (int)Math.ceil(FigureUtilities.getTextExtents("dummy", getFont()).height) 
+			size.height = FigureUtilities.getTextExtents("dummy", getFont()).height
 							+ GAP_BTW_MARK_LABEL + TICK_LENGTH;
 		} else {
 			updateTickLabelMaxLength();
@@ -351,7 +358,7 @@ public class LinearScaledMarker extends Figure {
 		
 	}
 	
-	class MarkerProperties {		
+	private static class MarkerProperties {		
 
 		private double value;
 

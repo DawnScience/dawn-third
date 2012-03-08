@@ -2,10 +2,8 @@ package org.csstudio.swt.xygraph.toolbar;
 
 import java.util.List;
 
-import org.csstudio.swt.xygraph.Activator;
 import org.csstudio.swt.xygraph.figures.XYGraph;
 import org.csstudio.swt.xygraph.figures.XYGraphFlags;
-import org.csstudio.swt.xygraph.preferences.XYConstants;
 import org.csstudio.swt.xygraph.undo.AddAnnotationCommand;
 import org.csstudio.swt.xygraph.undo.IOperationsManagerListener;
 import org.csstudio.swt.xygraph.undo.OperationsManager;
@@ -90,17 +88,10 @@ public class XYGraphToolbar extends Figure {
 		showLegend.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent event) {
 				xyGraph.setShowLegend(!xyGraph.isShowLegend());
-				Activator.getDefault().getPreferenceStore().setValue(XYConstants.XY_SHOWLEGEND, xyGraph.isShowLegend());
 			}
 		});
-		boolean showLeg = true;
-		try {
-			showLeg = Activator.getDefault().getPreferenceStore().getBoolean(XYConstants.XY_SHOWLEGEND);
-		} catch (NullPointerException ne) {
-			showLeg = true;
-		}
-		showLegend.setSelected(showLeg);
-		xyGraph.setDefaultShowLegend(showLeg);
+		
+		showLegend.setSelected(xyGraph.isShowLegend());
 		
 		addSeparator("org.csstudio.swt.xygraph.toolbar.showLegend");	
 		final Button addAnnotationButton = new Button(createImage("icons/Add_Annotation.png"));
@@ -171,8 +162,7 @@ public class XYGraphToolbar extends Figure {
 	}
 	
 	protected static Image createImage(String path) {			
-		Image image = XYGraphMediaFactory.getInstance().getImageFromPlugin(Activator.getDefault(),
-				Activator.PLUGIN_ID, path);				
+		Image image = XYGraphMediaFactory.getInstance().getImage(path);				
 		return image;
 	}
 	

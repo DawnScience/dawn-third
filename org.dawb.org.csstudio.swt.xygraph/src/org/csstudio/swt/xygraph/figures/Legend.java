@@ -1,7 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2010 Oak Ridge National Laboratory.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ ******************************************************************************/
 package org.csstudio.swt.xygraph.figures;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.csstudio.swt.xygraph.Preferences;
@@ -13,7 +21,6 @@ import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Font;
 
 /**The legend to indicate the style and size of the trace line and point. 
  * The border color of the legend is same as the traces' Y-Axis color. 
@@ -25,20 +32,27 @@ public class Legend extends RectangleFigure {
 	private final static int INNER_GAP = 2;
 	private final static int OUT_GAP = 5;
 	
-	private final static Font LEGEND_FONT = XYGraphMediaFactory.getInstance().getFont(
-			XYGraphMediaFactory.FONT_ARIAL);
+//	private final static Font LEGEND_FONT = XYGraphMediaFactory.getInstance().getFont(
+//			XYGraphMediaFactory.FONT_ARIAL);
+//	
+//	private final Color WHITE_COLOR = XYGraphMediaFactory.getInstance().getColor(
+//			XYGraphMediaFactory.COLOR_WHITE); 
 	
-	private final static Color WHITE_COLOR = XYGraphMediaFactory.getInstance().getColor(
-			XYGraphMediaFactory.COLOR_WHITE); 
-	
-	private final static Color BLACK_COLOR = XYGraphMediaFactory.getInstance().getColor(
+	private final Color BLACK_COLOR = XYGraphMediaFactory.getInstance().getColor(
 			XYGraphMediaFactory.COLOR_BLACK);
 	
-	private final List<Trace> traceList = new ArrayList<Trace>();	
+	private final List<Trace> traceList = new ArrayList<Trace>();
 	
-	public Legend() {
-		setFont(LEGEND_FONT);
-		setBackgroundColor(WHITE_COLOR);
+	
+	public Legend(XYGraph xyGraph) {
+//		setFont(LEGEND_FONT);
+		xyGraph.getPlotArea().addPropertyChangeListener(PlotArea.BACKGROUND_COLOR, new PropertyChangeListener() {
+			
+			public void propertyChange(PropertyChangeEvent evt) {
+				setBackgroundColor((Color) evt.getNewValue());
+			}
+		});
+		setBackgroundColor(xyGraph.getPlotArea().getBackgroundColor());
 		setForegroundColor(BLACK_COLOR);
 		setOpaque(false);
 		setOutline(true);
@@ -60,26 +74,21 @@ public class Legend extends RectangleFigure {
 	
 	@Override
 	protected void outlineShape(Graphics graphics) {
-		if (traceList.isEmpty()) return;
-		graphics.setForegroundColor(traceList.get(0).getYAxis().getForegroundColor());
+		if (!traceList.isEmpty()) {
+		    graphics.setForegroundColor(traceList.get(0).getYAxis().getForegroundColor());
+		}
 		super.outlineShape(graphics);
 		
 	}
 	
 	@Override
 	protected void fillShape(Graphics graphics) {
-		
-		if(!((XYGraph)getParent()).isTransparent()) super.fillShape(graphics);
+		if(!((XYGraph)getParent()).isTransparent())
+			super.fillShape(graphics);
 		int hPos = bounds.x + INNER_GAP;
 		int vPos = bounds.y + INNER_GAP;
 		int i=0;
-		for (Iterator<Trace> it = traceList.iterator(); it.hasNext();) {
-			Trace trace = (Trace) it.next();
-			
-			if (trace.isDisposed()) {
-				it.remove();
-				continue;
-			}
+		for(Trace trace : traceList){
 			int hwidth = OUT_GAP + ICON_WIDTH + INNER_GAP +  
 					+ FigureUtilities.getTextExtents(trace.getName(), getFont()).width;
 			int hEnd = hPos + hwidth;
@@ -101,9 +110,9 @@ public class Legend extends RectangleFigure {
 	}
 	
 	private void drawTraceLagend(Trace trace, Graphics graphics, int hPos, int vPos){
-		
 		graphics.pushState();
-        if (Preferences.useAdvancedGraphics()) graphics.setAntialias(SWT.ON);
+        if (Preferences.useAdvancedGraphics())
+            graphics.setAntialias(SWT.ON);
 		graphics.setForegroundColor(trace.getTraceColor());
 		//draw symbol
 		switch (trace.getTraceType()) {
@@ -144,7 +153,7 @@ public class Legend extends RectangleFigure {
 		int maxWidth =0;
 		int hEnd =  INNER_GAP;
 		int height = ICON_WIDTH + INNER_GAP;
-		int i=0;
+//		int i=0;
 		for(Trace trace : traceList){
 			hEnd = hEnd + OUT_GAP + ICON_WIDTH + INNER_GAP +  
 					+ FigureUtilities.getTextExtents(trace.getName(), getFont()).width;
@@ -156,7 +165,7 @@ public class Legend extends RectangleFigure {
 			}	
 			if(maxWidth < hEnd) 
 				maxWidth = hEnd;
-			i++;
+//			i++;
 		}
 		return new Dimension(maxWidth, height);
 	}

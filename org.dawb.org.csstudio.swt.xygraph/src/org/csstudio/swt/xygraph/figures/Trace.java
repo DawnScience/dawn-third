@@ -10,6 +10,7 @@ import org.csstudio.swt.xygraph.dataprovider.ISample;
 import org.csstudio.swt.xygraph.dataprovider.Sample;
 import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.csstudio.swt.xygraph.linearscale.Range;
+import org.csstudio.swt.xygraph.util.SWTConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Point;
@@ -221,7 +222,7 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
 	private void drawErrorBar(Graphics graphics, Point dpPos, ISample dp){
 		graphics.pushState();
 		graphics.setForegroundColor(errorBarColor);
-		graphics.setLineStyle(SWT.LINE_SOLID);
+		graphics.setLineStyle(SWTConstants.LINE_SOLID);
 		graphics.setLineWidth(1);
 		Point ep;
 		switch (yErrorBarType) {
@@ -321,7 +322,7 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
 		graphics.setBackgroundColor(traceColor);
 		//graphics.setForegroundColor(traceColor);
 		graphics.setLineWidth(1);
-		graphics.setLineStyle(SWT.LINE_SOLID);
+		graphics.setLineStyle(SWTConstants.LINE_SOLID);
 		switch (pointStyle) {
 		case POINT:			
 			graphics.fillOval(new Rectangle(
@@ -405,7 +406,7 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
 		    case STEP_HORIZONTALLY:
 
 			    graphics.pushState();
-		    	graphics.setLineStyle(SWT.LINE_SOLID);
+		    	graphics.setLineStyle(SWTConstants.LINE_SOLID);
 		    	Point ph = new Point(p2.x, p1.y);
 		    	graphics.drawLine(p1, ph);
 		    	graphics.drawLine(ph, p2);
@@ -414,7 +415,7 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
 		    	
 		    case STEP_VERTICALLY:
 			    graphics.pushState();
-	    	    graphics.setLineStyle(SWT.LINE_SOLID);
+	    	    graphics.setLineStyle(SWTConstants.LINE_SOLID);
 		    	Point pv = new Point(p1.x, p2.y);
 		    	graphics.drawLine(p1, pv);
 		    	graphics.drawLine(pv, p2);
@@ -425,7 +426,7 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
 			    graphics.pushState();
 				if (use_advanced_graphics)
 					graphics.setAlpha(areaAlpha);
-				graphics.setLineStyle(SWT.LINE_SOLID);
+				graphics.setLineStyle(SWTConstants.LINE_SOLID);
 				graphics.drawLine(p1, p2);
 				graphics.popState();
 				return;	
@@ -449,11 +450,11 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
 		
 		switch (traceType) {
 		case SOLID_LINE:
-			graphics.setLineStyle(SWT.LINE_SOLID);
+			graphics.setLineStyle(SWTConstants.LINE_SOLID);
 			graphics.drawPolyline(points);
 			break;
 		case DASH_LINE:
-			graphics.setLineStyle(SWT.LINE_DASH);
+			graphics.setLineStyle(SWTConstants.LINE_DASH);
 			graphics.drawPolyline(points);
 			break;
 		case AREA:
@@ -483,6 +484,9 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
 	protected void paintFigure(Graphics graphics) {
 		
 		super.paintFigure(graphics);
+		
+		if (isDisposed()) return; // We are 
+		
 		graphics.pushState();
 		
 		if (use_advanced_graphics) graphics.setAntialias(antiAliasing? SWT.ON : SWT.OFF);
@@ -849,7 +853,7 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
 		if(xyGraph.getLegendMap().containsKey(axis))
 			xyGraph.getLegendMap().get(axis).addTrace(this);
 		else{
-			xyGraph.getLegendMap().put(axis, new Legend());
+			xyGraph.getLegendMap().put(axis, new Legend(xyGraph));
 			xyGraph.getLegendMap().get(axis).addTrace(this);
 			xyGraph.add(xyGraph.getLegendMap().get(axis));
 		}

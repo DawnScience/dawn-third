@@ -1,7 +1,17 @@
+/*******************************************************************************
+ * Copyright (c) 2010 Oak Ridge National Laboratory.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ ******************************************************************************/
 package org.csstudio.swt.xygraph.dataprovider;
 
 import java.util.AbstractCollection;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
+
+import org.eclipse.core.runtime.Assert;
 
 /**A particular circular buffer. New arrived data will be appended to the tail of the buffer. 
  * When buffer is full, the oldest data will be deleted when new data arrived. 
@@ -16,6 +26,7 @@ public class CircularBuffer<T> extends AbstractCollection<T> {
 	private int count;
 	
 	public CircularBuffer(int bufferSize) {
+		Assert.isTrue(bufferSize > 0, "Buffer size must be greater than zero.");
 		this.setBufferSize(bufferSize, true);
 	}
 	
@@ -41,7 +52,7 @@ public class CircularBuffer<T> extends AbstractCollection<T> {
 	 * @param index the index of the element in the buffer.
 	 * @return the element. null if the data at the index doesn't exist.
 	 */
-	public T getElement(int index){
+	public synchronized T getElement(int index){
 		if(index < count)
 			return buffer[(head + index) % bufferSize];		
 		else
@@ -51,7 +62,7 @@ public class CircularBuffer<T> extends AbstractCollection<T> {
 	/**Get head element
 	 * @return the head element. null if the buffer is empty.
 	 */
-	public T getHead(){
+	public synchronized T getHead(){
 		if(count > 0)
 			return buffer[head];		
 		else
@@ -61,7 +72,7 @@ public class CircularBuffer<T> extends AbstractCollection<T> {
 	/**Get tail element
 	 * @return the tail element. null if the buffer is empty.
 	 */
-	public T getTail(){
+	public synchronized T getTail(){
 		if(count > 0)
 			return buffer[(head+count-1)%bufferSize];		
 		else
@@ -73,7 +84,7 @@ public class CircularBuffer<T> extends AbstractCollection<T> {
 	/**
 	 * clear the buffer;
 	 */
-	public void clear(){
+	public synchronized void clear(){
 		head = 0;
 		tail = 0;
 		count = 0;
@@ -86,7 +97,7 @@ public class CircularBuffer<T> extends AbstractCollection<T> {
 	 * than the exist data count. 
 	 */
 	@SuppressWarnings("unchecked")
-	public void setBufferSize(int bufferSize, boolean clear) {
+	public synchronized void setBufferSize(int bufferSize, boolean clear) {
 		assert bufferSize > 0;		
 		if(this.bufferSize != bufferSize){
 			this.bufferSize = bufferSize;
@@ -109,7 +120,7 @@ public class CircularBuffer<T> extends AbstractCollection<T> {
 	/**
 	 * @return the bufferSize
 	 */
-	public int getBufferSize() {
+	public synchronized int getBufferSize() {
 		return bufferSize;
 	}	
 
@@ -122,6 +133,8 @@ public class CircularBuffer<T> extends AbstractCollection<T> {
 				return index < count;
 			}
 			public T next() {
+				if(!hasNext())
+					throw new NoSuchElementException();
 				return buffer[(head+index++)%bufferSize];
 			}
 			public void remove() {}			
