@@ -231,6 +231,10 @@ public class LinearScale extends AbstractScale {
     @Override
     protected void layout() {
     	super.layout();
+    	layoutTicks();	
+    } 
+
+    protected void layoutTicks() {
     	updateTick();
       	Rectangle area = getClientArea();
       	if(isHorizontal() && getTickLablesSide() == LabelSide.Primary) {
@@ -273,10 +277,10 @@ public class LinearScale extends AbstractScale {
       				area.y,
       				LinearScaleTickMarks.MAJOR_TICK_LENGTH,
       				area.height));  
-      	}    	
-    } 
+      	}    		
+	}
 
-    @Override
+	@Override
     public void setBounds(Rectangle rect) {
     	if(!bounds.equals(rect)){
     		setDirty(true);

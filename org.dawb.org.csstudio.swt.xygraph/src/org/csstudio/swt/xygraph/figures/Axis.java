@@ -821,7 +821,7 @@ public class Axis extends LinearScale{
 			command = null;
             start = null;
             end = null;
-		}
+ 		}
 
 		/** Perform the zoom to mouse start/end */
         private void performStartEndZoom()
