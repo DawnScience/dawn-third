@@ -780,7 +780,7 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
 		if(xAxis == axis)
 			return;
 		if(xAxis != null){
-			xAxis.removeListenr(this);
+			xAxis.removeListener(this);
 			xAxis.removeTrace(this);
 		}
 
@@ -821,7 +821,7 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
 			xyGraph.add(xyGraph.getLegendMap().get(axis));
 		}
 		if(yAxis != null){
-			yAxis.removeListenr(this);
+			yAxis.removeListener(this);
 			yAxis.removeTrace(this);
 		}
 		/*if(traceDataProvider != null){
