@@ -725,8 +725,16 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
 		// would cut both X as well as both Y axes.
 		// Return only the X axes hits, since Y axes hits are actually the
 		// same points.
-		if (count == 2)
-		    return dpTuple;
+		if (count == 2) {
+			if (Math.signum(dpTuple[1].getYValue()-dpTuple[0].getYValue()) == Math.signum(dy)) {  
+				return dpTuple;
+			} else {
+				ISample tmp = dpTuple[0];
+				dpTuple[0] = dpTuple[1];
+				dpTuple[1] = tmp;
+				return dpTuple;
+			}
+		}
 		if (dx != 0.0)
 		{   // Intersection with left yAxis
 		    final double xmin = xAxis.getRange().getLower();
@@ -740,6 +748,16 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
             y = (xmax-x1)*dy/dx + y1;
             if(dx != 0 && evalDP(x, y, dp1, dp2))
                 dpTuple[count++] =  new Sample(x, y);
+		}
+		if(count == 2) {
+			if (Math.signum(dpTuple[1].getXValue()-dpTuple[0].getXValue()) == Math.signum(dx)) {  
+				return dpTuple;
+			} else {
+				ISample tmp = dpTuple[0];
+				dpTuple[0] = dpTuple[1];
+				dpTuple[1] = tmp;
+				return dpTuple;
+			}
 		}
 		return dpTuple;
 	}
