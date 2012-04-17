@@ -1,6 +1,8 @@
 package org.csstudio.swt.xygraph.linearscale;
 
 
+import java.util.Date;
+
 import org.eclipse.draw2d.FigureUtilities;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Rectangle;
@@ -25,7 +27,7 @@ import org.eclipse.swt.graphics.Font;
  * @author Xihui Chen
  *  
  */
-public class LinearScale extends AbstractScale {
+public class LinearScale extends AbstractScale implements IScaleProvider {
 
 	/** scale direction */
     public enum Orientation {
@@ -340,9 +342,10 @@ public class LinearScale extends AbstractScale {
     	}    	
     }	
 
-	
+
 	@Override
-	protected boolean useLocalCoordinates() {
-		return true;
+	public Range getScaleRange() {
+		return getRange();
 	}
+
 }

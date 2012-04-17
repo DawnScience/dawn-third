@@ -37,7 +37,7 @@ public class LinearScaleTickLabels extends Figure {
     
     private int gridStepInPixel;
     
-    private LinearScale scale;
+    private IScaleProvider scale;
 
     /**
      * Constructor.
@@ -45,7 +45,7 @@ public class LinearScaleTickLabels extends Figure {
      * @param linearScale
      *            the scale
      */
-    protected LinearScaleTickLabels(LinearScale linearScale) {
+    protected LinearScaleTickLabels(IScaleProvider linearScale) {
     	
     	this.scale = linearScale;
         tickLabelValues = new ArrayList<Double>();
@@ -86,8 +86,8 @@ public class LinearScaleTickLabels extends Figure {
      *            the length of scale
      */
     private void updateTickLabelForLogScale(int length) {
-        double min = scale.getRange().getLower();
-        double max = scale.getRange().getUpper();
+        double min = scale.getScaleRange().getLower();
+        double max = scale.getScaleRange().getUpper();
         if(min <= 0 || max <= 0)
         	throw new IllegalArgumentException(
         			"the range for log scale must be in positive range");
@@ -193,8 +193,8 @@ public class LinearScaleTickLabels extends Figure {
      *            scale tick length (without margin)
      */
     private void updateTickLabelForLinearScale(int length) {
-        double min = scale.getRange().getLower();
-        double max = scale.getRange().getUpper();
+        double min = scale.getScaleRange().getLower();
+        double max = scale.getScaleRange().getUpper();
         BigDecimal gridStepBigDecimal = getGridStep(length, min, max);
         gridStepInPixel = (int) (length * gridStepBigDecimal.doubleValue()/(max - min));
         updateTickLabelForLinearScale(length, gridStepBigDecimal);
@@ -209,8 +209,8 @@ public class LinearScaleTickLabels extends Figure {
      *            the tick step
      */
     private void updateTickLabelForLinearScale(int length, BigDecimal tickStep) {
-        double min = scale.getRange().getLower();
-        double max = scale.getRange().getUpper();
+        double min = scale.getScaleRange().getLower();
+        double max = scale.getScaleRange().getUpper();
 
         boolean minBigger = max < min;
         
@@ -630,6 +630,14 @@ public class LinearScaleTickLabels extends Figure {
 	 */
 	public int getGridStepInPixel() {
 		return gridStepInPixel;
+	}
+
+	public IScaleProvider getScale() {
+		return scale;
+	}
+
+	public void setScale(IScaleProvider scale) {
+		this.scale = scale;
 	}
 
 }
