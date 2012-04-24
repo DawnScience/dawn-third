@@ -43,7 +43,8 @@ public class XYGraphConfigDialog extends Dialog {
 	private GraphConfigPage graphConfigPage;
 	private List<AnnotationConfigPage> annotationConfigPageList;
 	private List<AxisConfigPage> axisConfigPageList;
-	private List<TraceConfigPage> traceConfigPageList;
+	protected Combo traceCombo;
+	protected List<TraceConfigPage> traceConfigPageList;
 	protected XYGraph xyGraph;
 	protected XYGraphConfigCommand command;
 	private boolean changed = false;
@@ -139,7 +140,7 @@ public class XYGraphConfigDialog extends Dialog {
 	    			SWT.FILL, SWT.FILL,true, false));
 	    	traceSelectGroup.setText("Select Trace");
 	    	traceSelectGroup.setLayout(new GridLayout(1, false));    	        
-	    	final Combo traceCombo = new Combo(traceSelectGroup, SWT.DROP_DOWN);
+	    	this.traceCombo = new Combo(traceSelectGroup, SWT.DROP_DOWN);
 	    	traceCombo.setLayoutData(new GridData(SWT.FILL, 0, true, false));
 		    for(Trace trace : xyGraph.getPlotArea().getTraceList())
 		        traceCombo.add(trace.getName());	   
