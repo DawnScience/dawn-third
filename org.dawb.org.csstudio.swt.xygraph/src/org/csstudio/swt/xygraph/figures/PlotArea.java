@@ -17,6 +17,7 @@ import org.csstudio.swt.xygraph.undo.ZoomType;
 import org.csstudio.swt.xygraph.util.SWTConstants;
 import org.csstudio.swt.xygraph.util.XYGraphMediaFactory;
 import org.csstudio.swt.xygraph.util.XYGraphMediaFactory.CURSOR_TYPE;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.MouseEvent;
@@ -188,10 +189,12 @@ public class PlotArea extends Figure {
 			case RUBBERBAND_ZOOM:
 			case HORIZONTAL_ZOOM:
 			case VERTICAL_ZOOM:
+				graphics.setXORMode(true); 
 				graphics.setLineStyle(SWTConstants.LINE_DOT);
 				graphics.setLineWidth(1);
-				graphics.setForegroundColor(revertBackColor);
+				graphics.setForegroundColor(ColorConstants.white);
 				graphics.drawRectangle(start.x, start.y, end.x - start.x, end.y - start.y);
+				graphics.setXORMode(false); 
 				break;
 
 			default:
