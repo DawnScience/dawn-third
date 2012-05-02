@@ -118,6 +118,7 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
 		NONE(Messages.PointNone),
 		POINT(Messages.PointPoint),
 		CIRCLE(Messages.PointCircle),
+		FILLED_CIRCLE(Messages.PointFilledCircle),
 		TRIANGLE(Messages.PointTriangle),
 		FILLED_TRIANGLE(Messages.PointFilledTriangle),
 		SQUARE(Messages.PointSquare),
@@ -342,6 +343,11 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
 			break;
 		case CIRCLE:
 			graphics.drawOval(new Rectangle(
+					pos.x - pointSize/2, pos.y - pointSize/2,
+					pointSize, pointSize));
+			break;
+		case FILLED_CIRCLE:
+			graphics.fillOval(new Rectangle(
 					pos.x - pointSize/2, pos.y - pointSize/2,
 					pointSize, pointSize));
 			break;
