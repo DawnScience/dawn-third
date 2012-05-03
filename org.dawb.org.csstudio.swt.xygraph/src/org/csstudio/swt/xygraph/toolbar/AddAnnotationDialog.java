@@ -27,7 +27,7 @@ import org.eclipse.swt.widgets.Shell;
 public class AddAnnotationDialog extends Dialog {
 	private AnnotationConfigPage configPage;
 	
-	protected AddAnnotationDialog(final Shell parentShell, final XYGraph xyGraph) {
+	public AddAnnotationDialog(final Shell parentShell, final XYGraph xyGraph) {
 		super(parentShell);	
 		
         // Allow resize
