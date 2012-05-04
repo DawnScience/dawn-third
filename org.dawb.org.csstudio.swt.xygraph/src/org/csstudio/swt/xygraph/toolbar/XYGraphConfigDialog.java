@@ -41,9 +41,10 @@ import org.eclipse.swt.widgets.TabItem;
 public class XYGraphConfigDialog extends Dialog {
 	
 	private GraphConfigPage graphConfigPage;
-	private List<AnnotationConfigPage> annotationConfigPageList;
+	protected List<AnnotationConfigPage> annotationConfigPageList;
 	private List<AxisConfigPage> axisConfigPageList;
 	protected Combo traceCombo;
+	protected Combo annotationsCombo;
 	protected List<TraceConfigPage> traceConfigPageList;
 	protected XYGraph xyGraph;
 	protected XYGraphConfigCommand command;
@@ -186,7 +187,7 @@ public class XYGraphConfigDialog extends Dialog {
         			SWT.FILL, SWT.FILL,true, false));
         	annoSelectGroup.setText("Select Annotation");
         	annoSelectGroup.setLayout(new GridLayout(1, false));    	        
-        	final Combo annotationsCombo = new Combo(annoSelectGroup, SWT.DROP_DOWN);
+        	this.annotationsCombo = new Combo(annoSelectGroup, SWT.DROP_DOWN);
         	annotationsCombo.setLayoutData(new GridData(SWT.FILL, 0, true, false));
  	        for(Annotation annotation : xyGraph.getPlotArea().getAnnotationList())
  	        	annotationsCombo.add(annotation.getName());

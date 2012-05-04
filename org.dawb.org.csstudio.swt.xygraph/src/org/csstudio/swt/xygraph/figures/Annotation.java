@@ -14,6 +14,7 @@ import org.csstudio.swt.xygraph.dataprovider.ISample;
 import org.csstudio.swt.xygraph.linearscale.Range;
 import org.csstudio.swt.xygraph.undo.MovingAnnotationCommand;
 import org.csstudio.swt.xygraph.undo.MovingAnnotationLabelCommand;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Cursors;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
@@ -75,7 +76,7 @@ public class Annotation extends Figure implements IAxisListener, IDataProviderLi
 		
 	}
 	
-	
+	private IAnnotationLabelProvider labelProvder = null;
 	
 	private Axis xAxis;	
 	private Axis yAxis;	
@@ -177,7 +178,7 @@ public class Annotation extends Figure implements IAxisListener, IDataProviderLi
 		Dimension size = infoLabel.getPreferredSize();
 		updateX0Y0Fromdxdy(size);	
 		//System.out.println(x0 +": " +y0 + " ");
-
+		
 		Rectangle infoBounds = new Rectangle((int) (currentPosition.x + x0 - size.width/2.0), 
 				(int) (currentPosition.y +y0 - size.height/2.0), size.width, size.height);
 		
@@ -383,15 +384,23 @@ public class Annotation extends Figure implements IAxisListener, IDataProviderLi
 	/**
 	 * 
 	 */
-	private void updateInfoLableText(boolean updateX0Y0) {
-		String info = "";		
-		if(showName)
-			info = name;
-		if(showSampleInfo && currentSnappedSample != null && !currentSnappedSample.getInfo().equals(""))
-			info += "\n" + currentSnappedSample.getInfo();
-		if(showPosition)
-				info += "\n" + "(" + xAxis.format(xValue) + ", " + 
-				(Double.isNaN(yValue) ? "NaN" : yAxis.format(yValue)) + ")";				
+	protected void updateInfoLableText(boolean updateX0Y0) {
+		String info = null;		
+		if (labelProvder!=null) {
+			info = labelProvder.getInfoText(xValue, yValue);
+		}
+		
+		if (info==null) {
+			info = "";
+			if(showName)
+				info = name;
+			if(showSampleInfo && currentSnappedSample != null && !currentSnappedSample.getInfo().equals(""))
+				info += "\n" + currentSnappedSample.getInfo();
+			if(showPosition)
+					info += "\n" + "(" + xAxis.format(xValue) + ", " + 
+					(Double.isNaN(yValue) ? "NaN" : yAxis.format(yValue)) + ")";
+		}
+			
 		infoLabel.setText(info);
 		knowX0Y0 = !updateX0Y0;
 		
@@ -800,6 +809,14 @@ class Pointer extends Figure{
 				clientArea.x, clientArea.y + clientArea.height);
 				
 	}
+}
+
+public IAnnotationLabelProvider getLabelProvder() {
+	return labelProvder;
+}
+
+public void setLabelProvder(IAnnotationLabelProvider labelProvder) {
+	this.labelProvder = labelProvder;
 }
 
 
