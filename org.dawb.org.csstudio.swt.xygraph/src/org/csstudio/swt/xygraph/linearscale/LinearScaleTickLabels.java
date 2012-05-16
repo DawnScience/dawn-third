@@ -303,8 +303,12 @@ public class LinearScaleTickLabels extends Figure {
             // check if there is enough space to draw tick label
             boolean hasSpaceToDraw = true;
             if (i != 0) {
-                hasSpaceToDraw = hasSpaceToDraw(previousPosition,
-                        tickLabelPositions.get(i), previousLabel, tickLabels.get(i));
+            	try {
+	                hasSpaceToDraw = hasSpaceToDraw(previousPosition,
+	                        tickLabelPositions.get(i), previousLabel, tickLabels.get(i));
+            	} catch (java.lang.IndexOutOfBoundsException iobe) {
+            		hasSpaceToDraw = false;
+            	}
             }
 
             // check if the same tick label is repeated
@@ -320,7 +324,11 @@ public class LinearScaleTickLabels extends Figure {
             }
 
             if (!hasSpaceToDraw || isRepeatSameTickAndNotEnd || !isMajorTickOrEnd) {
-                tickVisibilities.set(i, Boolean.FALSE);
+            	try {
+                    tickVisibilities.set(i, Boolean.FALSE);
+            	} catch (java.lang.IndexOutOfBoundsException iobe) {
+            		// Ignored or causes SWT error.
+            	}
             } else {
                 previousPosition = tickLabelPositions.get(i);
                 previousLabel = currentLabel;
