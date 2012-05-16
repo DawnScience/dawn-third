@@ -3,7 +3,7 @@
       id="org.dawb.apache.feature"
       label="Apache Code for DAWB"
       version="1.0.0.qualifier"
-      provider-name="Diamond Light Source Ltd.">
+      provider-name="Diamond Light Source">
 
    <description>
       A feature used in the Data Analysis Workbench

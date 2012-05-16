@@ -3,7 +3,7 @@
       id="org.dawb.misc.feature"
       label="Additional Tools for DAWB"
       version="1.0.0.qualifier"
-      provider-name="DLS Ltd.">
+      provider-name="Diamond Light Source">
 
    <description>
       A feature used in the Data Analysis Workbench
