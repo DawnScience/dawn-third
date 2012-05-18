@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Jmol Plug-in
 Bundle-SymbolicName: org.dawb.jmol
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.1.0.qualifier
 Bundle-ClassPath: Jmol.jar
 Bundle-Vendor: jmol.org
 Export-Package: Acme,
