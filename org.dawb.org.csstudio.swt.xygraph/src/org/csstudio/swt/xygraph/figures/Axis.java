@@ -123,12 +123,12 @@ public class Axis extends LinearScale{
 		return listeners.remove(listener);
 	}
 
-	private void fireRevalidated(){
+	protected void fireRevalidated(){
 		for(IAxisListener listener : listeners)
 			listener.axisRevalidated(this);
 	}
 
-	private void fireAxisRangeChanged(final Range old_range, final Range new_range){
+	protected void fireAxisRangeChanged(final Range old_range, final Range new_range){
 		for(IAxisListener listener : listeners)
 			listener.axisRangeChanged(this, old_range, new_range);
 	}
