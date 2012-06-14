@@ -290,8 +290,7 @@ public class Axis extends LinearScale{
 
 	    // Get range of data in all traces
         final Range range = getTraceDataRange();
-        if (range == null)
-            return false;
+        if (range == null) return false;
 		double tempMin = range.getLower();
 		double tempMax = range.getUpper();
 
@@ -308,16 +307,15 @@ public class Axis extends LinearScale{
 		}
 
 		final double thr = (max - min)*autoScaleThreshold;
+		final double cor = (tempMax - tempMin)*autoScaleThreshold;
 
 		//if both the changes are lower than threshold, return
 		if(((tempMin - min)>=0 && (tempMin - min)<thr)
 				&& ((max - tempMax)>=0 && (max - tempMax)<thr)){
 			return false;
 		}else { //expand more space than needed
-			if((tempMin - min)<0)
-				tempMin -= thr;
-			if((tempMax - max) > 0)
-				tempMax += thr;
+			if ((tempMin - min)<0)  tempMin -= cor;		
+			if ((tempMax - max)>0)  tempMax += cor;
 		}
 
 		// Any change at all?
