@@ -403,6 +403,14 @@ public class XYGraph extends Figure{
 				remove(legendMap.remove(trace.getYAxis()));
 			}
 		}
+		try {
+			for (Axis axis : getAxisList()) {
+				axis.removeTrace(trace);
+			}
+		} catch (Throwable ne) {
+			// Ignored, this is a bug fix for Dawn 1.0
+			// to make the plots rescale after a plot is deleted.
+		}
 		plotArea.removeTrace(trace);
 		revalidate();
 		repaint();
