@@ -184,7 +184,7 @@ public abstract class AbstractScale extends Figure{
 	}
 
 
-
+    private boolean userDefinedFormat = false;
 	/**
      * Gets the state indicating if log scale is enabled.
      * 
@@ -239,7 +239,17 @@ public abstract class AbstractScale extends Figure{
      * @exception IllegalArgumentException if the given pattern is invalid.
      */
     public void setFormatPattern(String formatPattern) {
-    	 try {
+    	
+    	this.userDefinedFormat = true;
+    	setFormat(formatPattern);
+    }
+    
+    public void setDefaultFormatPattern(String formatPattern) {
+    	setFormat(formatPattern);
+    }
+    
+	private void setFormat(String formatPattern) {
+		try {
  			new DecimalFormat(formatPattern);
  		} catch (NullPointerException e) {
  			throw e;
@@ -252,8 +262,12 @@ public abstract class AbstractScale extends Figure{
         autoFormat = false;
         setDirty(true);
         revalidate();
-        repaint();
-    }
+        repaint();		
+	}
+
+	public boolean hasUserDefinedFormat() {
+		return userDefinedFormat;
+	}
 
 	/**
 	 * @return the formatPattern
