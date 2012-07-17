@@ -610,7 +610,7 @@ public class Axis extends LinearScale{
 	 *  @param t1 Start of the panning move
 	 *  @param t2 End of the panning move
 	 */
-	void pan(final Range temp, double t1, double t2)
+	protected void pan(final Range temp, double t1, double t2)
     {
         if (isLogScaleEnabled())
         {
