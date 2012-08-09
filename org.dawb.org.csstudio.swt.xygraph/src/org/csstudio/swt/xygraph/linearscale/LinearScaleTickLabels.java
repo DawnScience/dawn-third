@@ -269,12 +269,7 @@ public class LinearScaleTickLabels extends Figure {
         if((minBigger ? max < tickLabelValues.get(tickLabelValues.size()-1) :
         	max > tickLabelValues.get(tickLabelValues.size()-1) )) {
         	tickLabelValues.add(max);
-        	if (scale.isDateEnabled()) {
-                Date date = new Date((long) max);
-                tickLabels.add(scale.format(date));
-            } else {
-                tickLabels.add(scale.format(max));
-            }
+        	tickLabels.add("");
         	tickLabelPositions.add(scale.getMargin() + length);
         }
         	
@@ -371,6 +366,10 @@ public class LinearScaleTickLabels extends Figure {
      */
     private boolean hasSpaceToDraw(int previousPosition, int tickLabelPosition,
             String previousTickLabel, String tickLabel) {
+    	
+    	
+    	if (!scale.isHorizontal()) return true;
+    	
         Dimension tickLabelSize = FigureUtilities.getTextExtents(tickLabel, scale.getFont());
         Dimension previousTickLabelSize = FigureUtilities.getTextExtents(previousTickLabel, scale.getFont());
         int interval = tickLabelPosition - previousPosition;

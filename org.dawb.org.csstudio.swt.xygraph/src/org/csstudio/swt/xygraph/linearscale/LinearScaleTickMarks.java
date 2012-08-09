@@ -149,7 +149,9 @@ public class LinearScaleTickMarks extends Figure {
                 if (tickLabelSide == LabelSide.Secondary) {
                     y = height - 1 - LINE_WIDTH - MAJOR_TICK_LENGTH;
                 }
-                gc.drawLine(x, y, x, y + MAJOR_TICK_LENGTH);
+                if (i!=tickLabelPositions.size()-1) {
+                    gc.drawLine(x, y, x, y + MAJOR_TICK_LENGTH);
+                }
                 //draw minor ticks for linear scale
                 if(scale.isMinorTicksVisible()){
                 	if(i>0) {
@@ -256,7 +258,9 @@ public class LinearScaleTickMarks extends Figure {
                     x = LINE_WIDTH;
                 }
                 y = height - tickLabelPositions.get(i);
-                gc.drawLine(x, y, x + MAJOR_TICK_LENGTH, y);
+                if (i!=tickLabelPositions.size()-1) {
+                    gc.drawLine(x, y, x + MAJOR_TICK_LENGTH, y);
+                }
                 //draw minor ticks for linear scale
                 if(scale.isMinorTicksVisible()){
                 	if(i>0) {
