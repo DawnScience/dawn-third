@@ -14,10 +14,10 @@ import org.csstudio.swt.xygraph.dataprovider.ISample;
 import org.csstudio.swt.xygraph.linearscale.Range;
 import org.csstudio.swt.xygraph.undo.MovingAnnotationCommand;
 import org.csstudio.swt.xygraph.undo.MovingAnnotationLabelCommand;
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Cursors;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.InputEvent;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.MouseEvent;
@@ -817,6 +817,17 @@ public IAnnotationLabelProvider getLabelProvder() {
 
 public void setLabelProvder(IAnnotationLabelProvider labelProvder) {
 	this.labelProvder = labelProvder;
+}
+
+public void toFront() {
+	final IFigure par = getParent();
+	if (par!=null) {
+		par.remove(this);
+		final int end = par.getChildren()!=null 
+				? par.getChildren().size()
+						: 0;
+		par.add(this, end);
+	}
 }
 
 
