@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Aparapi
 Bundle-SymbolicName: com.amd.aparapi;singleton:=true
-Bundle-Version: 1.0.0
+Bundle-Version: 1.0.0.20120506
 Export-Package: com.amd.aparapi;version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-NativeCode: lib/aparapi_x86.dll;
@@ -17,4 +17,4 @@ Bundle-NativeCode: lib/aparapi_x86.dll;
  osname=macosx; osname=Mac OS X;  osname=MacOS; processor=x86_64,
  *
 Bundle-Vendor: Aparapi
-Bundle-ClassPath: .
+Bundle-ClassPath: jars/aparapi.jar
