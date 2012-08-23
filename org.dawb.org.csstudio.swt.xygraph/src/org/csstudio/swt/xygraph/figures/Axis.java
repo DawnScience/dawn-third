@@ -633,7 +633,7 @@ public class Axis extends LinearScale{
 	 */
 	public void zoomInOut(final double center, final double factor)
     {
-	    final double t1, t2;
+	    final double t1, t2; // TODO remove redundant arithmetic
 	    if (isLogScaleEnabled())
 	    {
 	        final double l = Math.log10(getRange().getUpper()) -

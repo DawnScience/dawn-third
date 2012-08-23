@@ -1,7 +1,5 @@
 package org.csstudio.swt.xygraph.linearscale;
 
-import java.util.Date;
-
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 
