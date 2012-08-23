@@ -1,8 +1,6 @@
 package org.csstudio.swt.xygraph.linearscale;
 
 
-import java.util.Date;
-
 import org.eclipse.draw2d.FigureUtilities;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Rectangle;
@@ -43,7 +41,12 @@ public class LinearScale extends AbstractScale implements IScaleProvider {
     
     /** scale direction, no meaning for round scale */
     private Orientation orientation = Orientation.HORIZONTAL;
-    
+
+    /**
+     * 
+     */
+    private ITicksProvider ticksProvider;
+
     /** the scale tick labels */
     private LinearScaleTickLabels tickLabels;
 
@@ -62,8 +65,9 @@ public class LinearScale extends AbstractScale implements IScaleProvider {
      */
     public LinearScale() {      
     	
-        tickLabels = new LinearScaleTickLabels(this);        
-        tickMarks = new LinearScaleTickMarks(this);                  
+        tickLabels = new LinearScaleTickLabels(this);
+        ticksProvider = tickLabels.getTicksProvider();
+        tickMarks = new LinearScaleTickMarks(this);
         add(tickMarks);        
         add(tickLabels);    
 //        setFont(XYGraphMediaFactory.getInstance().getFont(
@@ -129,7 +133,15 @@ public class LinearScale extends AbstractScale implements IScaleProvider {
 		
 	}
 
-    /**
+	/**
+	 * Gets the ticks provider
+	 * @return
+	 */
+	public ITicksProvider getTicksProvider() {
+		return ticksProvider;
+	}
+
+	/**
      * Gets the scale tick labels.
      * 
      * @return the scale tick labels

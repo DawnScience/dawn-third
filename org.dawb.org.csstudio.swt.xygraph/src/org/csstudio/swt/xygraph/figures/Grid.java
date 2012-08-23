@@ -35,7 +35,7 @@ public class Grid extends Figure implements IAxisListener{
 			graphics.setLineStyle(axis.isDashGridLine()? SWTConstants.LINE_DASH : SWTConstants.LINE_SOLID);
 			graphics.setForegroundColor(axis.getMajorGridColor());
 			graphics.setLineWidth(1);
-			for(int pos: axis.getScaleTickLabels().getTickLabelPositions()){
+			for(int pos: axis.getTicksProvider().getPositions()){
 				if(axis.isHorizontal())
 					graphics.drawLine(axis.getBounds().x + pos, bounds.y + bounds.height,
 							axis.getBounds().x + pos, bounds.y);
