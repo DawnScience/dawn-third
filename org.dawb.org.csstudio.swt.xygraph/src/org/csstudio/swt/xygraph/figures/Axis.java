@@ -80,6 +80,8 @@ public class Axis extends LinearScale{
 
 	private ZoomType zoomType = ZoomType.NONE;
 
+	private IAutoScaler autoScaler;
+
 	private Point start;
 	private Point end;
 	private boolean armed;
@@ -111,6 +113,7 @@ public class Axis extends LinearScale{
 		}else
 			revertBackColor = XYGraphMediaFactory.getInstance().getColor(100,100,100);
 
+		autoScaler = new AutoScaler();
 	}
 
 	public void addListener(final IAxisListener listener){
@@ -238,7 +241,7 @@ public class Axis extends LinearScale{
 
 	/** @return Range that reflects the minimum and maximum value of all
 	 *          traces on this axis.
-	 *          Returns <code>null</code> if there is no trace data.
+	 *          Returns <code>null</code> if there is no trace data or all trace ranges have NaNs or infinities.
 	 */
     public Range getTraceDataRange()
     {
@@ -254,16 +257,18 @@ public class Axis extends LinearScale{
             else
                 range = trace.getDataProvider().getYDataMinMax();
             if (range == null)
+            	continue;
+
+            final double l = range.getLower();
+            final double h = range.getUpper();
+            
+            if (Double.isInfinite(l) || Double.isInfinite(h)
+                    || Double.isNaN(l) || Double.isNaN(h))
                 continue;
-            if (Double.isInfinite(range.getLower())
-                    || Double.isInfinite(range.getUpper())
-                    || Double.isNaN(range.getLower())
-                    || Double.isNaN(range.getUpper()))
-                continue;
-            if (low > range.getLower())
-                low = range.getLower();
-            if (high < range.getUpper())
-                high = range.getUpper();
+            if (low > l)
+                low = l;
+            if (high < h)
+                high = h;
         }
         if (Double.isInfinite(low) || Double.isInfinite(high))
             return null;
@@ -283,7 +288,7 @@ public class Axis extends LinearScale{
 	 *
 	 *  @see #autoScaleThreshold
 	 */
-	public boolean performAutoScale(final boolean force){
+	public boolean performAutoScale(final boolean force) {
 	    // Anything to do? Autoscale not enabled nor forced?
 		if (traceList.size() <= 0  ||  !(force || autoScale))
 		    return false;
@@ -291,48 +296,13 @@ public class Axis extends LinearScale{
 	    // Get range of data in all traces
         final Range range = getTraceDataRange();
         if (range == null) return false;
-		double tempMin = range.getLower();
-		double tempMax = range.getUpper();
 
-		// Get current axis range, determine how 'different' they are
-		double max = getRange().getUpper();
-		double min = getRange().getLower();
+        Range newRange = autoScaler.calculateNewRange(range, getRange(), isLogScaleEnabled(), autoScaleThreshold);
+        if (newRange == null)
+        	return false;
 
-		if (isLogScaleEnabled())
-		{   // Transition into log space
-		    tempMin = Log10.log10(tempMin);
-		    tempMax = Log10.log10(tempMax);
-		    max = Log10.log10(max);
-		    min = Log10.log10(min);
-		}
-
-		final double thr = (max - min)*autoScaleThreshold;
-		final double cor = (tempMax - tempMin)*autoScaleThreshold;
-
-		//if both the changes are lower than threshold, return
-		if(((tempMin - min)>=0 && (tempMin - min)<thr)
-				&& ((max - tempMax)>=0 && (max - tempMax)<thr)){
-			return false;
-		}else { //expand more space than needed
-			if ((tempMin - min)<0)  tempMin -= cor;		
-			if ((tempMax - max)>0)  tempMax += cor;
-		}
-
-		// Any change at all?
-		if((Double.doubleToLongBits(tempMin) == Double.doubleToLongBits(min)
-				&& Double.doubleToLongBits(tempMax) == Double.doubleToLongBits(max)) ||
-				Double.isInfinite(tempMin) || Double.isInfinite(tempMax) ||
-				Double.isNaN(tempMin) || Double.isNaN(tempMax))
-			return false;
-
-        if (isLogScaleEnabled())
-        {   // Revert from log space
-            tempMin = Log10.pow10(tempMin);
-            tempMax = Log10.pow10(tempMax);
-        }
-
-		// Update axis
-		setRange(tempMin, tempMax);
+        // Update axis
+		setRange(newRange.getLower(), newRange.getUpper());
 		repaint();
 		return true;
 	}
@@ -614,9 +584,9 @@ public class Axis extends LinearScale{
     {
         if (isLogScaleEnabled())
         {
-            final double m = Math.log10(t2) - Math.log10(t1);
-            t1 = Math.pow(10,Math.log10(temp.getLower()) - m);
-            t2 = Math.pow(10,Math.log10(temp.getUpper()) - m);
+            final double m = Log10.log10(t2) - Math.log10(t1);
+            t1 = Log10.pow10(Log10.log10(temp.getLower()) - m);
+            t2 = Log10.pow10(Log10.log10(temp.getUpper()) - m);
         }
         else
         {
@@ -631,24 +601,20 @@ public class Axis extends LinearScale{
 	 *  @param center Axis position at the 'center' of the zoom
 	 *  @param factor Zoom factor. Positive to zoom 'in', negative 'out'.
 	 */
-	public void zoomInOut(final double center, final double factor)
+	public void zoomInOut(double center, final double factor)
     {
-	    final double t1, t2; // TODO remove redundant arithmetic
-	    if (isLogScaleEnabled())
-	    {
-	        final double l = Math.log10(getRange().getUpper()) -
-                    Math.log10(getRange().getLower());
-	        final double r1 = (Math.log10(center) - Math.log10(getRange().getLower()))/l;
-	        final double r2 = (Math.log10(getRange().getUpper()) - Math.log10(center))/l;
-            t1 = Math.pow(10, Math.log10(getRange().getLower()) + r1 * factor * l);
-            t2 = Math.pow(10, Math.log10(getRange().getUpper()) - r2 * factor * l);
-        }else{
-            final double l = getRange().getUpper() - getRange().getLower();
-            final double r1 = (center - getRange().getLower())/l;
-            final double r2 = (getRange().getUpper() - center)/l;
-            t1 = getRange().getLower() + r1 * factor * l;
-            t2 = getRange().getUpper() - r2 * factor * l;
-        }
+	    final double t1, t2;
+	    final Range range = getRange();
+	    final double cfactor = 1.0 - factor;
+		if (isLogScaleEnabled()) {
+			center = Log10.log10(center) * factor;
+			t1 = Log10.pow10(Log10.log10(range.getLower()) * cfactor + center);
+			t2 = Log10.pow10(Log10.log10(range.getUpper()) * cfactor + center);
+		} else {
+			center = center * factor;
+			t1 = range.getLower() * cfactor + center;
+			t2 = range.getUpper() * cfactor + center;
+		}
         setRange(t1, t2);
     }
 
