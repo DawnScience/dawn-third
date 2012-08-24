@@ -49,7 +49,7 @@ public abstract class AbstractScale extends Figure{
 	private static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd\nHH:mm:ss";    	
     
     /** ticks label position */
-    private LabelSide tickLableSide = LabelSide.Primary;   
+    private LabelSide tickLabelSide = LabelSide.Primary;   
 
 
     /** the default minimum value of log scale range */
@@ -157,8 +157,8 @@ public abstract class AbstractScale extends Figure{
 	/**
 	 * @return the side of the tick label relative to the tick marks
 	 */
-	public LabelSide getTickLablesSide() {
-		return tickLableSide;
+	public LabelSide getTickLabelSide() {
+		return tickLabelSide;
 	}
 
 	/**
@@ -422,7 +422,7 @@ public abstract class AbstractScale extends Figure{
 	 * @param tickLabelSide the side of the tick label relative to tick mark
 	 */
 	public void setTickLableSide(LabelSide tickLabelSide) {
-		this.tickLableSide = tickLabelSide;
+		this.tickLabelSide = tickLabelSide;
 		revalidate();
 	}
 
