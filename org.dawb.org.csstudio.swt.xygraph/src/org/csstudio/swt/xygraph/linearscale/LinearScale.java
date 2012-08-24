@@ -74,18 +74,25 @@ public class LinearScale extends AbstractScale implements IScaleProvider {
 //        		XYGraphMediaFactory.FONT_ARIAL));
  
     }
-	
+
 	private void calcMargin() {
-		if(isHorizontal()) {			
-			margin = (int) Math.ceil(Math.max(FigureUtilities.getTextExtents(
-					format(getRange().getLower()),getFont()).width, 
-					FigureUtilities.getTextExtents(format(getRange().getUpper()), getFont()).width)/2.0);
-		}else
-			margin = (int) Math.ceil(Math.max(FigureUtilities.getTextExtents(
-					format(getRange().getLower()), getFont()).height, 
-					FigureUtilities.getTextExtents(format(getRange().getUpper()), getFont()).height)/2.0);
+		margin = (int) Math.ceil(Math.max(calculateSpan(getRange().getLower()), calculateSpan(getRange().getUpper()))/2.0);
 	}
-	
+
+	/**
+	 * Calculate span of a textual form of object in scale's orientation
+	 * @param obj object
+	 * @return span in pixel
+	 */
+	@Override
+	public int calculateSpan(Object obj) {
+		Dimension extent = FigureUtilities.getTextExtents(format(obj), getFont());
+		if (isHorizontal()) {
+			return extent.width;
+		}
+		return extent.height;
+	}
+
 	/**
 	 * @return the length of the whole scale (include margin)
 	 */

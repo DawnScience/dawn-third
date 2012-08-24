@@ -40,4 +40,5 @@ public interface IScaleProvider {
 
 	public int getLength();
 
+	public int calculateSpan(Object obj);
 }
