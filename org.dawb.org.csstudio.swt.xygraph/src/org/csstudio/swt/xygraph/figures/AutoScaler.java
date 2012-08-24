@@ -31,8 +31,8 @@ public class AutoScaler implements IAutoScaler {
 		double tempMax = inputRange.getUpper();
 
 		// Get current axis range, determine how 'different' they are
-		double max = currentRange.getUpper();
 		double min = currentRange.getLower();
+		double max = currentRange.getUpper();
 
 		if (isLogScale)
 		{   // Transition into log space
@@ -67,7 +67,7 @@ public class AutoScaler implements IAutoScaler {
             tempMax = Log10.pow10(tempMax);
         }
 
-        return null;
+        return new Range(tempMin, tempMax);
 	}
 
 }
