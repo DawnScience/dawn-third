@@ -113,7 +113,7 @@ public class Axis extends LinearScale{
 		}else
 			revertBackColor = XYGraphMediaFactory.getInstance().getColor(100,100,100);
 
-		autoScaler = new AutoScaler();
+		autoScaler = new NullAutoScaler();
 	}
 
 	public void addListener(final IAxisListener listener){
