@@ -47,8 +47,15 @@ public class LinearScaleTicks implements ITicksProvider {
     
     /** the maximum height of tick labels */
     private int maxHeight;
-    
-    private int stepInPixel;
+
+    /** number of pixels between major ticks */
+    private int majorStepInPixel;
+
+    /** number of pixels between minor ticks */
+    private int minorStepInPixel;
+
+    /** number of minor ticks between two major ticks */
+    private int minorTicks;
 
     private IScaleProvider scale;
 
@@ -86,13 +93,23 @@ public class LinearScaleTicks implements ITicksProvider {
 	}
 
 	@Override
-	public int getStepInPixels() {
-		return stepInPixel;
+	public int getMajorStepInPixels() {
+		return majorStepInPixel;
 	}
 
 	@Override
-	public int getCount() {
+	public int getMinorStepInPixels() {
+		return minorStepInPixel;
+	}
+
+	@Override
+	public int getMajorCount() {
 		return labels.size();
+	}
+
+	@Override
+	public int getMinorCount() {
+		return minorTicks;
 	}
 
 	@Override
@@ -121,6 +138,7 @@ public class LinearScaleTicks implements ITicksProvider {
         updateTickVisibility();
         updateTickLabelMaxLengthAndHeight(font);
 
+        updateMinorTickParameters();
 	}
 
     /**
@@ -240,7 +258,7 @@ public class LinearScaleTicks implements ITicksProvider {
         double min = scale.getScaleRange().getLower();
         double max = scale.getScaleRange().getUpper();
         BigDecimal gridStepBigDecimal = getGridStep(length, min, max);
-        stepInPixel = (int) (length * gridStepBigDecimal.doubleValue()/(max - min));
+        majorStepInPixel = (int) (length * gridStepBigDecimal.doubleValue()/(max - min));
         updateTickLabelForLinearScale(length, gridStepBigDecimal);
     }
 
@@ -454,6 +472,29 @@ public class LinearScaleTicks implements ITicksProvider {
             }
         }
     }
+
+	private void updateMinorTickParameters() {
+		if (scale.isDateEnabled()) {
+			minorTicks = 6;
+			minorStepInPixel = (int) (majorStepInPixel / 6.0);
+			return;
+		}
+
+		if (majorStepInPixel / 5 >= scale.getMinorTickMarkStepHint()) {
+			minorTicks = 5;
+			minorStepInPixel = (int) (majorStepInPixel / 5.0);
+			return;
+		}
+
+		if (majorStepInPixel / 4 >= scale.getMinorTickMarkStepHint()) {
+			minorTicks = 4;
+			minorStepInPixel = (int) (majorStepInPixel / 4.0);
+			return;
+		}
+
+		minorTicks = 2;
+		minorStepInPixel = (int) (majorStepInPixel / 2.0);
+	}
 
     /**
      * Calculates the value of the first argument raised to the power of the

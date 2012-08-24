@@ -65,7 +65,7 @@ public class LinearScaleTickLabels extends Figure {
     private void drawXTick(Graphics grahics) {
         // draw tick labels
         grahics.setFont(scale.getFont());
-        final int imax = ticks.getCount();
+        final int imax = ticks.getMajorCount();
         for (int i = 0; i < imax; i++) {
             if (ticks.isVisible(i)) {
                 String text = ticks.getLabel(i);
@@ -86,7 +86,7 @@ public class LinearScaleTickLabels extends Figure {
         // draw tick labels
         grahpics.setFont(scale.getFont());
         int fontHeight = ticks.getMaxHeight();
-        final int imax = ticks.getCount();
+        final int imax = ticks.getMajorCount();
         for (int i = 0; i < imax; i++) {
             if (ticks.isVisible(i)) {
                 String text = ticks.getLabel(i);

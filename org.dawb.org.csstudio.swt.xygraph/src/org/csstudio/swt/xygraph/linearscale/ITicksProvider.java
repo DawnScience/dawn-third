@@ -64,13 +64,25 @@ public interface ITicksProvider {
      * 
      * @return
      */
-    public int getStepInPixels();
+    public int getMajorStepInPixels();
+
+    /**
+     * 
+     * @return
+     */
+    public int getMinorStepInPixels();
 
     /**
      * 
      * @return number of major ticks
      */
-    public int getCount();
+    public int getMajorCount();
+
+    /**
+     * 
+     * @return number of minor ticks between two major tick
+     */
+    public int getMinorCount();
 
     /**
      * Update ticks

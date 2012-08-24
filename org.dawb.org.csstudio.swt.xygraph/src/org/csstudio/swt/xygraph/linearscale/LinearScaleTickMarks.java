@@ -59,6 +59,8 @@ public class LinearScaleTickMarks extends Figure {
    protected void paintClientArea(Graphics graphics) {
 	   graphics.translate(bounds.x, bounds.y);
 	   ITicksProvider ticks = scale.getTicksProvider();
+	   minorGridStepInPixel = ticks.getMinorStepInPixels();
+	   minorTicksNumber = ticks.getMinorCount();
 
         int width = getSize().width;
         int height = getSize().height;
@@ -71,34 +73,6 @@ public class LinearScaleTickMarks extends Figure {
                     height);
         }
    };
-    
-   
-	/**
-	 * update the parameters for minor ticks
-	 */
-	public void updateMinorTickParas() {
-		int gridStep = scale.getTicksProvider().getStepInPixels();
-		if(scale.isDateEnabled()) {
-			minorTicksNumber = 6;
-			minorGridStepInPixel = (int) (gridStep/6.0);
-			return;
-		}
-			
-		if(gridStep/5 >= scale.getMinorTickMarkStepHint()){
-			minorTicksNumber = 5;
-			minorGridStepInPixel = (int) (gridStep/5.0);
-			return;
-		}			
-		if(gridStep/4 >= scale.getMinorTickMarkStepHint()){
-			minorTicksNumber = 4;
-			minorGridStepInPixel = (int) (gridStep/4.0);
-			return;
-		}
-		
-		minorTicksNumber = 2;
-		minorGridStepInPixel = (int) (gridStep/2.0);
-		return;
-	}
 
     /**
      * Draw the X tick marks.
@@ -117,10 +91,9 @@ public class LinearScaleTickMarks extends Figure {
     private void drawXTickMarks(Graphics gc, ITicksProvider ticks,
             LabelSide tickLabelSide, int width, int height) {
     	
-    	updateMinorTickParas();
         // draw tick marks
         gc.setLineStyle(SWTConstants.LINE_SOLID);
-        int imax = ticks.getCount();
+        int imax = ticks.getMajorCount();
         if(scale.isLogScaleEnabled()) {
         	for (int i = 0; i < imax; i++) {
                 int x = ticks.getPosition(i);
@@ -139,12 +112,9 @@ public class LinearScaleTickMarks extends Figure {
                 	gc.drawLine(x, y, x, y + tickLength);
         	}
         } else {
+        	final int y = tickLabelSide == LabelSide.Secondary ? height - 1 - LINE_WIDTH - MAJOR_TICK_LENGTH : 0;
         	for (int i = 0; i < imax; i++) {
                 int x = ticks.getPosition(i);
-                int y = 0;
-                if (tickLabelSide == LabelSide.Secondary) {
-                    y = height - 1 - LINE_WIDTH - MAJOR_TICK_LENGTH;
-                }
                 if (i!=imax-1) {
                     gc.drawLine(x, y, x, y + MAJOR_TICK_LENGTH);
                 }
@@ -153,7 +123,7 @@ public class LinearScaleTickMarks extends Figure {
                 	if(i>0) {
                 		//draw the first grid step which is start from min value
                 		if(i == 1 && (ticks.getPosition(1) - ticks.getPosition(0))
-                				< ticks.getStepInPixels()){
+                				< ticks.getMajorStepInPixels()){
                 			x = ticks.getPosition(1);
                 			while((x - ticks.getPosition(0)) > minorGridStepInPixel + 3) {
                 				x = x - minorGridStepInPixel;
@@ -161,7 +131,7 @@ public class LinearScaleTickMarks extends Figure {
                 			}
                 		} //draw the last grid step which is end to max value
                 		else if(i == imax-1 && (ticks.getPosition(i) - ticks.getPosition(i-1))
-                				< ticks.getStepInPixels()){
+                				< ticks.getMajorStepInPixels()){
                 			x = ticks.getPosition(i-1);                			
                 			while((ticks.getPosition(i) -x ) > minorGridStepInPixel + 3) {
                 				x = x + minorGridStepInPixel;
@@ -217,12 +187,11 @@ public class LinearScaleTickMarks extends Figure {
      *            the graphics context
      */
     private void drawYTickMarks(Graphics gc, ITicksProvider ticks, LabelSide tickLabelSide, int width, int height) {
-    	updateMinorTickParas();
         // draw tick marks
         gc.setLineStyle(SWTConstants.LINE_SOLID);
         int x = 0;
         int y = 0;
-        int imax = ticks.getCount();
+        int imax = ticks.getMajorCount();
         if(scale.isLogScaleEnabled()) {
         	for (int i = 0; i < imax; i++) {
         		
@@ -257,7 +226,7 @@ public class LinearScaleTickMarks extends Figure {
                 	if(i>0) {
                 		//draw the first grid step which is start from min value
                 		if(i == 1 && (ticks.getPosition(1) - ticks.getPosition(0))
-                				< ticks.getStepInPixels()){
+                				< ticks.getMajorStepInPixels()){
                 			y = ticks.getPosition(1);
                 			while((y - ticks.getPosition(0)) > minorGridStepInPixel + 3) {
                 				y = y - minorGridStepInPixel;
@@ -265,7 +234,7 @@ public class LinearScaleTickMarks extends Figure {
                 			}
                 		} //draw the last grid step which is end to max value
                 		else if(i == imax-1 && (ticks.getPosition(i) - ticks.getPosition(i-1))
-                				< ticks.getStepInPixels()){
+                				< ticks.getMajorStepInPixels()){
                 			y = ticks.getPosition(i-1);                			
                 			while((imax -y ) > minorGridStepInPixel + 3) {
                 				y = y + minorGridStepInPixel;
