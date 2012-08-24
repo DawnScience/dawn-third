@@ -366,7 +366,9 @@ public abstract class AbstractScale extends Figure{
        // }
 
         if (lower == upper) {
-        	upper = lower +1;
+        	final double delta = Math.abs(lower)/8.; // make 25% percent different
+        	upper += delta;
+        	lower -= delta;
         	if(Double.isInfinite(upper))
                 throw new IllegalArgumentException("Illegal range: lower=" + lower + ", upper=" + upper);
         }

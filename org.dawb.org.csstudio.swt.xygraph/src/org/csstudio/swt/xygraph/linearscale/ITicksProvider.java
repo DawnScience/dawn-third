@@ -33,54 +33,42 @@ public interface ITicksProvider {
     public List<Integer> getPositions();
 
     /**
-     * 
      * @param index
-     * @return
+     * @return tick position
      */
     public int getPosition(int index);
 
     /**
-     * 
      * @param index
-     * @return
+     * @return tick value
      */
     public double getValue(int index);
 
     /**
-     * 
      * @param index
-     * @return
+     * @return tick label
      */
     public String getLabel(int index);
 
     /**
-     * 
      * @param index
-     * @return
+     * @return true if tick is visible
      */
     public boolean isVisible(int index);
 
     /**
-     * 
-     * @return
-     */
-    public int getMajorStepInPixels();
-
-    /**
-     * 
-     * @return
-     */
-    public int getMinorStepInPixels();
-
-    /**
-     * 
      * @return number of major ticks
      */
     public int getMajorCount();
 
     /**
-     * 
-     * @return number of minor ticks between two major tick
+     * @param index
+     * @return minor tick position
+     */
+    public int getMinorPosition(int index);
+
+    /**
+     * @return number of minor ticks
      */
     public int getMinorCount();
 
@@ -96,4 +84,5 @@ public interface ITicksProvider {
     public int getMaxWidth();
 
     public int getMaxHeight();
+
 }

@@ -34,7 +34,7 @@ public class LinearScaleTicks implements ITicksProvider {
     /** the array of tick label */
     private ArrayList<String> labels;
 
-    /** the array of tick label position in pixels */
+    /** the array of tick label positions in pixels */
     private ArrayList<Integer> positions;
 
     /** the array of visibility state of tick label */
@@ -57,6 +57,9 @@ public class LinearScaleTicks implements ITicksProvider {
     /** number of minor ticks between two major ticks */
     private int minorTicks;
 
+    /** the array of minor tick positions in pixels */
+    private ArrayList<Integer> minorPositions;
+
     private IScaleProvider scale;
 
 	public LinearScaleTicks(IScaleProvider scale) {
@@ -65,6 +68,7 @@ public class LinearScaleTicks implements ITicksProvider {
 		labels = new ArrayList<String>();
 		positions = new ArrayList<Integer>();
 		visibilities = new ArrayList<Boolean>();
+		minorPositions = new ArrayList<Integer>();
 	}
 
 	@Override
@@ -93,23 +97,18 @@ public class LinearScaleTicks implements ITicksProvider {
 	}
 
 	@Override
-	public int getMajorStepInPixels() {
-		return majorStepInPixel;
-	}
-
-	@Override
-	public int getMinorStepInPixels() {
-		return minorStepInPixel;
-	}
-
-	@Override
 	public int getMajorCount() {
 		return labels.size();
 	}
 
 	@Override
 	public int getMinorCount() {
-		return minorTicks;
+		return minorPositions.size();
+	}
+
+	@Override
+	public int getMinorPosition(int index) {
+		return minorPositions.get(index);
 	}
 
 	@Override
@@ -123,22 +122,25 @@ public class LinearScaleTicks implements ITicksProvider {
 	}
 
 	@Override
-	public void update(Font font, double min, double max, int length) {
+	public void update(final Font font, final double min, final double max, final int length) {
 		values.clear();
 		labels.clear();
 		positions.clear();
 		visibilities.clear();
+		minorPositions.clear();
 
         if (scale.isLogScaleEnabled()) {
-            updateTickLabelForLogScale(length);
+            updateTickLabelForLogScale(min, max, length);
         }else {
-            updateTickLabelForLinearScale(length);
+            updateTickLabelForLinearScale(min, max, length);
         }
 
         updateTickVisibility();
         updateTickLabelMaxLengthAndHeight(font);
 
         updateMinorTickParameters();
+
+        updateMinorTicks();
 	}
 
     /**
@@ -147,9 +149,7 @@ public class LinearScaleTicks implements ITicksProvider {
      * @param length
      *            the length of scale
      */
-    private void updateTickLabelForLogScale(int length) {
-        double min = scale.getScaleRange().getLower();
-        double max = scale.getScaleRange().getUpper();
+    private void updateTickLabelForLogScale(double min, double max, int length) {
         if(min <= 0 || max <= 0)
         	throw new IllegalArgumentException(
         			"the range for log scale must be in positive range");
@@ -254,12 +254,10 @@ public class LinearScaleTicks implements ITicksProvider {
      * @param length
      *            scale tick length (without margin)
      */
-    private void updateTickLabelForLinearScale(int length) {
-        double min = scale.getScaleRange().getLower();
-        double max = scale.getScaleRange().getUpper();
+    private void updateTickLabelForLinearScale(double min, double max, int length) {
         BigDecimal gridStepBigDecimal = getGridStep(length, min, max);
         majorStepInPixel = (int) (length * gridStepBigDecimal.doubleValue()/(max - min));
-        updateTickLabelForLinearScale(length, gridStepBigDecimal);
+        updateTickLabelForLinearScale(min, max, length, gridStepBigDecimal);
     }
 
     /**
@@ -270,10 +268,7 @@ public class LinearScaleTicks implements ITicksProvider {
      * @param tickStep
      *            the tick step
      */
-    private void updateTickLabelForLinearScale(int length, BigDecimal tickStep) {
-        double min = scale.getScaleRange().getLower();
-        double max = scale.getScaleRange().getUpper();
-
+    private void updateTickLabelForLinearScale(double min, double max, int length, BigDecimal tickStep) {
         boolean minBigger = max < min;
         
         final BigDecimal MIN = new BigDecimal(new Double(min).toString());
@@ -625,4 +620,36 @@ public class LinearScaleTicks implements ITicksProvider {
         	gridStep = gridStep.negate();
         return gridStep;
     }
+
+	private void updateMinorTicks() {
+		final int imax = getMajorCount();
+
+		double lx = positions.get(0);
+		double cx, dx, tx;
+		for (int i = 1; i < imax; i++) {
+			// draw the first grid step which is start from min value
+			cx = positions.get(i);
+			dx = cx - lx;
+			if (i == 1 && dx < majorStepInPixel) {
+				tx = cx;
+				while ((tx - lx) > minorStepInPixel + 3) {
+					tx -= minorStepInPixel;
+					minorPositions.add((int) tx);
+				}
+			} // draw the last grid step which is end to max value
+			else if (i == imax - 1 && dx < majorStepInPixel) {
+				tx = lx;
+				while ((getPosition(i) - tx) > minorStepInPixel + 3) {
+					tx += minorStepInPixel;
+					minorPositions.add((int) tx);
+				}
+			} else { // draw regular steps
+				for (int j = 0; j < minorTicks; j++) {
+					tx = lx + (dx * j) / minorTicks;
+					minorPositions.add((int) tx);
+				}
+			}
+			lx = cx;
+		}
+	}
 }
