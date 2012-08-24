@@ -34,6 +34,8 @@ public interface IScaleProvider {
 
 	public int getMajorTickMarkStepHint();
 
+	public int getMinorTickMarkStepHint();
+
 	public int getTimeUnit();
 
 	public int getLength();
