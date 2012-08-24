@@ -624,32 +624,32 @@ public class LinearScaleTicks implements ITicksProvider {
 	private void updateMinorTicks() {
 		final int imax = getMajorCount();
 
-		double lx = positions.get(0);
-		double cx, dx, tx;
+		double lp = positions.get(0);
+		double cp, dp, tp;
 		for (int i = 1; i < imax; i++) {
-			// draw the first grid step which is start from min value
-			cx = positions.get(i);
-			dx = cx - lx;
-			if (i == 1 && dx < majorStepInPixel) {
-				tx = cx;
-				while ((tx - lx) > minorStepInPixel + 3) {
-					tx -= minorStepInPixel;
-					minorPositions.add((int) tx);
+			cp = positions.get(i);
+			dp = cp - lp;
+			// add the first minor ticks which is start from min value
+			if (i == 1 && dp < majorStepInPixel) {
+				tp = cp;
+				while ((tp - lp) > minorStepInPixel + 3) {
+					tp -= minorStepInPixel;
+					minorPositions.add((int) tp);
 				}
-			} // draw the last grid step which is end to max value
-			else if (i == imax - 1 && dx < majorStepInPixel) {
-				tx = lx;
-				while ((getPosition(i) - tx) > minorStepInPixel + 3) {
-					tx += minorStepInPixel;
-					minorPositions.add((int) tx);
+			} // add the last minor ticks which is end to max value
+			else if (i == imax - 1 && dp < majorStepInPixel) {
+				tp = lp;
+				while ((getPosition(i) - tp) > minorStepInPixel + 3) {
+					tp += minorStepInPixel;
+					minorPositions.add((int) tp);
 				}
-			} else { // draw regular steps
+			} else { // add regular minor ticks
 				for (int j = 0; j < minorTicks; j++) {
-					tx = lx + (dx * j) / minorTicks;
-					minorPositions.add((int) tx);
+					tp = lp + (dp * j) / minorTicks;
+					minorPositions.add((int) tp);
 				}
 			}
-			lx = cx;
+			lp = cp;
 		}
 	}
 }

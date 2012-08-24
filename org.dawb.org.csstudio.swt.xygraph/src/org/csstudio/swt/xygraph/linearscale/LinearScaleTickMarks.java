@@ -187,7 +187,7 @@ public class LinearScaleTickMarks extends Figure {
             if(scale.isMinorTicksVisible()){
             	final int jmax = ticks.getMinorCount();
             	for (int j = 0; j < jmax; j++) {
-    				drawYMinorTicks(gc, tickLabelSide, x, y - ticks.getMinorPosition(j)); 
+    				drawYMinorTicks(gc, tickLabelSide, x, height - ticks.getMinorPosition(j)); 
             	}
             }
         }
