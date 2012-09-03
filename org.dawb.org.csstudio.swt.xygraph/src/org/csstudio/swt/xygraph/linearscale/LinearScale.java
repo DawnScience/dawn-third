@@ -76,7 +76,8 @@ public class LinearScale extends AbstractScale implements IScaleProvider {
     }
 
 	private void calcMargin() {
-		margin = (int) Math.ceil(Math.max(calculateSpan(getRange().getLower()), calculateSpan(getRange().getUpper()))/2.0);
+		final Range r = getRange();
+		margin = (int) Math.ceil(Math.max(calculateSpan(r.getLower()), calculateSpan(r.getUpper()))/2.0);
 	}
 
 	/**
@@ -84,13 +85,25 @@ public class LinearScale extends AbstractScale implements IScaleProvider {
 	 * @param obj object
 	 * @return span in pixel
 	 */
-	@Override
 	public int calculateSpan(Object obj) {
-		Dimension extent = FigureUtilities.getTextExtents(format(obj), getFont());
+		final Dimension extent = calculateDimension(obj);
 		if (isHorizontal()) {
 			return extent.width;
 		}
 		return extent.height;
+	}
+
+	/**
+	 * Calculate dimension of a textual form of object
+	 * @param obj object
+	 * @return dimension
+	 */
+	@Override
+	public Dimension calculateDimension(Object obj) {
+		if (obj instanceof String)
+			return FigureUtilities.getTextExtents((String) obj, getFont());
+
+		return FigureUtilities.getTextExtents(format(obj), getFont());
 	}
 
 	/**
@@ -313,9 +326,7 @@ public class LinearScale extends AbstractScale implements IScaleProvider {
     	super.setBounds(rect);   
     	
     }
-    /*
-     * @see IAxisTick#setFont(Font)
-     */
+
     @Override
     public void setFont(Font font) {
         if (font != null && font.isDisposed()) {

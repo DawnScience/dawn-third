@@ -22,9 +22,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.eclipse.draw2d.FigureUtilities;
 import org.eclipse.draw2d.geometry.Dimension;
-import org.eclipse.swt.graphics.Font;
 
 public class LinearScaleTicks implements ITicksProvider {
 
@@ -122,7 +120,7 @@ public class LinearScaleTicks implements ITicksProvider {
 	}
 
 	@Override
-	public void update(final Font font, final double min, final double max, final int length) {
+	public void update(final double min, final double max, final int length) {
 		values.clear();
 		labels.clear();
 		positions.clear();
@@ -136,7 +134,7 @@ public class LinearScaleTicks implements ITicksProvider {
         }
 
         updateTickVisibility();
-        updateTickLabelMaxLengthAndHeight(font);
+        updateTickLabelMaxLengthAndHeight();
 
         updateMinorTickParameters();
 
@@ -416,7 +414,7 @@ public class LinearScaleTicks implements ITicksProvider {
      * @param tickLabelPosition
      *            the tick label position.
      *  @param previousTickLabel
-     *            the prevoius tick label.          
+     *            the previous tick label.          
      * @param tickLabel
      *            the tick label text
      * @return true if there is a space to draw tick label
@@ -427,8 +425,8 @@ public class LinearScaleTicks implements ITicksProvider {
     	
     	if (!scale.isHorizontal()) return true;
     	
-        Dimension tickLabelSize = FigureUtilities.getTextExtents(tickLabel, scale.getFont());
-        Dimension previousTickLabelSize = FigureUtilities.getTextExtents(previousTickLabel, scale.getFont());
+        Dimension tickLabelSize = scale.calculateDimension(tickLabel);
+        Dimension previousTickLabelSize = scale.calculateDimension(previousTickLabel);
         int interval = tickLabelPosition - previousPosition;
         int textLength = (int) (scale.isHorizontal() ? (tickLabelSize.width/2.0 + previousTickLabelSize.width/2.0)  
         		: tickLabelSize.height);
@@ -436,8 +434,7 @@ public class LinearScaleTicks implements ITicksProvider {
        
         boolean noLapOnEnd = true;
         if(tickLabelPosition != positions.get(positions.size() - 1)){
-        	Dimension endTickLabelSize = FigureUtilities.getTextExtents(
-        		labels.get(labels.size()-1), scale.getFont());
+        	Dimension endTickLabelSize = scale.calculateDimension(labels.get(labels.size()-1));
         	interval = positions.get(positions.size() - 1) - tickLabelPosition;
         	textLength = (int) (scale.isHorizontal() ? (tickLabelSize.width/2.0 + endTickLabelSize.width/2.0)
         			: tickLabelSize.height);
@@ -449,14 +446,14 @@ public class LinearScaleTicks implements ITicksProvider {
     /**
      * Gets max length of tick label.
      */
-    private void updateTickLabelMaxLengthAndHeight(Font font) {
+    private void updateTickLabelMaxLengthAndHeight() {
         maxWidth = 0;
         maxHeight = 0; 
         for (int i = 0; i < labels.size(); i++) {
             if (visibilities.size() > i && visibilities.get(i) == true) {
-            	Dimension p = FigureUtilities.getTextExtents(labels.get(i), scale.getFont());
+            	Dimension p = scale.calculateDimension(labels.get(i));
             	if (labels.get(0).startsWith("-") && !labels.get(i).startsWith("-")) {
-                    p.width += FigureUtilities.getTextExtents("-", font).width;
+                    p.width += scale.calculateDimension("-").width;
                 }
                 if (p.width > maxWidth) {
                     maxWidth = p.width;

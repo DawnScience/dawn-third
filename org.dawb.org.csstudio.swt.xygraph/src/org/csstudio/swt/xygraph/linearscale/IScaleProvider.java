@@ -1,5 +1,6 @@
 package org.csstudio.swt.xygraph.linearscale;
 
+import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 
@@ -40,5 +41,5 @@ public interface IScaleProvider {
 
 	public int getLength();
 
-	public int calculateSpan(Object obj);
+	public Dimension calculateDimension(Object obj);
 }

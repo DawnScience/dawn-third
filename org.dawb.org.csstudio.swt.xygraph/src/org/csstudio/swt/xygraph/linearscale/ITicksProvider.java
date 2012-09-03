@@ -17,8 +17,6 @@ package org.csstudio.swt.xygraph.linearscale;
 
 import java.util.List;
 
-import org.eclipse.swt.graphics.Font;
-
 /**
  * 
  *
@@ -79,10 +77,18 @@ public interface ITicksProvider {
      * @param max
      * @param length
      */
-    public void update(Font font, double min , double max, int length);
+    public void update(double min , double max, int length);
 
+    /**
+     * 
+     * @return maximum width in pixels of tick labels
+     */
     public int getMaxWidth();
 
+    /**
+     * 
+     * @return maximum height in pixels of tick labels
+     */
     public int getMaxHeight();
 
 }

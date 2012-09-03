@@ -1,7 +1,6 @@
 package org.csstudio.swt.xygraph.linearscale;
 
 import org.eclipse.draw2d.Figure;
-import org.eclipse.draw2d.FigureUtilities;
 import org.eclipse.draw2d.Graphics;
 
 /**
@@ -40,13 +39,14 @@ public class LinearScaleTickLabels extends Figure {
      *            scale tick length (without margin)
      */
     protected void update(int length) {
-    	Range range = scale.getScaleRange();
-    	ticks.update(getFont(), range.getLower(), range.getUpper(), length);
+    	final Range range = scale.getScaleRange();
+    	ticks.update(range.getLower(), range.getUpper(), length);
     }
 
     @Override
     protected void paintClientArea(Graphics graphics) {
     	graphics.translate(bounds.x, bounds.y);
+    	graphics.setFont(getFont());
     	if (scale.isHorizontal()) {
             drawXTick(graphics);
         } else {
@@ -59,44 +59,44 @@ public class LinearScaleTickLabels extends Figure {
     /**
      * Draw the X tick.
      * 
-     * @param grahics
+     * @param graphics
      *            the graphics context
      */
-    private void drawXTick(Graphics grahics) {
+    private void drawXTick(Graphics graphics) {
         // draw tick labels
-        grahics.setFont(scale.getFont());
         final int imax = ticks.getMajorCount();
         for (int i = 0; i < imax; i++) {
             if (ticks.isVisible(i)) {
                 String text = ticks.getLabel(i);
-                int fontWidth = FigureUtilities.getTextExtents(text, getFont()).width;
+                int fontWidth = scale.calculateDimension(text).width;
                 int x = (int) Math.ceil(ticks.getPosition(i) - fontWidth / 2.0);// + offset);
-                grahics.drawText(text, x, 0);
+                graphics.drawText(text, x, 0);
             }
         }
     }
 
+    private static final String MINUS = "-";
+
     /**
      * Draw the Y tick.
      * 
-     * @param grahpics
+     * @param graphics
      *            the graphics context
      */
-    private void drawYTick(Graphics grahpics) {
+    private void drawYTick(Graphics graphics) {
         // draw tick labels
-        grahpics.setFont(scale.getFont());
         int fontHeight = ticks.getMaxHeight();
         final int imax = ticks.getMajorCount();
         for (int i = 0; i < imax; i++) {
             if (ticks.isVisible(i)) {
                 String text = ticks.getLabel(i);
                 int x = 0;
-                if (ticks.getLabel(0).startsWith("-") && !text.startsWith("-")) {
-                    x += FigureUtilities.getTextExtents("-", getFont()).width;
+                if (ticks.getLabel(0).startsWith(MINUS) && !text.startsWith(MINUS)) {
+                    x += scale.calculateDimension(MINUS).width;
                 }
                 int y = (int) Math.ceil(scale.getLength() - ticks.getPosition(i)
                         - fontHeight / 2.0);
-                grahpics.drawText(text, x, y);
+                graphics.drawText(text, x, y);
             }
         }
     }
@@ -112,7 +112,7 @@ public class LinearScaleTickLabels extends Figure {
 	 * @return the tickLabelMaxHeight
 	 */
 	public int getTickLabelMaxHeight() {
-		return ticks.getMaxWidth();
+		return ticks.getMaxHeight();
 	}
 
 	public IScaleProvider getScale() {
