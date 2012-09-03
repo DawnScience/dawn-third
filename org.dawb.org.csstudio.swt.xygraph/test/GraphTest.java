@@ -86,7 +86,7 @@ class XYGraphTest extends Figure {
 		xyGraph.primaryXAxis.setAutoScaleThreshold(0);
 
 		Axis x2Axis = new Axis("X-2", false);	
-		x2Axis.setTickLableSide(LabelSide.Secondary);
+		x2Axis.setTickLabelSide(LabelSide.Secondary);
 		//x2Axis.setAutoScale(true);
 		xyGraph.addAxis(x2Axis);
 		
@@ -96,7 +96,7 @@ class XYGraphTest extends Figure {
 		y2Axis.setLogScale(true);
 		//y2Axis.setAutoScale(true);
 		y2Axis.setForegroundColor(XYGraphMediaFactory.getInstance().getColor(XYGraphMediaFactory.COLOR_PINK));
-		y2Axis.setTickLableSide(LabelSide.Secondary);				
+		y2Axis.setTickLabelSide(LabelSide.Secondary);				
 		xyGraph.addAxis(y2Axis);
 		/*
 		Axis y3Axis = new Axis("Y-3", true);

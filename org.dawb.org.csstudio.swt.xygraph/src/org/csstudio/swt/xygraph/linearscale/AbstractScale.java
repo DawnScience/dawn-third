@@ -423,7 +423,7 @@ public abstract class AbstractScale extends Figure{
 	/**
 	 * @param tickLabelSide the side of the tick label relative to tick mark
 	 */
-	public void setTickLableSide(LabelSide tickLabelSide) {
+	public void setTickLabelSide(LabelSide tickLabelSide) {
 		this.tickLabelSide = tickLabelSide;
 		revalidate();
 	}
