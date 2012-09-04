@@ -115,13 +115,11 @@ public class XYGraph extends Figure{
 		add(titleLabel);
 		add(plotArea);
 		primaryYAxis = new Axis("Y-Axis", true);
-		primaryYAxis.setOrientation(Orientation.VERTICAL);
 		primaryYAxis.setTickLabelSide(LabelSide.Primary);
 		primaryYAxis.setAutoScaleThreshold(0.1);
 		addAxis(primaryYAxis);
 
 		primaryXAxis = new Axis("X-Axis", false);
-		primaryXAxis.setOrientation(Orientation.HORIZONTAL);
 		primaryXAxis.setTickLabelSide(LabelSide.Primary);
 		addAxis(primaryXAxis);
 
