@@ -76,7 +76,7 @@ public class Annotation extends Figure implements IAxisListener, IDataProviderLi
 		
 	}
 	
-	private IAnnotationLabelProvider labelProvder = null;
+	private IAnnotationLabelProvider labelProvider = null;
 	
 	private Axis xAxis;	
 	private Axis yAxis;	
@@ -386,8 +386,8 @@ public class Annotation extends Figure implements IAxisListener, IDataProviderLi
 	 */
 	protected void updateInfoLableText(boolean updateX0Y0) {
 		String info = null;		
-		if (labelProvder!=null) {
-			info = labelProvder.getInfoText(xValue, yValue);
+		if (labelProvider!=null) {
+			info = labelProvider.getInfoText(xValue, yValue);
 		}
 		
 		if (info==null) {
@@ -811,12 +811,12 @@ class Pointer extends Figure{
 	}
 }
 
-public IAnnotationLabelProvider getLabelProvder() {
-	return labelProvder;
+public IAnnotationLabelProvider getLabelProvider() {
+	return labelProvider;
 }
 
-public void setLabelProvder(IAnnotationLabelProvider labelProvder) {
-	this.labelProvder = labelProvder;
+public void setLabelProvider(IAnnotationLabelProvider labelProvider) {
+	this.labelProvider = labelProvider;
 }
 
 public void toFront() {
