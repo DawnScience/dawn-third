@@ -80,16 +80,13 @@ public class LinearScaleTickMarks extends Figure {
         if(scale.isLogScaleEnabled()) {
         	for (int i = 0; i < imax; i++) {
                 int x = ticks.getPosition(i);
-                int y = 0;
                 int tickLength =0;
                 if(ticks.isVisible(i))
                 	tickLength = MAJOR_TICK_LENGTH;
                 else
                 	tickLength = MINOR_TICK_LENGTH;
+                int y = tickLabelSide == LabelSide.Primary ? 0 : height - 1 - LINE_WIDTH - tickLength;;
 
-                if (tickLabelSide == LabelSide.Secondary) {
-                    y = height - 1 - LINE_WIDTH - tickLength;
-                }
                 //draw minor ticks for log scale
                 if(ticks.isVisible(i) || scale.isMinorTicksVisible())
                 	gc.drawLine(x, y, x, y + tickLength);
@@ -98,24 +95,17 @@ public class LinearScaleTickMarks extends Figure {
         	int y = tickLabelSide == LabelSide.Primary ? 0 : height - 1 - LINE_WIDTH - MAJOR_TICK_LENGTH;
         	for (int i = 0; i < imax; i++) {
                 int x = ticks.getPosition(i);
-                if (i!=imax-1) {
-                    gc.drawLine(x, y, x, y + MAJOR_TICK_LENGTH);
-                }
-                
+                gc.drawLine(x, y, x, y + MAJOR_TICK_LENGTH);
             }
             //draw minor ticks for linear scale
 			if (scale.isMinorTicksVisible()) {
-            	int y2;
-            	if (tickLabelSide == LabelSide.Primary) {
-            		y2 = y + MINOR_TICK_LENGTH;
-            	} else {
-            		y2 = y + MAJOR_TICK_LENGTH;
-            		y += MAJOR_TICK_LENGTH - MINOR_TICK_LENGTH;
+            	if (tickLabelSide == LabelSide.Secondary) {
+					y = height - 1 - LINE_WIDTH - MINOR_TICK_LENGTH;
             	}
             	int jmax = ticks.getMinorCount();
             	for (int j = 0; j < jmax; j++) {
                     int x = ticks.getMinorPosition(j);
-                    gc.drawLine(x, y, x, y2);
+                    gc.drawLine(x, y, x, y + MINOR_TICK_LENGTH);
             	}
             }
         }
@@ -152,44 +142,32 @@ public class LinearScaleTickMarks extends Figure {
         int imax = ticks.getMajorCount();
         if(scale.isLogScaleEnabled()) {
         	for (int i = 0; i < imax; i++) {
-                int x = 0;
-        		
                 int tickLength =0;
                 if(ticks.isVisible(i))
                 	tickLength = MAJOR_TICK_LENGTH;
                 else
                  	tickLength = MINOR_TICK_LENGTH;            
                 
-                if (tickLabelSide == LabelSide.Primary) {
-                    x = width - 1 - LINE_WIDTH - tickLength;
-                } else {
-                    x = LINE_WIDTH;
-                }
+                int x = tickLabelSide == LabelSide.Primary ? width - 1 - LINE_WIDTH - tickLength : LINE_WIDTH;
                 y = height - ticks.getPosition(i);
                 if(ticks.isVisible(i) || scale.isMinorTicksVisible())
                 	gc.drawLine(x, y, x + tickLength, y);
         	}
         } else {        
-            int x = tickLabelSide == LabelSide.Primary ? width - 1 - LINE_WIDTH - MAJOR_TICK_LENGTH : LINE_WIDTH;
+            int x = tickLabelSide == LabelSide.Primary ? width - LINE_WIDTH - MAJOR_TICK_LENGTH : LINE_WIDTH;
             for (int i = 0; i < imax; i++) {
                 y = height - ticks.getPosition(i);
-                if (i!=imax-1) {
-                    gc.drawLine(x, y, x + MAJOR_TICK_LENGTH, y);
-                }
+                gc.drawLine(x, y, x + MAJOR_TICK_LENGTH, y);
             }
             //draw minor ticks for linear scale
             if(scale.isMinorTicksVisible()){
-            	final int x2;
             	if (tickLabelSide == LabelSide.Primary) {
-            		x2 = x + MINOR_TICK_LENGTH - 1;
-            		x += MAJOR_TICK_LENGTH - MINOR_TICK_LENGTH + 1;
-            	} else {
-            		x2 = x + MAJOR_TICK_LENGTH;
+					x = width - LINE_WIDTH - MINOR_TICK_LENGTH;
             	}
             	final int jmax = ticks.getMinorCount();
             	for (int j = 0; j < jmax; j++) {
             		y = height - ticks.getMinorPosition(j);
-					gc.drawLine(x, y, x2, y);
+					gc.drawLine(x, y, x + MINOR_TICK_LENGTH, y);
             	}
             }
         }

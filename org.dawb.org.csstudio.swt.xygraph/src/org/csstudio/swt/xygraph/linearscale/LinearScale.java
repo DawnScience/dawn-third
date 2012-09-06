@@ -264,47 +264,32 @@ public class LinearScale extends AbstractScale implements IScaleProvider {
     protected void layoutTicks() {
     	updateTick();
       	Rectangle area = getClientArea();
-      	if(isHorizontal() && getTickLabelSide() == LabelSide.Primary) {
-      		tickLabels.setBounds(new Rectangle(area.x, 
-      				area.y + LinearScaleTickMarks.MAJOR_TICK_LENGTH + SPACE_BTW_MARK_LABEL,
-      				area.width, area.height - LinearScaleTickMarks.MAJOR_TICK_LENGTH
-      				));
-      		tickMarks.setBounds(area);      		
-      	}else if(isHorizontal() && getTickLabelSide() == LabelSide.Secondary) {
-      		tickLabels.setBounds(new Rectangle(area.x, 
-      				area.y + area.height -LinearScaleTickMarks.MAJOR_TICK_LENGTH - 
-      				tickLabels.getTickLabelMaxHeight() - SPACE_BTW_MARK_LABEL,
-      				area.width,
-      				tickLabels.getTickLabelMaxHeight()
-      				));
-      		tickMarks.setBounds(new Rectangle(area.x, 
-      				area.y + area.height - LinearScaleTickMarks.MAJOR_TICK_LENGTH,
-      				area.width,
-      				LinearScaleTickMarks.MAJOR_TICK_LENGTH
-      				));  
-      	}else if(getTickLabelSide() == LabelSide.Primary) {
-      		tickLabels.setBounds(new Rectangle(area.x + area.width 
-      				- LinearScaleTickMarks.MAJOR_TICK_LENGTH - tickLabels.getTickLabelMaxLength()
-      				-SPACE_BTW_MARK_LABEL, 
-      				area.y, 
-      				tickLabels.getTickLabelMaxLength(),
-      				area.height));
-      		tickMarks.setBounds(new Rectangle(area.x + area.width 
-      				- LinearScaleTickMarks.MAJOR_TICK_LENGTH, 
-      				area.y,
-      				LinearScaleTickMarks.MAJOR_TICK_LENGTH,
-      				area.height));  
-      	}else {
-      		tickLabels.setBounds(new Rectangle(area.x+ LinearScaleTickMarks.MAJOR_TICK_LENGTH 
-      				+SPACE_BTW_MARK_LABEL, 
-      				area.y, 
-      				tickLabels.getTickLabelMaxLength(),
-      				area.height));
-      		tickMarks.setBounds(new Rectangle(area.x, 
-      				area.y,
-      				LinearScaleTickMarks.MAJOR_TICK_LENGTH,
-      				area.height));  
-      	}    		
+		if (isHorizontal()) {
+			if (getTickLabelSide() == LabelSide.Primary) {
+				tickLabels.setBounds(new Rectangle(area.x, area.y + LinearScaleTickMarks.MAJOR_TICK_LENGTH + SPACE_BTW_MARK_LABEL,
+						area.width, area.height - LinearScaleTickMarks.MAJOR_TICK_LENGTH));
+				tickMarks.setBounds(area);
+			} else {
+				tickLabels.setBounds(new Rectangle(area.x, area.y + area.height
+						- LinearScaleTickMarks.MAJOR_TICK_LENGTH - tickLabels.getTickLabelMaxHeight() - SPACE_BTW_MARK_LABEL,
+						area.width, tickLabels.getTickLabelMaxHeight()));
+				tickMarks.setBounds(new Rectangle(area.x, area.y + area.height - LinearScaleTickMarks.MAJOR_TICK_LENGTH,
+						area.width, LinearScaleTickMarks.MAJOR_TICK_LENGTH));
+			}
+		} else {
+			if (getTickLabelSide() == LabelSide.Primary) {
+				tickLabels.setBounds(new Rectangle(area.x + area.width
+						- LinearScaleTickMarks.MAJOR_TICK_LENGTH - tickLabels.getTickLabelMaxLength() - SPACE_BTW_MARK_LABEL, area.y,
+						tickLabels.getTickLabelMaxLength(), area.height));
+				tickMarks.setBounds(new Rectangle(area.x + area.width - LinearScaleTickMarks.MAJOR_TICK_LENGTH - LinearScaleTickMarks.LINE_WIDTH,
+						area.y, LinearScaleTickMarks.MAJOR_TICK_LENGTH + LinearScaleTickMarks.LINE_WIDTH, area.height));
+			} else {
+				tickLabels.setBounds(new Rectangle(area.x + LinearScaleTickMarks.MAJOR_TICK_LENGTH + SPACE_BTW_MARK_LABEL, area.y,
+						tickLabels.getTickLabelMaxLength(), area.height));
+				tickMarks.setBounds(new Rectangle(area.x, area.y,
+						LinearScaleTickMarks.MAJOR_TICK_LENGTH, area.height));
+			}
+		}
 	}
 
 	@Override
