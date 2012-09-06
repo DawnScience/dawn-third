@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import org.eclipse.draw2d.Figure;
 import org.eclipse.swt.SWT;
@@ -97,8 +98,12 @@ public abstract class AbstractScale extends Figure{
     private boolean autoFormat = true;
 	
     private Range range = new Range(min, max);
-    
-	/**
+
+    private Format cachedFormat = null;
+
+    protected ITicksProvider ticksProvider;
+
+    /**
      * Formats the given object.
      * 
      * @param obj
@@ -106,39 +111,59 @@ public abstract class AbstractScale extends Figure{
      * @return the formatted string
      */
     public String format(Object obj) {     
-        	
-            if (isDateEnabled()) {
-              	if (autoFormat || formatPattern == null || formatPattern.equals("")
-            			|| formatPattern.equals(default_decimal_format)
-            			|| formatPattern.equals(DEFAULT_ENGINEERING_FORMAT)) {            		
-            		formatPattern =  DEFAULT_DATE_FORMAT;     
-            		double length = Math.abs(max - min);
-	                if (length <=1000 || timeUnit == Calendar.MILLISECOND) { //less than a second
-	                	formatPattern = "HH:mm:ss.SSS";
-	                } else if (length <=3600000d || timeUnit == Calendar.SECOND) { //less than a hour
-	                	formatPattern = "HH:mm:ss";
-	                } else if (length <= 86400000d || timeUnit == Calendar.MINUTE) { // less than a day
-	                	formatPattern = "HH:mm";
-	                } else if (length <= 604800000d || timeUnit == Calendar.HOUR_OF_DAY) { //less than a week
-	                	formatPattern = "dd HH:mm";
-	                } else if (length <= 2592000000d || timeUnit == Calendar.DATE) { //less than a month
-	                	formatPattern = "MMMMM d";
-	                } else if (length <= 31536000000d ||timeUnit == Calendar.MONTH) { //less than a year
-	                	formatPattern = "yyyy MMMMM";
-	                } else {//if (timeUnit == Calendar.YEAR) {
-	                	formatPattern = "yyyy";
-	                } 
-	                autoFormat = true;
-            	}
-            	return new SimpleDateFormat(formatPattern).format(obj);
-            }
-            
-            if (formatPattern == null || formatPattern.equals("")) {            	
-            	formatPattern = default_decimal_format;  
-            	autoFormat = true;
-            }       
-                                
-            return new DecimalFormat(formatPattern).format(obj);
+		if (cachedFormat == null) {
+			if (isDateEnabled()) {
+				if (autoFormat || formatPattern == null
+						|| formatPattern.equals("")
+						|| formatPattern.equals(default_decimal_format)
+						|| formatPattern.equals(DEFAULT_ENGINEERING_FORMAT)) {
+					formatPattern = DEFAULT_DATE_FORMAT; // (?) overridden anyway
+					double length = Math.abs(max - min);
+					if (length <= 1000 || timeUnit == Calendar.MILLISECOND) { // less than a second
+						formatPattern = "HH:mm:ss.SSS";
+					} else if (length <= 3600000d
+							|| timeUnit == Calendar.SECOND) { // less than a hour
+						formatPattern = "HH:mm:ss";
+					} else if (length <= 86400000d
+							|| timeUnit == Calendar.MINUTE) { // less than a day
+						formatPattern = "HH:mm";
+					} else if (length <= 604800000d
+							|| timeUnit == Calendar.HOUR_OF_DAY) { // less than a week
+						formatPattern = "dd HH:mm";
+					} else if (length <= 2592000000d
+							|| timeUnit == Calendar.DATE) { // less than a month
+						formatPattern = "MMMMM d";
+					} else if (length <= 31536000000d
+							|| timeUnit == Calendar.MONTH) { // less than a year
+						formatPattern = "yyyy MMMMM";
+					} else {// if (timeUnit == Calendar.YEAR) {
+						formatPattern = "yyyy";
+					}
+					autoFormat = true;
+				}
+				cachedFormat = new SimpleDateFormat(formatPattern);
+			} else {
+				if (formatPattern == null || formatPattern == default_decimal_format || formatPattern.equals("")) {
+					formatPattern = ticksProvider.getDefaultFormatPattern(min, max);
+					autoFormat = true;
+				}
+
+				if (formatPattern.equals(default_decimal_format)
+						|| formatPattern.equals(DEFAULT_ENGINEERING_FORMAT)) {
+					if ((max != 0 && Math.abs(Math.log10(Math.abs(max))) >= ENGINEERING_LIMIT)
+							|| (min != 0 && Math.abs(Math.log10(Math.abs(min))) >= ENGINEERING_LIMIT))
+						formatPattern = DEFAULT_ENGINEERING_FORMAT;
+					else
+						formatPattern = default_decimal_format;
+					autoFormat = true;
+				}
+				cachedFormat = new DecimalFormat(formatPattern);
+			}
+		}
+
+		if (isDateEnabled() && obj instanceof Number)
+			return cachedFormat.format(new Date(((Number) obj).longValue()));
+		return cachedFormat.format(obj);
    }
 	
 	/**
@@ -215,9 +240,9 @@ public abstract class AbstractScale extends Figure{
 	 */
 	public void setDateEnabled(boolean dateEnabled) {
 		this.dateEnabled = dateEnabled;
+		cachedFormat = null;
         setDirty(true);
         revalidate();
-
 	}
 
 	/** Whenever any parameter has been changed, the scale should be marked as dirty, 
@@ -256,7 +281,7 @@ public abstract class AbstractScale extends Figure{
  		} catch (IllegalArgumentException e){
  			throw e;
  		}
- 		
+		cachedFormat = null;
         this.formatPattern = formatPattern;
        
         autoFormat = false;
@@ -379,33 +404,6 @@ public abstract class AbstractScale extends Figure{
 
         min = lower;
         max = upper;
-        
-        
-        //calculate the default decimal format
-        if(formatPattern ==null || formatPattern == default_decimal_format) {
-        	 if(Math.abs(max-min) > 0.1)
-            	default_decimal_format = "############.##";
-             else {
-            	default_decimal_format = "##.##";
-	            double mantissa = Math.abs(max-min);   
-	            while (mantissa < 1) {
-	                mantissa *= 10.0;
-	                default_decimal_format += "#"; 
-	            }
-             }
-        	 formatPattern = default_decimal_format;
-        	 autoFormat = true;
-        }
-        
-        if(formatPattern.equals(default_decimal_format) || 
-        		formatPattern.equals(DEFAULT_ENGINEERING_FORMAT)) {
-        	if((max != 0 && Math.abs(Math.log10(Math.abs(max))) >= ENGINEERING_LIMIT)
-        		|| (min !=0 && Math.abs(Math.log10(Math.abs(min))) >= ENGINEERING_LIMIT))
-                formatPattern = DEFAULT_ENGINEERING_FORMAT;
-        	else
-        		formatPattern = default_decimal_format;
-        	autoFormat = true;
-        } 
         range = new Range(min, max);
         setDirty(true);
         revalidate();
@@ -483,10 +481,10 @@ public abstract class AbstractScale extends Figure{
 		this.autoFormat = autoFormat;
 		if(autoFormat){
 			formatPattern = null;
+			cachedFormat = null;
 			setRange(getRange());
 			format(0);
 		}
-		
 	}
 
 	/**
@@ -495,5 +493,4 @@ public abstract class AbstractScale extends Figure{
 	public boolean isAutoFormat() {
 		return autoFormat;
 	}
- 
 }

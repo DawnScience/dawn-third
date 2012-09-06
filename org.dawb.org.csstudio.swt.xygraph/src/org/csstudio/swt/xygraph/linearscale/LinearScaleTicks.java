@@ -19,7 +19,6 @@ package org.csstudio.swt.xygraph.linearscale;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.draw2d.geometry.Dimension;
@@ -177,12 +176,7 @@ public class LinearScaleTicks implements ITicksProvider {
        
         if(MIN.compareTo(firstPosition) == (minBigger? 1:-1) ) {
         	values.add(min);
-        	if (scale.isDateEnabled()) {
-                Date date = new Date((long) MIN.doubleValue());
-                labels.add(scale.format(date));
-            } else {
-                labels.add(scale.format(MIN.doubleValue()));
-            }
+            labels.add(scale.format(MIN.doubleValue()));
         	positions.add(scale.getMargin());        	
         }
        
@@ -191,12 +185,7 @@ public class LinearScaleTicks implements ITicksProvider {
         		 BigDecimal v = pow(10,i);
         		 if(v.doubleValue() > max)
         			 break;
-        		 if (scale.isDateEnabled()) {
-	                    Date date = new Date((long) v.doubleValue());
-	                    labels.add(scale.format(date));
-	                } else {
-	                    labels.add(scale.format(v.doubleValue()));
-	                }
+                 labels.add(scale.format(v.doubleValue()));
 	                values.add(v.doubleValue());
 	
 	                int tickLabelPosition = (int) ((Math.log10(v.doubleValue()) - Math
@@ -211,12 +200,7 @@ public class LinearScaleTicks implements ITicksProvider {
 	                    break;
 	                }
 	
-	                if (scale.isDateEnabled()) {
-	                    Date date = new Date((long) j.doubleValue());
-	                    labels.add(scale.format(date));
-	                } else {
-	                    labels.add(scale.format(j.doubleValue()));
-	                }
+                    labels.add(scale.format(j.doubleValue()));
 	                values.add(j.doubleValue());
 	
 	                int tickLabelPosition = (int) ((Math.log10(j.doubleValue()) - Math
@@ -234,19 +218,14 @@ public class LinearScaleTicks implements ITicksProvider {
         if(minBigger? max < values.get(values.size()-1) 
         		: max > values.get(values.size()-1)) {
         	values.add(max);
-        	if (scale.isDateEnabled()) {
-                Date date = new Date((long) max);
-                labels.add(scale.format(date));
-            } else {
-                labels.add(scale.format(max));
-            }
+            labels.add(scale.format(max));
         	positions.add(scale.getMargin() + length);
         }
     }
 
    
 
-     /**
+	/**
      * Updates tick label for normal scale.
      * 
      * @param length
@@ -295,23 +274,13 @@ public class LinearScaleTicks implements ITicksProvider {
         int r = minBigger? 1 : -1;
         if(MIN.compareTo(firstPosition) == r ) {
         	values.add(min);
-        	if (scale.isDateEnabled()) {
-                Date date = new Date((long) MIN.doubleValue());
-                labels.add(scale.format(date));
-            } else {
-                labels.add(scale.format(MIN.doubleValue()));
-            }
+            labels.add(scale.format(MIN.doubleValue()));
         	positions.add(scale.getMargin());        	
         }
         	
         for (BigDecimal b = firstPosition; max >= min ? b.doubleValue() <= max : b.doubleValue() >= max; b = b
                 .add(tickStep)) {
-            if (scale.isDateEnabled()) {
-                Date date = new Date((long) b.doubleValue());
-                labels.add(scale.format(date));
-            } else {
-                labels.add(scale.format(b.doubleValue()));
-            }
+            labels.add(scale.format(b.doubleValue()));
             values.add(b.doubleValue());
 
             int tickLabelPosition = (int) ((b.doubleValue() - min)
