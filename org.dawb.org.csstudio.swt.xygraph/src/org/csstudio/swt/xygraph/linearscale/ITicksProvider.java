@@ -91,4 +91,20 @@ public interface ITicksProvider {
      */
     public int getMaxHeight();
 
+    /**
+     * @param min
+     * @param max
+     * @return default format pattern for labels
+     */
+    public String getDefaultFormatPattern(double min , double max);
+
+    /**
+     * @return margin in pixel between edge of client area and head of axis line
+     */
+    public int getHeadMargin();
+
+    /**
+     * @return margin in pixel between edge of client area and tail of axis line
+     */
+    public int getTailMargin();
 }

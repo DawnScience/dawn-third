@@ -140,7 +140,26 @@ public class LinearScaleTicks implements ITicksProvider {
         updateMinorTicks();
 	}
 
-    /**
+	@Override
+	public String getDefaultFormatPattern(double min, double max) {
+		String format = null;
+        
+        //calculate the default decimal format
+		if (Math.abs(max - min) > 0.1)
+			format = "############.##";
+		else {
+			format = "##.##";
+			double mantissa = Math.abs(max - min);
+			while (mantissa < 1) {
+				mantissa *= 10.0;
+				format += "#";
+			}
+		}
+
+		return format;
+	}
+
+	/**
      * Updates tick label for log scale.
      * 
      * @param length
@@ -223,7 +242,23 @@ public class LinearScaleTicks implements ITicksProvider {
         }
     }
 
-   
+	@Override
+	public int getHeadMargin() {
+		final Range r = scale.getScaleRange();
+		final Dimension l = scale.calculateDimension(r.getLower());
+		final Dimension h = scale.calculateDimension(r.getUpper());
+		if (scale.isHorizontal()) {
+			System.err.println("calculate X margin with " + r);
+			return (int) Math.ceil(Math.max(l.width, h.width)/2.0);
+		}
+		System.err.println("calculate Y margin with " + r);
+		return (int) Math.ceil(Math.max(l.height, h.height)/2.0);
+	}
+
+	@Override
+	public int getTailMargin() {
+		return getHeadMargin();
+	}
 
 	/**
      * Updates tick label for normal scale.

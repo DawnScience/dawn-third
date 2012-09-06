@@ -45,8 +45,6 @@ public class LinearScale extends AbstractScale implements IScaleProvider {
     /**
      * 
      */
-    private ITicksProvider ticksProvider;
-
     /** the scale tick labels */
     private LinearScaleTickLabels tickLabels;
 
@@ -74,11 +72,6 @@ public class LinearScale extends AbstractScale implements IScaleProvider {
 //        		XYGraphMediaFactory.FONT_ARIAL));
  
     }
-
-	private void calcMargin() {
-		final Range r = getRange();
-		margin = (int) Math.ceil(Math.max(calculateSpan(r.getLower()), calculateSpan(r.getUpper()))/2.0);
-	}
 
 	/**
 	 * Calculate span of a textual form of object in scale's orientation
@@ -113,7 +106,8 @@ public class LinearScale extends AbstractScale implements IScaleProvider {
 		return length;
 	}
 
-    /**Margin is half of the label's length(Horizontal Scale) or 
+    /**
+     * Margin is half of the label's length(Horizontal Scale) or
      * height(Vertical scale), so that the label can be displayed correctly. 
      * So the range and format pattern must be set correctly
      * before you can get the correct margin.
@@ -121,7 +115,7 @@ public class LinearScale extends AbstractScale implements IScaleProvider {
      */
     public int getMargin() {
 		if(isDirty())
-			calcMargin();
+			margin = ticksProvider.getHeadMargin();
 		return margin;
 	}
 	/**
@@ -150,7 +144,6 @@ public class LinearScale extends AbstractScale implements IScaleProvider {
 		}
 			
 		return size;
-		
 	}
 
 	/**
@@ -378,4 +371,8 @@ public class LinearScale extends AbstractScale implements IScaleProvider {
 		return getRange();
 	}
 
+	@Override
+	public boolean isPrimary() {
+		return getTickLabelSide() == LabelSide.Primary;
+	}
 }

@@ -27,6 +27,12 @@ public interface IScaleProvider {
 
 	public String format(Object date);
 
+	public boolean isAutoFormat();
+
+	public void setAutoFormat(boolean autoFormat);
+
+	public void setDefaultFormatPattern(String formatPattern);
+
 	public int getMargin();
 
 	public boolean isHorizontal();
@@ -42,4 +48,6 @@ public interface IScaleProvider {
 	public int getLength();
 
 	public Dimension calculateDimension(Object obj);
+
+	public boolean isPrimary();
 }
