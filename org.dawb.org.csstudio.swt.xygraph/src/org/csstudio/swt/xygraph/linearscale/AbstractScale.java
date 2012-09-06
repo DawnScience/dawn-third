@@ -405,6 +405,7 @@ public abstract class AbstractScale extends Figure{
         min = lower;
         max = upper;
         range = new Range(min, max);
+        cachedFormat = null;
         setDirty(true);
         revalidate();
         repaint();

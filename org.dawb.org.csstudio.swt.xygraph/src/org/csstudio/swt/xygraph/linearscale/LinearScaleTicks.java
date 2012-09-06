@@ -145,11 +145,11 @@ public class LinearScaleTicks implements ITicksProvider {
 		String format = null;
         
         //calculate the default decimal format
-		if (Math.abs(max - min) > 0.1)
+		double mantissa = Math.abs(max - min);
+		if (Math.abs(mantissa) > 0.1)
 			format = "############.##";
 		else {
 			format = "##.##";
-			double mantissa = Math.abs(max - min);
 			while (mantissa < 1) {
 				mantissa *= 10.0;
 				format += "#";
