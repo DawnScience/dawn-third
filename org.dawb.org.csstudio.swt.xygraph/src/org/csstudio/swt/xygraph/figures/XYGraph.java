@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
-import org.csstudio.swt.xygraph.linearscale.LinearScale.Orientation;
 import org.csstudio.swt.xygraph.linearscale.Range;
 import org.csstudio.swt.xygraph.undo.OperationsManager;
 import org.csstudio.swt.xygraph.undo.ZoomCommand;
@@ -59,7 +58,7 @@ public class XYGraph extends Figure{
         new RGB(242,  26,  26), // red
         new RGB( 33, 179,  33), // green
         new RGB(  0,   0,   0), // black
-        new RGB(128,   0, 255), // violett
+        new RGB(128,   0, 255), // violet
         new RGB(255, 170,   0), // (darkish) yellow
         new RGB(255,   0, 240), // pink
         new RGB(243, 132, 132), // peachy
@@ -226,8 +225,8 @@ public class XYGraph extends Figure{
 
 		for(int i=yAxisList.size()-1; i>=0; i--){
 			Axis yAxis = yAxisList.get(i);
-			int hintHeight = clientArea.height + (hasTopXAxis ? 1 :0) *yAxis.getMargin()
-				+ (hasBottomXAxis ? 1 :0) *yAxis.getMargin();
+			int hintHeight = clientArea.height + (hasTopXAxis ? yAxis.getMargin() :0)
+				+ (hasBottomXAxis ? yAxis.getMargin() :0);
 			if(hintHeight > getClientArea().height)
 				hintHeight = clientArea.height;
 			Dimension yAxisSize = yAxis.getPreferredSize(clientArea.width,
@@ -250,7 +249,7 @@ public class XYGraph extends Figure{
 			}
 		}
 
-		//re-adjust xAxis boundss
+		//re-adjust xAxis bounds
 		for(int i=xAxisList.size()-1; i>=0; i--){
 			Axis xAxis = xAxisList.get(i);
 			Rectangle r = xAxis.getBounds().getCopy();
