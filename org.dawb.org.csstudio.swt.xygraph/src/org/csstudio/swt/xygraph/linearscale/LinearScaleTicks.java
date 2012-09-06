@@ -119,7 +119,7 @@ public class LinearScaleTicks implements ITicksProvider {
 	}
 
 	@Override
-	public void update(final double min, final double max, final int length) {
+	public Range update(final double min, final double max, final int length) {
 		values.clear();
 		labels.clear();
 		positions.clear();
@@ -138,6 +138,8 @@ public class LinearScaleTicks implements ITicksProvider {
         updateMinorTickParameters();
 
         updateMinorTicks();
+
+        return null;
 	}
 
 	@Override

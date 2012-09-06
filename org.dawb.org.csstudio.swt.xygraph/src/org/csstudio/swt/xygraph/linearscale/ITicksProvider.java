@@ -76,8 +76,9 @@ public interface ITicksProvider {
      * @param min
      * @param max
      * @param length
+     * @return new axis range
      */
-    public void update(double min , double max, int length);
+    public Range update(double min , double max, int length);
 
     /**
      * 

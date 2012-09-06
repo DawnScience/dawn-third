@@ -38,9 +38,9 @@ public class LinearScaleTickLabels extends Figure {
      * @param length
      *            scale tick length (without margin)
      */
-    protected void update(int length) {
+    protected Range update(int length) {
     	final Range range = scale.getScaleRange();
-    	ticks.update(range.getLower(), range.getUpper(), length);
+		return ticks.update(range.getLower(), range.getUpper(), length);
     }
 
     @Override

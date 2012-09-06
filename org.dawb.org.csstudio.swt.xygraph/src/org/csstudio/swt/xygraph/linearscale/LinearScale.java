@@ -344,8 +344,13 @@ public class LinearScale extends AbstractScale implements IScaleProvider {
     	if(isDirty()){
 	    	length = isHorizontal() ? 
 	    			getClientArea().width: getClientArea().height;    		
-	    	if(length > 2*getMargin())
-	    		tickLabels.update(length-2*getMargin());    
+			if (length > 2*getMargin()) {
+				Range r = tickLabels.update(length-2*getMargin());
+				if (r != null) {
+					min = r.getLower();
+					max = r.getUpper();
+				}
+			}
 	    	setDirty(false);
     	}    	
     }	
