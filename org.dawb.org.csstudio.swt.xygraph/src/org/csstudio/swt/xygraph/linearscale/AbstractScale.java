@@ -79,7 +79,7 @@ public abstract class AbstractScale extends Figure{
     
      /** Whenever any parameter has been  changed, the scale should be marked as dirty, 
       * so all the inner parameters could be recalculated before the next paint*/
-    protected boolean dirty = true;
+    private boolean dirty = true;
 
     private boolean dateEnabled = false;
     

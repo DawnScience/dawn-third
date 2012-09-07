@@ -186,8 +186,7 @@ public class LinearScale extends AbstractScale implements IScaleProvider {
 	 * @return position in pixels
 	 */
 	public int getValuePosition(double value, boolean relative) {		
-		if(dirty)
-			updateTick();
+		updateTick();
 		//coerce to range		
 		//value = value < min ? min : (value > max ? max : value);
 		int pixelsToStart =0;
