@@ -265,8 +265,8 @@ public class XYGraph extends Figure{
 			Rectangle plotAreaBound = new Rectangle(
 					primaryXAxis.getBounds().x + primaryXAxis.getMargin(),
 					primaryYAxis.getBounds().y + primaryYAxis.getMargin(),
-					primaryXAxis.getBounds().width - 2*primaryXAxis.getMargin(),
-					primaryYAxis.getBounds().height - 2*primaryYAxis.getMargin()
+					primaryXAxis.getTickLength(),
+					primaryYAxis.getTickLength()
 					);
 			plotArea.setBounds(plotAreaBound);
 
