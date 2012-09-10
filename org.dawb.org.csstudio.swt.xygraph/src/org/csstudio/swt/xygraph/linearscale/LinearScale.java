@@ -93,6 +93,9 @@ public class LinearScale extends AbstractScale implements IScaleProvider {
 	 */
 	@Override
 	public Dimension calculateDimension(Object obj) {
+		if (obj == null)
+			return new Dimension();
+
 		if (obj instanceof String)
 			return FigureUtilities.getTextExtents((String) obj, getFont());
 

@@ -47,7 +47,25 @@ public interface IScaleProvider {
 
 	public int getLength();
 
+	/**
+	 * @param obj
+	 * @return dimension of object that has been formatted as a string in current font
+	 */
 	public Dimension calculateDimension(Object obj);
 
+	/**
+	 * @return true if axis is a primary one (i.e. left for y and bottom for x)
+	 */
 	public boolean isPrimary();
+
+	/**
+	 * @return true if scale line starts and ends with ticks
+	 */
+	public boolean hasTicksAtEnds();
+
+	/**
+	 * Set scale so that there are ticks on the start and end
+	 * @param ticksAtEnds if true then place ticks on scale ends
+	 */
+	public void setTicksAtEnds(boolean ticksAtEnds);
 }

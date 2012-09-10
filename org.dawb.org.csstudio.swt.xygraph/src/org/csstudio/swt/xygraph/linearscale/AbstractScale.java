@@ -103,6 +103,8 @@ public abstract class AbstractScale extends Figure{
 
     protected ITicksProvider ticksProvider;
 
+    private boolean ticksAtEnds = true;
+
     /**
      * Formats the given object.
      * 
@@ -493,5 +495,13 @@ public abstract class AbstractScale extends Figure{
 	 */
 	public boolean isAutoFormat() {
 		return autoFormat;
+	}
+
+	public boolean hasTicksAtEnds() {
+		return ticksAtEnds;
+	}
+
+	public void setTicksAtEnds(boolean ticksAtEnds) {
+		this.ticksAtEnds = ticksAtEnds;
 	}
 }
