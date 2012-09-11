@@ -37,6 +37,8 @@ public class LinearScaleTicks implements ITicksProvider {
     /** the array of visibility state of tick label */
     private ArrayList<Boolean> visibilities;
 
+    /** the array of label positions in pixels */
+    private ArrayList<Integer> lPositions;
    
 
 	/** the maximum width of tick labels */
@@ -64,6 +66,7 @@ public class LinearScaleTicks implements ITicksProvider {
 		values = new ArrayList<Double>();
 		labels = new ArrayList<String>();
 		positions = new ArrayList<Integer>();
+		lPositions = new ArrayList<Integer>();
 		visibilities = new ArrayList<Boolean>();
 		minorPositions = new ArrayList<Integer>();
 	}
@@ -86,6 +89,11 @@ public class LinearScaleTicks implements ITicksProvider {
 	@Override
 	public String getLabel(int index) {
 		return labels.get(index);
+	}
+
+	@Override
+	public int getLabelPosition(int index) {
+		return lPositions.get(index);
 	}
 
 	@Override
@@ -123,6 +131,7 @@ public class LinearScaleTicks implements ITicksProvider {
 		values.clear();
 		labels.clear();
 		positions.clear();
+		lPositions.clear();
 		visibilities.clear();
 		minorPositions.clear();
 
@@ -133,11 +142,14 @@ public class LinearScaleTicks implements ITicksProvider {
         }
 
         updateTickVisibility();
-        updateTickLabelMaxLengthAndHeight();
+
+        updateLabelPositionsAndMaxDimensions(length);
 
         updateMinorTickParameters();
 
-        updateMinorTicks();
+        if (!scale.isLogScaleEnabled()) {
+            updateMinorTicks();
+        }
 
         return null;
 	}
@@ -450,24 +462,54 @@ public class LinearScaleTicks implements ITicksProvider {
     }
 
     /**
-     * Gets max length of tick label.
+     * Update positions and max dimensions of tick labels
      */
-    private void updateTickLabelMaxLengthAndHeight() {
+    private void updateLabelPositionsAndMaxDimensions(int length) {
         maxWidth = 0;
-        maxHeight = 0; 
+        maxHeight = 0;
         for (int i = 0; i < labels.size(); i++) {
             if (visibilities.size() > i && visibilities.get(i) == true) {
-            	Dimension p = scale.calculateDimension(labels.get(i));
-            	if (labels.get(0).startsWith("-") && !labels.get(i).startsWith("-")) {
-                    p.width += scale.calculateDimension("-").width;
+                final String text = labels.get(i);
+                final Dimension d = scale.calculateDimension(text);
+                if (labels.get(0).startsWith("-") && !text.startsWith("-")) {
+                    d.width += scale.calculateDimension("-").width;
                 }
-                if (p.width > maxWidth) {
-                    maxWidth = p.width;
+                if (d.width > maxWidth) {
+                    maxWidth = d.width;
                 }
-                if(p.height > maxHeight){
-                	maxHeight = p.height;
+                if(d.height > maxHeight){
+                    maxHeight = d.height;
                 }
             }
+        }
+
+        if (scale.isHorizontal()) {
+            length += maxWidth;
+        } else {
+            length += maxHeight;
+        }
+
+        for (int i = 0; i < labels.size(); i++) {
+            int p = positions.get(i);
+            if (visibilities.size() > i && visibilities.get(i) == true) {
+                final Dimension d = scale.calculateDimension(labels.get(i));
+                if (scale.isHorizontal()) {
+                    p = (int) Math.ceil(p - d.width*0.5);
+                    if (p < 0) {
+                        p = 0;
+                    } else if (p + d.width >= length) {
+                        p = length - 1 - d.width;
+                    }
+                } else {
+                    p = (int) Math.ceil(length - p - d.height*0.5);
+                    if (p < 0) {
+                        p = 0;
+                    } else if (p + d.height >= length) {
+                        p = length - 1 - d.height;
+                    }
+                }
+            }
+            lPositions.add(p);
         }
     }
 

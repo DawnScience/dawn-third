@@ -67,15 +67,7 @@ public class LinearScaleTickLabels extends Figure {
         final int imax = ticks.getMajorCount();
         for (int i = 0; i < imax; i++) {
             if (ticks.isVisible(i)) {
-                String text = ticks.getLabel(i);
-                int fontWidth = scale.calculateDimension(text).width;
-                int x = (int) Math.ceil(ticks.getPosition(i) - fontWidth / 2.0);// + offset);
-                if (x < 0) {
-                    x = 0;
-                } else if (x + fontWidth >= bounds.width) {
-                    x = bounds.width - 1 - fontWidth;
-                }
-                graphics.drawText(text, x, 0);
+                graphics.drawText(ticks.getLabel(i), ticks.getLabelPosition(i), 0);
             }
         }
     }
@@ -93,15 +85,13 @@ public class LinearScaleTickLabels extends Figure {
         final int imax = ticks.getMajorCount();
         if (imax < 1)
             return;
-        final int start = scale.getLength() - ticks.getMaxHeight() / 2;
         final boolean hasNegative = ticks.getLabel(0).startsWith(MINUS);
         final int minus = scale.calculateDimension(MINUS).width;
         for (int i = 0; i < imax; i++) {
             if (ticks.isVisible(i)) {
                 String text = ticks.getLabel(i);
                 int x = (hasNegative && !text.startsWith(MINUS)) ? minus : 0;
-                int y = (int) Math.ceil(start - ticks.getPosition(i));
-                graphics.drawText(text, x, y);
+                graphics.drawText(text, x, ticks.getLabelPosition(i));
             }
         }
     }

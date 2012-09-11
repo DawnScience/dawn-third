@@ -50,6 +50,12 @@ public interface ITicksProvider {
 
     /**
      * @param index
+     * @return label position
+     */
+    public int getLabelPosition(int index);
+
+    /**
+     * @param index
      * @return true if tick is visible
      */
     public boolean isVisible(int index);

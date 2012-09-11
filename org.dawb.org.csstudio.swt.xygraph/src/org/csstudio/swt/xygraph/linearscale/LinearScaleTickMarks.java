@@ -79,16 +79,13 @@ public class LinearScaleTickMarks extends Figure {
         int imax = ticks.getMajorCount();
         if(scale.isLogScaleEnabled()) {
             int y;
-            boolean oldTicking = false;
         	for (int i = 0; i < imax; i++) {
                 int x = ticks.getPosition(i);
                 int tickLength =0;
                 if(ticks.isVisible(i))
                 	tickLength = MAJOR_TICK_LENGTH;
-                else {
+                else
                 	tickLength = MINOR_TICK_LENGTH;
-                    oldTicking = true;
-                }
                 y = tickLabelSide == LabelSide.Primary ? 0 : height - 1 - LINE_WIDTH - tickLength;;
 
                 //draw minor ticks for log scale
@@ -97,7 +94,7 @@ public class LinearScaleTickMarks extends Figure {
         	}
 
 			//draw minor ticks for log scale
-			if (!oldTicking && scale.isMinorTicksVisible()) {
+			if (scale.isMinorTicksVisible()) {
 				y = tickLabelSide == LabelSide.Primary ? 0 : height - 1 - LINE_WIDTH - MINOR_TICK_LENGTH;
 				int jmax = ticks.getMinorCount();
 				for (int j = 0; j < jmax; j++) {
@@ -156,15 +153,12 @@ public class LinearScaleTickMarks extends Figure {
         int imax = ticks.getMajorCount();
         if(scale.isLogScaleEnabled()) {
             int x;
-            boolean oldTicking = false;
         	for (int i = 0; i < imax; i++) {
                 int tickLength =0;
                 if(ticks.isVisible(i))
                 	tickLength = MAJOR_TICK_LENGTH;
-                else {
-                    oldTicking = true;
+                else
                  	tickLength = MINOR_TICK_LENGTH;            
-                }
 
                 x = tickLabelSide == LabelSide.Primary ? width - 1 - LINE_WIDTH - tickLength : LINE_WIDTH;
                 y = height - ticks.getPosition(i);
@@ -173,7 +167,7 @@ public class LinearScaleTickMarks extends Figure {
 			}
 
 			// draw minor ticks for log scale
-			if (!oldTicking && scale.isMinorTicksVisible()) {
+			if (scale.isMinorTicksVisible()) {
 				x = tickLabelSide == LabelSide.Primary ? width - LINE_WIDTH - MINOR_TICK_LENGTH : LINE_WIDTH;
 				final int jmax = ticks.getMinorCount();
 				for (int j = 0; j < jmax; j++) {
