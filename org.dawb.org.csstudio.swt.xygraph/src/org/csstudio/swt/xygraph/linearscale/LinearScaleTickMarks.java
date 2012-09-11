@@ -4,6 +4,7 @@ import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.csstudio.swt.xygraph.util.SWTConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
+import org.eclipse.draw2d.geometry.Dimension;
 
 /**
  * Linear scale tick marks.
@@ -45,15 +46,14 @@ public class LinearScaleTickMarks extends Figure {
 	   graphics.translate(bounds.x, bounds.y);
 	   ITicksProvider ticks = scale.getTicksProvider();
 
-        int width = getSize().width;
-        int height = getSize().height;
+	   Dimension d = getSize();
+        int width = d.width;
+        int height = d.height;
 
         if (scale.isHorizontal()) {
-            drawXTickMarks(graphics, ticks, scale.getTickLabelSide(), width,
-                    height);
+            drawXTickMarks(graphics, ticks, scale.getTickLabelSide(), width, height);
         } else {
-            drawYTickMarks(graphics, ticks, scale.getTickLabelSide(), width,
-                    height);
+            drawYTickMarks(graphics, ticks, scale.getTickLabelSide(), width, height);
         }
    };
 
@@ -78,19 +78,33 @@ public class LinearScaleTickMarks extends Figure {
         gc.setLineStyle(SWTConstants.LINE_SOLID);
         int imax = ticks.getMajorCount();
         if(scale.isLogScaleEnabled()) {
+            int y;
+            boolean oldTicking = false;
         	for (int i = 0; i < imax; i++) {
                 int x = ticks.getPosition(i);
                 int tickLength =0;
                 if(ticks.isVisible(i))
                 	tickLength = MAJOR_TICK_LENGTH;
-                else
+                else {
                 	tickLength = MINOR_TICK_LENGTH;
-                int y = tickLabelSide == LabelSide.Primary ? 0 : height - 1 - LINE_WIDTH - tickLength;;
+                    oldTicking = true;
+                }
+                y = tickLabelSide == LabelSide.Primary ? 0 : height - 1 - LINE_WIDTH - tickLength;;
 
                 //draw minor ticks for log scale
                 if(ticks.isVisible(i) || scale.isMinorTicksVisible())
                 	gc.drawLine(x, y, x, y + tickLength);
         	}
+
+			//draw minor ticks for log scale
+			if (!oldTicking && scale.isMinorTicksVisible()) {
+				y = tickLabelSide == LabelSide.Primary ? 0 : height - 1 - LINE_WIDTH - MINOR_TICK_LENGTH;
+				int jmax = ticks.getMinorCount();
+				for (int j = 0; j < jmax; j++) {
+					int x = ticks.getMinorPosition(j);
+					gc.drawLine(x, y, x, y + MINOR_TICK_LENGTH);
+				}
+			}
         } else {
         	int y = tickLabelSide == LabelSide.Primary ? 0 : height - 1 - LINE_WIDTH - MAJOR_TICK_LENGTH;
         	for (int i = 0; i < imax; i++) {
@@ -141,24 +155,39 @@ public class LinearScaleTickMarks extends Figure {
         int y = 0;
         int imax = ticks.getMajorCount();
         if(scale.isLogScaleEnabled()) {
+            int x;
+            boolean oldTicking = false;
         	for (int i = 0; i < imax; i++) {
                 int tickLength =0;
                 if(ticks.isVisible(i))
                 	tickLength = MAJOR_TICK_LENGTH;
-                else
+                else {
+                    oldTicking = true;
                  	tickLength = MINOR_TICK_LENGTH;            
-                
-                int x = tickLabelSide == LabelSide.Primary ? width - 1 - LINE_WIDTH - tickLength : LINE_WIDTH;
+                }
+
+                x = tickLabelSide == LabelSide.Primary ? width - 1 - LINE_WIDTH - tickLength : LINE_WIDTH;
                 y = height - ticks.getPosition(i);
                 if(ticks.isVisible(i) || scale.isMinorTicksVisible())
                 	gc.drawLine(x, y, x + tickLength, y);
-        	}
+			}
+
+			// draw minor ticks for log scale
+			if (!oldTicking && scale.isMinorTicksVisible()) {
+				x = tickLabelSide == LabelSide.Primary ? width - LINE_WIDTH - MINOR_TICK_LENGTH : LINE_WIDTH;
+				final int jmax = ticks.getMinorCount();
+				for (int j = 0; j < jmax; j++) {
+					y = height - ticks.getMinorPosition(j);
+					gc.drawLine(x, y, x + MINOR_TICK_LENGTH, y);
+				}
+			}
         } else {        
             int x = tickLabelSide == LabelSide.Primary ? width - LINE_WIDTH - MAJOR_TICK_LENGTH : LINE_WIDTH;
             for (int i = 0; i < imax; i++) {
                 y = height - ticks.getPosition(i);
                 gc.drawLine(x, y, x + MAJOR_TICK_LENGTH, y);
             }
+
             //draw minor ticks for linear scale
             if(scale.isMinorTicksVisible()){
             	if (tickLabelSide == LabelSide.Primary) {
