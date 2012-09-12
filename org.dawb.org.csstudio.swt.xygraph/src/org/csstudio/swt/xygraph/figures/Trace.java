@@ -17,7 +17,7 @@ import org.csstudio.swt.xygraph.dataprovider.ISample;
 import org.csstudio.swt.xygraph.dataprovider.Sample;
 import org.csstudio.swt.xygraph.linearscale.AbstractScale.LabelSide;
 import org.csstudio.swt.xygraph.linearscale.Range;
-import org.csstudio.swt.xygraph.preferences.Preferences;
+import org.csstudio.swt.xygraph.preference.XYPreferences;
 import org.csstudio.swt.xygraph.util.SWTConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
@@ -41,7 +41,7 @@ public class Trace extends Figure implements IDataProviderListener, IAxisListene
      *  Might not make a real performance difference, but since this it called a lot,
      *  keep it in variable
      */
-    final protected static boolean use_advanced_graphics = Preferences.useAdvancedGraphics();
+    final protected static boolean use_advanced_graphics = XYPreferences.useAdvancedGraphics();
 
 
 

@@ -1,7 +1,7 @@
 package org.csstudio.swt.xygraph.linearscale;
 
 import org.csstudio.swt.xygraph.Activator;
-import org.csstudio.swt.xygraph.preferences.Preferences;
+import org.csstudio.swt.xygraph.preference.XYPreferences;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -27,10 +27,10 @@ public class LinearScaleTickLabels extends Figure {
     	this.scale = linearScale;
 
         IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-        String provider = store.isDefault(Preferences.TICKS_PROVIDER) ? store.getDefaultString(Preferences.TICKS_PROVIDER) :
-            store.getString(Preferences.TICKS_PROVIDER);
+        String provider = store.isDefault(XYPreferences.TICKS_PROVIDER) ? store.getDefaultString(XYPreferences.TICKS_PROVIDER) :
+            store.getString(XYPreferences.TICKS_PROVIDER);
 
-        if (Preferences.TICKS_PROVIDER_ORIGINAL.equals(provider))
+        if (XYPreferences.TICKS_PROVIDER_ORIGINAL.equals(provider))
             ticks = new LinearScaleTicks(scale);
         else
             ticks = new LinearScaleTicks2(scale);

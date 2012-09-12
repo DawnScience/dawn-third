@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  ******************************************************************************/
-package org.csstudio.swt.xygraph.preferences;
+package org.csstudio.swt.xygraph.preference;
 
 
 /** Access to preference settings.
@@ -14,7 +14,7 @@ package org.csstudio.swt.xygraph.preferences;
  *  @author Kay Kasemir
  */
 @SuppressWarnings("nls")
-public class Preferences
+public class XYPreferences
 {
     // useAdvancedGraphics() is called from many drawing operations, so
     // only determine it once

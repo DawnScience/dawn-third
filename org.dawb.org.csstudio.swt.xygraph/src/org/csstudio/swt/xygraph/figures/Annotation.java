@@ -11,7 +11,7 @@ import org.csstudio.swt.xygraph.dataprovider.IDataProvider;
 import org.csstudio.swt.xygraph.dataprovider.IDataProviderListener;
 import org.csstudio.swt.xygraph.dataprovider.ISample;
 import org.csstudio.swt.xygraph.linearscale.Range;
-import org.csstudio.swt.xygraph.preferences.Preferences;
+import org.csstudio.swt.xygraph.preference.XYPreferences;
 import org.csstudio.swt.xygraph.undo.MovingAnnotationCommand;
 import org.csstudio.swt.xygraph.undo.MovingAnnotationLabelCommand;
 import org.eclipse.draw2d.Cursors;
@@ -165,7 +165,7 @@ public class Annotation extends Figure implements IAxisListener, IDataProviderLi
 		if(trace != null && currentSnappedSample == null &&!pointerDragged)
 			updateToDefaultPosition();
 			
-        if (Preferences.useAdvancedGraphics())
+        if (XYPreferences.useAdvancedGraphics())
             graphics.setAntialias(SWT.ON);
 		Color tempColor;
 		if(annotationColor == null){
@@ -799,7 +799,7 @@ class Pointer extends Figure{
 	@Override
 	protected void paintClientArea(Graphics graphics) {
 		super.paintClientArea(graphics);
-        if (Preferences.useAdvancedGraphics())
+        if (XYPreferences.useAdvancedGraphics())
             graphics.setAntialias(SWT.ON);
 		//draw X-cross point		
 		Rectangle clientArea = getClientArea().getCopy().shrink(POINT_SIZE/2, POINT_SIZE/2);		

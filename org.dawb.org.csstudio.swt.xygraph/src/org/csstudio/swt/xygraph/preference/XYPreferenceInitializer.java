@@ -1,18 +1,18 @@
-package org.csstudio.swt.xygraph.preferences;
+package org.csstudio.swt.xygraph.preference;
 
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.csstudio.swt.xygraph.Activator;
 
-public class PreferenceInitializer extends AbstractPreferenceInitializer {
+public class XYPreferenceInitializer extends AbstractPreferenceInitializer {
 
-	public PreferenceInitializer() {
+	public XYPreferenceInitializer() {
 	}
 
 	@Override
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 
-		store.setDefault(Preferences.TICKS_PROVIDER, Preferences.TICKS_PROVIDER_ORIGINAL);
+		store.setDefault(XYPreferences.TICKS_PROVIDER, XYPreferences.TICKS_PROVIDER_ORIGINAL);
 	}
 }
