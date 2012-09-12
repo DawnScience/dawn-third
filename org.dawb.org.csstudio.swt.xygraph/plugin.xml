@@ -4,7 +4,7 @@
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="org.csstudio.swt.xygraph.preferences.XYInitializer">
+            class="org.csstudio.swt.xygraph.preferences.PreferenceInitializer">
       </initializer>
    </extension>
 

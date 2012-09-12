@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  ******************************************************************************/
-package org.csstudio.swt.xygraph;
+package org.csstudio.swt.xygraph.preferences;
 
 
 /** Access to preference settings.
@@ -31,4 +31,10 @@ public class Preferences
     	}
         return false;
     }
+
+    public static final String TICKS_PROVIDER = "swt.xygraph.ticksProvider";
+    public static final String TICKS_PROVIDER_ORIGINAL = "original";
+    public static final String TICKS_PROVIDER_MARK_2 = "mark2";
+
+
 }
