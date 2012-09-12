@@ -483,7 +483,7 @@ public class LinearScaleTicks implements ITicksProvider {
             }
         }
 
-        if (scale.isHorizontal()) {
+        if (scale.isHorizontal()) { // re-expand length (so labels can flow into margins)
             length += maxWidth;
         } else {
             length += maxHeight;
