@@ -90,7 +90,7 @@ class Tick {
 
 	@Override
 	public String toString() {
-		return text + " (" + position + ")";
+		return text + " (" + position + ", " + tPosition + ")";
 	}
 }
 
@@ -213,7 +213,7 @@ public class LinearScaleTicks2 implements ITicksProvider {
 			}
 		} while (!updateLabelPositionsAndCheckGaps(length, hMargin, tMargin) && numTicks-- > 2);
 
-		updateMinorTicks();
+		updateMinorTicks(length);
 		if (scale.hasTicksAtEnds() && ticks.size() > 1)
 			return new Range(ticks.get(0).getValue(), ticks.get(ticks.size() - 1).getValue());
 
@@ -285,7 +285,7 @@ public class LinearScaleTicks2 implements ITicksProvider {
 		}
 		final int imax = ticks.size();
 		if (imax > 1) {
-			majorStepInPixel = length / (imax - 1);
+			majorStepInPixel = (ticks.get(imax-1).getPosition() - ticks.get(0).getPosition()) / (imax - 1);
 		}
 
 		maxWidth = 0;
@@ -348,7 +348,7 @@ public class LinearScaleTicks2 implements ITicksProvider {
 
 	private static final double LAST_STEP_FRAC = 1 - Math.log10(9); // fraction of major tick step between 9 and 10
 
-	private void updateMinorTicks() {
+	private void updateMinorTicks(final int length) {
 		minorPositions.clear();
 
 		if (majorStepInPixel <= 0)
@@ -357,40 +357,72 @@ public class LinearScaleTicks2 implements ITicksProvider {
 		int minorTicks;
 
 		if (scale.isLogScaleEnabled()) {
-			if (majorStepInPixel * LAST_STEP_FRAC >= scale
-					.getMinorTickMarkStepHint()) {
+			if (majorStepInPixel * LAST_STEP_FRAC >= scale.getMinorTickMarkStepHint()) {
 				minorTicks = 10;
-				for (int j = 0, jmax = ticks.size() - 1; j < jmax; j++) {
-					double p = ticks.get(j).getPosition();
+				double p = ticks.get(0).getPosition();
+				if (p > 0) {
+					p -= majorStepInPixel;
 					for (int i = 1; i < minorTicks; i++) {
 						int q = (int) (p + majorStepInPixel * Math.log10((10. * i) / minorTicks));
-						if (!ticks.contains(q))
+						if (q >= 0 && q < length && !ticks.contains(q))
+							minorPositions.add(q);
+					}
+				}
+				for (int j = 0, jmax = ticks.size(); j < jmax; j++) {
+					p = ticks.get(j).getPosition();
+					for (int i = 1; i < minorTicks; i++) {
+						int q = (int) (p + majorStepInPixel * Math.log10((10. * i) / minorTicks));
+						if (q >= 0 && q < length && !ticks.contains(q))
 							minorPositions.add(q);
 					}
 				}
 			}
 		} else {
-			double minorStepInPixel;
 			if (scale.isDateEnabled()) {
 				minorTicks = 6;
-				minorStepInPixel = (majorStepInPixel / 6.0);
 			} else if (majorStepInPixel / 5 >= scale.getMinorTickMarkStepHint()) {
 				minorTicks = 5;
-				minorStepInPixel = (majorStepInPixel / 5.0);
 			} else if (majorStepInPixel / 4 >= scale.getMinorTickMarkStepHint()) {
 				minorTicks = 4;
-				minorStepInPixel = (majorStepInPixel / 4.0);
 			} else {
 				minorTicks = 2;
-				minorStepInPixel = (majorStepInPixel / 2.0);
 			}
 
-			for (int j = 0, jmax = ticks.size() - 1; j < jmax; j++) {
-				double p = ticks.get(j).getPosition();
-				for (int i = 1; i < minorTicks; i++) {
-					int q = (int) (p + i * minorStepInPixel);
-					if (!ticks.contains(q))
-						minorPositions.add(q);
+			double minorStepInPixel = majorStepInPixel / minorTicks;
+			double p = ticks.get(0).getPosition();
+			if (scale.isHorizontal()) {
+				if (p > 0) {
+					p -= majorStepInPixel;
+					for (int i = 1; i < minorTicks; i++) {
+						int q = (int) Math.floor(p + i * minorStepInPixel);
+						if (q >= 0 && q < length && !ticks.contains(q))
+							minorPositions.add(q);
+					}
+				}
+				for (int j = 0, jmax = ticks.size(); j < jmax; j++) {
+					p = ticks.get(j).getPosition();
+					for (int i = 1; i < minorTicks; i++) {
+						int q = (int) Math.floor(p + i * minorStepInPixel);
+						if (q >= 0 && q < length && !ticks.contains(q))
+							minorPositions.add(q);
+					}
+				}
+			} else {
+				if (p > 0) {
+					p -= majorStepInPixel;
+					for (int i = 1; i < minorTicks; i++) {
+						int q = (int) Math.ceil(p + i * minorStepInPixel);
+						if (q >= 0 && q < length && !ticks.contains(q))
+							minorPositions.add(q);
+					}
+				}
+				for (int j = 0, jmax = ticks.size(); j < jmax; j++) {
+					p = ticks.get(j).getPosition();
+					for (int i = 1; i < minorTicks; i++) {
+						int q = (int) Math.ceil(p + i * minorStepInPixel);
+						if (q >= 0 && q < length && !ticks.contains(q))
+							minorPositions.add(q);
+					}
 				}
 			}
 		}
