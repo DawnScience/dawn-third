@@ -262,10 +262,8 @@ public class LinearScaleTicks implements ITicksProvider {
 		final Dimension l = scale.calculateDimension(r.getLower());
 		final Dimension h = scale.calculateDimension(r.getUpper());
 		if (scale.isHorizontal()) {
-			System.err.println("calculate X margin with " + r);
 			return (int) Math.ceil(Math.max(l.width, h.width)/2.0);
 		}
-		System.err.println("calculate Y margin with " + r);
 		return (int) Math.ceil(Math.max(l.height, h.height)/2.0);
 	}
 
