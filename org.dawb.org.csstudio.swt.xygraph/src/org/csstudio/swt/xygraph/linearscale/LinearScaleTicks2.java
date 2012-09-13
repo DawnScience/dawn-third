@@ -178,24 +178,45 @@ public class LinearScaleTicks2 implements ITicksProvider {
 
 	@Override
 	public Range update(final double min, final double max, final int length) {
-		int maximumNumTicks = scale.isHorizontal() ? Math.min(8, length
-				/ TICKMINDIST_IN_PIXELS_X) : Math.min(8, length
-				/ TICKMINDIST_IN_PIXELS_Y);
+		if (scale.isLogScaleEnabled() && (min <= 0 || max <= 0))
+			throw new IllegalArgumentException("Range for log scale must be in positive range");
+
+		final int maximumNumTicks = scale.isHorizontal() ? Math.min(8, length / TICKMINDIST_IN_PIXELS_X)
+				: Math.min(8, length / TICKMINDIST_IN_PIXELS_Y);
 		int numTicks = Math.max(2, maximumNumTicks);
 
+		TickFormatting tFormat;
+		if (scale instanceof AbstractScale) {
+			if (((AbstractScale) scale).isAutoFormat()) {
+				tFormat = TickFormatting.plainMode;
+			} else {
+				String format = ((AbstractScale) scale).getFormatPattern();
+				if (format.contains("E")) {
+					tFormat = TickFormatting.useExponent;
+				} else {
+					tFormat = TickFormatting.plainMode;
+				}
+			}
+		} else {
+			tFormat = TickFormatting.plainMode;
+		}
+
+		final TickFactory tf = new TickFactory(tFormat);
+		final int hMargin = getHeadMargin();
+		final int tMargin = getTailMargin();
 		// loop until labels fit
 		do {
 			if (scale.isLogScaleEnabled()) {
-				updateTickLabelForLogScale(min, max, numTicks, length);
+				ticks = tf.generateLogTicks(length, min, max, numTicks, scale.isPrimary(), !scale.hasTicksAtEnds());
 			} else {
-				updateTickLabelForLinearScale(min, max, numTicks, length);
+				ticks = tf.generateTicks(length, min, max, numTicks, scale.isPrimary(), !scale.hasTicksAtEnds());
 			}
-		} while (!updateLabelPositionsAndCheckGaps(length) && numTicks-- > 2);
+		} while (!updateLabelPositionsAndCheckGaps(length, hMargin, tMargin) && numTicks-- > 2);
 
 		updateMinorTicks();
 		if (scale.hasTicksAtEnds() && ticks.size() > 1)
-			return new Range(ticks.get(0).getValue(), ticks.get(
-					ticks.size() - 1).getValue());
+			return new Range(ticks.get(0).getValue(), ticks.get(ticks.size() - 1).getValue());
+
 		return null;
 	}
 
@@ -223,109 +244,32 @@ public class LinearScaleTicks2 implements ITicksProvider {
 		if (ticks == null || ticks.size() == 0 || maxWidth == 0
 				|| maxHeight == 0) {
 //			System.err.println("No ticks yet!");
-			final Range r = scale.getScaleRange();
-			final Dimension l = scale.calculateDimension(r.getLower());
-			final Dimension h = scale.calculateDimension(r.getUpper());
+			final Dimension l = scale.calculateDimension(scale.getScaleRange().getLower());
 			if (scale.isHorizontal()) {
 //				System.err.println("calculate X margin with " + r);
-				return (int) Math.ceil(Math.max(l.width, h.width) / 2.0);
+				return l.width;
 			}
 //			System.err.println("calculate Y margin with " + r);
-			return (int) Math.ceil(Math.max(l.height, h.height) / 2.0);
+			return l.height;
 		}
 		return scale.isHorizontal() ? (maxWidth + 1) / 2 : (maxHeight + 1) / 2;
 	}
 
 	@Override
 	public int getTailMargin() {
-		return getHeadMargin();
-	}
-
-	/**
-	 * Updates tick label for log scale.
-	 * 
-	 * @param length
-	 *            the length of scale
-	 */
-	private void updateTickLabelForLogScale(double min, double max,
-			int maxTicks, int length) {
-		if (min <= 0 || max <= 0)
-			throw new IllegalArgumentException(
-					"the range for log scale must be in positive range");
-
-		TickFormatting tFormat;
-		if (scale instanceof AbstractScale) {
-			if (((AbstractScale) scale).isAutoFormat()) {
-				tFormat = TickFormatting.plainMode;
-			} else {
-				String format = ((AbstractScale) scale).getFormatPattern();
-				if (format.contains("E")) {
-					tFormat = TickFormatting.useExponent;
-				} else {
-					tFormat = TickFormatting.plainMode;
-				}
+		if (ticks == null || ticks.size() == 0 || maxWidth == 0
+				|| maxHeight == 0) {
+//			System.err.println("No ticks yet!");
+			final Dimension h = scale.calculateDimension(scale.getScaleRange().getUpper());
+			if (scale.isHorizontal()) {
+//				System.err.println("calculate X margin with " + r);
+				return h.width;
 			}
-		} else {
-			tFormat = TickFormatting.plainMode;
+//			System.err.println("calculate Y margin with " + r);
+			return h.height;
+//			System.err.println("No ticks yet!");
 		}
-
-		final TickFactory tf = new TickFactory(tFormat);
-		ticks = tf.generateLogTicks(length, min, max, maxTicks, scale.isPrimary(), !scale.hasTicksAtEnds());
-//		System.err.println((scale.isHorizontal() ? "X" : "Y")
-//				+ " tick unit is " + tf.getTickUnit() + " for " + min + ", "
-//				+ max);
-
-		final int margin = scale.getMargin();
-		for (Tick t : ticks) {
-			t.setPosition(length * t.getPosition() + margin);
-		}
-		final int imax = ticks.size();
-		if (imax > 1) {
-			majorStepInPixel = length / (imax - 1);
-		}
-	}
-
-	/**
-	 * Updates tick label for normal scale.
-	 * 
-	 * @param min
-	 * @param max
-	 * @param length
-	 *            scale tick length (without margin)
-	 */
-	private void updateTickLabelForLinearScale(double min, double max,
-			int maxTicks, int length) {
-
-		TickFormatting tFormat;
-		if (scale instanceof AbstractScale) {
-			if (((AbstractScale) scale).isAutoFormat()) {
-				tFormat = TickFormatting.plainMode;
-			} else {
-				String format = ((AbstractScale) scale).getFormatPattern();
-				if (format.contains("E")) {
-					tFormat = TickFormatting.useExponent;
-				} else {
-					tFormat = TickFormatting.plainMode;
-				}
-			}
-		} else {
-			tFormat = TickFormatting.plainMode;
-		}
-
-		final TickFactory tf = new TickFactory(tFormat);
-		ticks = tf.generateTicks(length, min, max, maxTicks, scale.isPrimary(), !scale.hasTicksAtEnds());
-//		System.err.println((scale.isHorizontal() ? "X" : "Y")
-//				+ " tick unit is " + tf.getTickUnit() + " for " + min + ", "
-//				+ max);
-
-		final int margin = scale.getMargin();
-		for (Tick t : ticks) {
-			t.setPosition(length * t.getPosition() + margin);
-		}
-		final int imax = ticks.size();
-		if (imax > 1) {
-			majorStepInPixel = length / (imax - 1);
-		}
+		return scale.isHorizontal() ? (maxWidth + 1) / 2 : (maxHeight + 1) / 2;
 	}
 
 	private static final String MINUS = "-";
@@ -335,7 +279,15 @@ public class LinearScaleTicks2 implements ITicksProvider {
 	 * 
 	 * @return true if there is no overlaps
 	 */
-	private boolean updateLabelPositionsAndCheckGaps(int length) {
+	private boolean updateLabelPositionsAndCheckGaps(int length, final int hMargin, final int tMargin) {
+		for (Tick t : ticks) {
+			t.setPosition(length * t.getPosition() + hMargin);
+		}
+		final int imax = ticks.size();
+		if (imax > 1) {
+			majorStepInPixel = length / (imax - 1);
+		}
+
 		maxWidth = 0;
 		maxHeight = 0;
 		final boolean hasNegative = ticks.get(0).getText().startsWith(MINUS);
@@ -358,29 +310,23 @@ public class LinearScaleTicks2 implements ITicksProvider {
 			return true; // sanity check
 
 //		System.err.println("Max labels have w:" + maxWidth + ", h:" + maxHeight);
+		length += hMargin + tMargin; // re-expand length (so labels can flow into margins)
 		if (scale.isHorizontal()) {
-			length += maxWidth; // re-expand length (so labels can flow into margins)
 			double last = 0;
 			for (Tick t : ticks) {
 				final Dimension d = scale.calculateDimension(t.getText());
 				double p = t.getPosition() - d.width * 0.5;
 				if (p < 0) {
 					p = 0;
-				} else if (p + d.width >= length - maxWidth*0.5) {
-					p = length - maxWidth*.5 - 1 - d.width;
-//					if (last > p)
-//						System.err.println("Last? " + t);
-//					p = last;
+				} else if (p + d.width >= length) {
+					p = length - 1 - d.width;
 				}
-//				} else
 				if (last > p)
 					return false;
-				System.err.println("H: " + last + " -> " + p);
 				last = p + d.width;
 				t.setTextPosition((int) Math.ceil(p));
 			}
 		} else {
-			length += maxHeight; // re-expand length (so labels can flow into margins)
 			double last = length;
 			for (Tick t : ticks) {
 				final Dimension d = scale.calculateDimension(t.getText());
@@ -417,8 +363,7 @@ public class LinearScaleTicks2 implements ITicksProvider {
 				for (int j = 0, jmax = ticks.size() - 1; j < jmax; j++) {
 					double p = ticks.get(j).getPosition();
 					for (int i = 1; i < minorTicks; i++) {
-						int q = (int) (p + majorStepInPixel
-								* Math.log10((10. * i) / minorTicks));
+						int q = (int) (p + majorStepInPixel * Math.log10((10. * i) / minorTicks));
 						if (!ticks.contains(q))
 							minorPositions.add(q);
 					}

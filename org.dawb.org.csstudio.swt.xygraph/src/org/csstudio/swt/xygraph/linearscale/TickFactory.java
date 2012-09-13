@@ -170,6 +170,67 @@ public class TickFactory {
 		return BigDecimal.valueOf(nf).scaleByPowerOfTen(expv);
 	}
 
+
+	/**
+	 * Round numerator down to multiples of denominators 
+	 * @param n numerator
+	 * @param d denominator
+	 * @return
+	 */
+	protected static double roundDown(BigDecimal n, BigDecimal d) {
+		final int ns = n.signum();
+		if (ns == 0)
+			return 0;
+		final int ds = d.signum();
+		if (ds == 0)
+			throw new IllegalArgumentException("Zero denominator is not allowed");
+
+		n = n.abs();
+		d = d.abs();
+		final BigDecimal[] x = n.divideAndRemainder(d);
+		final int xs = x[1].signum();
+		if (xs == 0) {
+			return ns != ds ? -x[0].multiply(d).doubleValue() : x[0].multiply(d).doubleValue();
+		} else if (xs < 0) {
+			throw new IllegalStateException("Cannot happen!");
+		}
+
+		if (ns != ds)
+			return x[0].signum() == 0 ? -d.doubleValue() : -x[0].add(BigDecimal.ONE).multiply(d).doubleValue();
+
+		return x[0].multiply(d).doubleValue();
+	}
+
+	/**
+	 * Round numerator up to multiples of denominators 
+	 * @param n numerator
+	 * @param d denominator
+	 * @return
+	 */
+	protected static double roundUp(BigDecimal n, BigDecimal d) {
+		final int ns = n.signum();
+		if (ns == 0)
+			return 0;
+		final int ds = d.signum();
+		if (ds == 0)
+			throw new IllegalArgumentException("Zero denominator is not allowed");
+
+		n = n.abs();
+		d = d.abs();
+		final BigDecimal[] x = n.divideAndRemainder(d);
+		final int xs = x[1].signum();
+		if (xs == 0) {
+			return ns != ds ? -x[0].multiply(d).doubleValue() : x[0].multiply(d).doubleValue();
+		} else if (xs < 0) {
+			throw new IllegalStateException("Cannot happen!");
+		}
+
+		if (ns != ds)
+			return x[0].signum() == 0 ? 0 : -x[0].multiply(d).doubleValue();
+
+		return x[0].add(BigDecimal.ONE).multiply(d).doubleValue();
+	}
+
 	private boolean determineNumTicks(int size, 
 								   double min, 
 								   double max,
@@ -204,24 +265,18 @@ public class TickFactory {
 			bUnit = nicenum(BigDecimal.valueOf(bRange.doubleValue() / (maxTicks - 1)), true);
 			n = bRange.divideToIntegralValue(bUnit).longValue();
 		} while (n > maxTicks-- && maxTicks > 1);
-	
+
 		tickUnit = isReverse ? -bUnit.doubleValue() : bUnit.doubleValue();
 		if (allowMinMaxOver) {
-			internalGraphmin = bMin.divideToIntegralValue(bUnit)
-					.multiply(bUnit).doubleValue();
+			internalGraphmin = roundDown(bMin, bUnit);
+
 			// check if difference is too large
 			if ((bMin.doubleValue() - internalGraphmin) > 1000) {
 				overwriteMinAnyway = true;
 				realGraphmin = min;
 			} else
 				realGraphmin = internalGraphmin;
-			BigDecimal[] bResult = bMax.divideAndRemainder(bUnit);
-			if (bResult[1].compareTo(BigDecimal.ZERO) > 0) {
-				graphmax = bResult[0].add(BigDecimal.ONE).multiply(bUnit)
-						.doubleValue();
-			} else {
-				graphmax = bResult[0].multiply(bUnit).doubleValue();
-			}
+			graphmax = roundUp(bMax, bUnit);
 		} else {
 			internalGraphmin = min;
 			realGraphmin = min;
