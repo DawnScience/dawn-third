@@ -95,11 +95,13 @@ public class LinearScaleTickMarks extends Figure {
 
 			//draw minor ticks for log scale
 			if (scale.isMinorTicksVisible()) {
+				final int start = scale.getTicksProvider().getHeadMargin();
 				y = tickLabelSide == LabelSide.Primary ? 0 : height - 1 - LINE_WIDTH - MINOR_TICK_LENGTH;
 				int jmax = ticks.getMinorCount();
 				for (int j = 0; j < jmax; j++) {
 					int x = ticks.getMinorPosition(j);
-					gc.drawLine(x, y, x, y + MINOR_TICK_LENGTH);
+					if (x >= start && x < width)
+						gc.drawLine(x, y, x, y + MINOR_TICK_LENGTH);
 				}
 			}
         } else {
@@ -110,15 +112,17 @@ public class LinearScaleTickMarks extends Figure {
             }
             //draw minor ticks for linear scale
 			if (scale.isMinorTicksVisible()) {
-            	if (tickLabelSide == LabelSide.Secondary) {
+				final int start = scale.getTicksProvider().getHeadMargin();
+				if (tickLabelSide == LabelSide.Secondary) {
 					y = height - 1 - LINE_WIDTH - MINOR_TICK_LENGTH;
-            	}
-            	int jmax = ticks.getMinorCount();
-            	for (int j = 0; j < jmax; j++) {
-                    int x = ticks.getMinorPosition(j);
-                    gc.drawLine(x, y, x, y + MINOR_TICK_LENGTH);
-            	}
-            }
+				}
+				int jmax = ticks.getMinorCount();
+				for (int j = 0; j < jmax; j++) {
+					int x = ticks.getMinorPosition(j);
+					if (x >= start && x < width)
+						gc.drawLine(x, y, x, y + MINOR_TICK_LENGTH);
+				}
+			}
         }
 
         //draw scale line
@@ -168,11 +172,13 @@ public class LinearScaleTickMarks extends Figure {
 
 			// draw minor ticks for log scale
 			if (scale.isMinorTicksVisible()) {
+				final int end = height - scale.getTicksProvider().getTailMargin();
 				x = tickLabelSide == LabelSide.Primary ? width - LINE_WIDTH - MINOR_TICK_LENGTH : LINE_WIDTH;
 				final int jmax = ticks.getMinorCount();
 				for (int j = 0; j < jmax; j++) {
 					y = height - ticks.getMinorPosition(j);
-					gc.drawLine(x, y, x + MINOR_TICK_LENGTH, y);
+					if (y >= 0 && y < end)
+						gc.drawLine(x, y, x + MINOR_TICK_LENGTH, y);
 				}
 			}
         } else {        
@@ -182,17 +188,19 @@ public class LinearScaleTickMarks extends Figure {
                 gc.drawLine(x, y, x + MAJOR_TICK_LENGTH, y);
             }
 
-            //draw minor ticks for linear scale
-            if(scale.isMinorTicksVisible()){
-            	if (tickLabelSide == LabelSide.Primary) {
+			// draw minor ticks for linear scale
+			if (scale.isMinorTicksVisible()) {
+				final int end = height - scale.getTicksProvider().getTailMargin();
+				if (tickLabelSide == LabelSide.Primary) {
 					x = width - LINE_WIDTH - MINOR_TICK_LENGTH;
-            	}
-            	final int jmax = ticks.getMinorCount();
-            	for (int j = 0; j < jmax; j++) {
-            		y = height - ticks.getMinorPosition(j);
-					gc.drawLine(x, y, x + MINOR_TICK_LENGTH, y);
-            	}
-            }
+				}
+				final int jmax = ticks.getMinorCount();
+				for (int j = 0; j < jmax; j++) {
+					y = height - ticks.getMinorPosition(j);
+					if (y >= 0 && y < end)
+						gc.drawLine(x, y, x + MINOR_TICK_LENGTH, y);
+				}
+			}
         }
 
         // draw scale line
