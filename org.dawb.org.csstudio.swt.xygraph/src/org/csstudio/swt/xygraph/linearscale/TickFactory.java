@@ -48,43 +48,30 @@ public class TickFactory {
 	private TickFormatting formatOfTicks;
 	private final static BigDecimal EPSILON = new BigDecimal("1.0E-20");
 	
-	private double tickUnit = 0.0;
 	private double internalGraphmin;
 	private double realGraphmin;
 	private double graphmax;
-	private int nfrac;
+	private String tickFormat;
 	private boolean overwriteMinAnyway = false;
 	
 	/**
 	 * @param format
 	 */
-	public TickFactory(TickFormatting format)
-	{
+	public TickFactory(TickFormatting format) {
 	   formatOfTicks = format;	
 	}
 
-	private String getTickString(double value)
-	{
+	private String getTickString(double value) {
 		String returnString = "";
-		switch (formatOfTicks)
-		{
-			case plainMode:
-			{
-				String formatStr = String.format("%%.%df",nfrac);
-				returnString = String.format(formatStr,value);
-			}
+		switch (formatOfTicks) {
+		case plainMode:
+			returnString = String.format(tickFormat, value);
 			break;
-			case roundAndChopMode:
-			{
-				long newValue = Math.round(value);
-				returnString = String.format("%d", newValue);
-			}
+		case useExponent:
+			returnString = String.format(tickFormat, value);
 			break;
-			case useExponent:
-			{
-				String formatStr = String.format("%%.%de",nfrac);
-				returnString = String.format(formatStr,value);
-			}
+		case roundAndChopMode:
+			returnString = String.format("%d", Math.round(value));
 			break;
 		case useSIunits:
 			double absValue = Math.abs(value);
@@ -107,7 +94,7 @@ public class TickFactory {
 			} else if (absValue < 1E9) {
 				returnString = String.format("%6.2fM", value * 1E-6);
 			} else if (absValue < 1E12) {
-				returnString = String.format("%6,2fG", value * 1E-9);
+				returnString = String.format("%6.2fG", value * 1E-9);
 			} else if (absValue < 1E15) {
 				returnString = String.format("%6.2fT", value * 1E-12);
 			} else if (absValue < 1E18)
@@ -231,12 +218,21 @@ public class TickFactory {
 		return x[0].add(BigDecimal.ONE).multiply(d).doubleValue();
 	}
 
-	private boolean determineNumTicks(int size, 
-								   double min, 
-								   double max,
-								   int maxTicks,
-								   boolean allowMinMaxOver)
-	{
+	private void createFormatString(final int precision) {
+		switch (formatOfTicks) {
+		case plainMode:
+			tickFormat = String.format("%%.%df", precision);
+			break;
+		case useExponent:
+			tickFormat = String.format("%%.%de", precision);
+			break;
+		default:
+			tickFormat = null;
+			break;
+		}
+	}
+
+	private double determineNumTicks(int size, double min, double max, int maxTicks, boolean allowMinMaxOver) {
 		overwriteMinAnyway = false;
 	
 		BigDecimal bMin = BigDecimal.valueOf(min);
@@ -255,7 +251,7 @@ public class TickFactory {
 	
 		// tick points to dense do not do anything
 		if (bRange.compareTo(EPSILON) < 0) {
-			return false;
+			return 0;
 		}
 	
 		bRange = nicenum(bRange, false);
@@ -266,7 +262,7 @@ public class TickFactory {
 			n = bRange.divideToIntegralValue(bUnit).longValue();
 		} while (n > maxTicks-- && maxTicks > 1);
 
-		tickUnit = isReverse ? -bUnit.doubleValue() : bUnit.doubleValue();
+		double tickUnit = isReverse ? -bUnit.doubleValue() : bUnit.doubleValue();
 		if (allowMinMaxOver) {
 			internalGraphmin = roundDown(bMin, bUnit);
 
@@ -289,8 +285,8 @@ public class TickFactory {
 			graphmax = t;
 		}
 	
-		nfrac = (int) Math.max(-Math.floor(Math.log10(Math.abs(tickUnit))), 0);
-		return true;
+		createFormatString((int) Math.max(-Math.floor(Math.log10(Math.abs(tickUnit))), 0));
+		return tickUnit;
 	}
 
 	/**
@@ -303,14 +299,11 @@ public class TickFactory {
 	 * @return a list of the ticks for the axis
 	 */
 	
-	public LinkedList<Tick> generateTicks(int displaySize, 
-										  double min, 
-										  double max, 
-										  int maxTicks,
+	public LinkedList<Tick> generateTicks(int displaySize, double min, double max, int maxTicks,
 										  boolean allowMinMaxOver, final boolean tight)
 	{
 		LinkedList<Tick> ticks = new LinkedList<Tick>();
-		determineNumTicks(displaySize, min, max, maxTicks, allowMinMaxOver);
+		double tickUnit = determineNumTicks(displaySize, min, max, maxTicks, allowMinMaxOver);
 		double p = internalGraphmin;
 		if (tickUnit > 0) {
 			final double pmax = graphmax + 0.5 * tickUnit;
@@ -375,7 +368,7 @@ public class TickFactory {
 	}
 
 
-	private boolean determineNumLogTicks(int size, double min, double max, int maxTicks, boolean allowMinMaxOver) {
+	private double determineNumLogTicks(int size, double min, double max, int maxTicks, boolean allowMinMaxOver) {
 		overwriteMinAnyway = false;
 	
 		final boolean isReverse = min > max;
@@ -397,7 +390,7 @@ public class TickFactory {
 			n = decades/++unit;
 		} while (n > maxTicks);	
 
-		tickUnit = isReverse ? Math.pow(10, -unit) : Math.pow(10, unit);
+		double tickUnit = isReverse ? Math.pow(10, -unit) : Math.pow(10, unit);
 		if (allowMinMaxOver) {
 			internalGraphmin = Math.pow(10, loDecade);
 			realGraphmin = internalGraphmin;
@@ -414,8 +407,8 @@ public class TickFactory {
 			graphmax = t;
 		}
 	
-		nfrac = (int) Math.max(-Math.floor(loDecade), 0);
-		return true;
+		createFormatString((int) Math.max(-Math.floor(loDecade), 0));
+		return tickUnit;
 	}
 
 	/**
@@ -427,14 +420,11 @@ public class TickFactory {
 	 * @param tight if true then remove ticks outside range 
 	 * @return a list of the ticks for the axis
 	 */
-	public LinkedList<Tick> generateLogTicks(int displaySize, 
-										  double min, 
-										  double max, 
-										  int maxTicks,
+	public LinkedList<Tick> generateLogTicks(int displaySize, double min, double max, int maxTicks,
 										  boolean allowMinMaxOver, final boolean tight)
 	{
 		LinkedList<Tick> ticks = new LinkedList<Tick>();
-		determineNumLogTicks(displaySize, min, max, maxTicks, allowMinMaxOver);
+		double tickUnit = determineNumLogTicks(displaySize, min, max, maxTicks, allowMinMaxOver);
 		double p = internalGraphmin;
 		if (tickUnit > 1) {
 			final double pmax = graphmax * Math.sqrt(tickUnit);
