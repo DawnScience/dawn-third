@@ -139,6 +139,10 @@ public class Axis extends LinearScale{
 	@Override
 	public void setRange(final double lower, final double upper) {
 		Range old_range = getRange();
+		if (old_range.getLower() == lower && old_range.getUpper() == upper) {
+			return;
+		}
+		setTicksAtEnds(false);
 		super.setRange(lower, upper);
 		fireAxisRangeChanged(old_range, getRange());
 	}
@@ -303,6 +307,7 @@ public class Axis extends LinearScale{
 
         // Update axis
 		setRange(newRange.getLower(), newRange.getUpper());
+		setTicksAtEnds(true);
 		repaint();
 		return true;
 	}

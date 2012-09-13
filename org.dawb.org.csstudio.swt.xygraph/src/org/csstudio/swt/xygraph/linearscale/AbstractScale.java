@@ -337,6 +337,7 @@ public abstract class AbstractScale extends Figure{
         }
         	
         logScaleEnabled = enabled;
+        setTicksAtEnds(true);
         range = new Range(min, max);
         setDirty(true);
 		revalidate();
