@@ -97,7 +97,7 @@ public abstract class AbstractScale extends Figure{
 
     private boolean autoFormat = true;
 	
-    private Range range = new Range(min, max);
+    protected Range range = new Range(min, max);
 
     private Format cachedFormat = null;
 

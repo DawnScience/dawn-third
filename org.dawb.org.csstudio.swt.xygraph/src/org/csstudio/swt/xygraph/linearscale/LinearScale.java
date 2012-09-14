@@ -226,8 +226,6 @@ public class LinearScale extends AbstractScale implements IScaleProvider {
 	public double getPositionValue(int position, boolean relative) {
 		updateTick();
 		//coerce to range
-		double min = getRange().getLower();
-        double max = getRange().getUpper();
         int pixelsToStart;
         double value;
         if(relative){
@@ -261,7 +259,7 @@ public class LinearScale extends AbstractScale implements IScaleProvider {
     protected void layout() {
     	super.layout();
     	layoutTicks();	
-    } 
+    }
 
     protected void layoutTicks() {
     	updateTick();
@@ -304,7 +302,6 @@ public class LinearScale extends AbstractScale implements IScaleProvider {
     			length = rect.height - getInsets().getHeight();
     	}
     	super.setBounds(rect);   
-    	
     }
 
     @Override
@@ -334,7 +331,6 @@ public class LinearScale extends AbstractScale implements IScaleProvider {
 		this.orientation = orientation;
         setDirty(true);
         revalidate();
-
 	}
 	
 
@@ -351,7 +347,9 @@ public class LinearScale extends AbstractScale implements IScaleProvider {
 				if (r != null) {
 					min = r.getLower();
 					max = r.getUpper();
+					range = r;
 				}
+//				getMargin();
 			}
 	    	setDirty(false);
     	}    	
