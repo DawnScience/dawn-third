@@ -390,7 +390,7 @@ public class LinearScaleTicks2 implements ITicksProvider {
 
 			double minorStepInPixel = majorStepInPixel / minorTicks;
 			double p = ticks.get(0).getPosition();
-			if (scale.isHorizontal()) {
+//			if (scale.isHorizontal()) {
 				if (p > 0) {
 					p -= majorStepInPixel;
 					for (int i = 1; i < minorTicks; i++) {
@@ -407,24 +407,24 @@ public class LinearScaleTicks2 implements ITicksProvider {
 							minorPositions.add(q);
 					}
 				}
-			} else {
-				if (p > 0) {
-					p -= majorStepInPixel;
-					for (int i = 1; i < minorTicks; i++) {
-						int q = (int) Math.ceil(p + i * minorStepInPixel);
-						if (q >= 0 && q < length && !ticks.contains(q))
-							minorPositions.add(q);
-					}
-				}
-				for (int j = 0, jmax = ticks.size(); j < jmax; j++) {
-					p = ticks.get(j).getPosition();
-					for (int i = 1; i < minorTicks; i++) {
-						int q = (int) Math.ceil(p + i * minorStepInPixel);
-						if (q >= 0 && q < length && !ticks.contains(q))
-							minorPositions.add(q);
-					}
-				}
-			}
+//			} else {
+//				if (p > 0) {
+//					p -= majorStepInPixel;
+//					for (int i = 1; i < minorTicks; i++) {
+//						int q = (int) Math.ceil(p + i * minorStepInPixel);
+//						if (q >= 0 && q < length && !ticks.contains(q))
+//							minorPositions.add(q);
+//					}
+//				}
+//				for (int j = 0, jmax = ticks.size(); j < jmax; j++) {
+//					p = ticks.get(j).getPosition();
+//					for (int i = 1; i < minorTicks; i++) {
+//						int q = (int) Math.ceil(p + i * minorStepInPixel);
+//						if (q >= 0 && q < length && !ticks.contains(q))
+//							minorPositions.add(q);
+//					}
+//				}
+//			}
 		}
 	}
 }
