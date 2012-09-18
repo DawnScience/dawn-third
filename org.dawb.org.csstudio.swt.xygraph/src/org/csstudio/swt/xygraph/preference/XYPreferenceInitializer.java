@@ -13,6 +13,6 @@ public class XYPreferenceInitializer extends AbstractPreferenceInitializer {
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 
-		store.setDefault(XYPreferences.TICKS_PROVIDER, XYPreferences.TICKS_PROVIDER_ORIGINAL);
+		store.setDefault(XYPreferences.TICKS_PROVIDER, XYPreferences.TICKS_PROVIDER_MARK_2);
 	}
 }
