@@ -232,6 +232,13 @@ public class TickFactory {
 		}
 	}
 
+	/*
+	 *  TODO include zero tick if range straddles origin
+	 *  Split into lower and upper ranges and use larger range?
+	 *  How do we reconcile with maxTicks?
+	 *  Or check if zero is included first?
+	 */
+
 	private double determineNumTicks(int size, double min, double max, int maxTicks, boolean allowMinMaxOver) {
 		overwriteMinAnyway = false;
 	
@@ -298,7 +305,6 @@ public class TickFactory {
 	 * @param tight if true then remove ticks outside range 
 	 * @return a list of the ticks for the axis
 	 */
-	
 	public LinkedList<Tick> generateTicks(int displaySize, double min, double max, int maxTicks,
 										  boolean allowMinMaxOver, final boolean tight)
 	{
