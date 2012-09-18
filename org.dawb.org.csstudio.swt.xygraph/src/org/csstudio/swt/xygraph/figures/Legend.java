@@ -102,14 +102,14 @@ public class Legend extends RectangleFigure {
 		//	Rectangle rect = new Rectangle(hPos, vPos-INNER_GAP/2, hwidth - OUT_GAP,ICON_WIDTH-INNER_GAP);
 		//	graphics.fillRectangle(rect);
 		//	graphics.drawRectangle(rect);
-			drawTraceLagend(trace, graphics, hPos, vPos);			
+			drawTraceLegend(trace, graphics, hPos, vPos);			
 			hPos = hEnd;
 			i++;
 		}
 		
 	}
 	
-	private void drawTraceLagend(Trace trace, Graphics graphics, int hPos, int vPos){
+	private void drawTraceLegend(Trace trace, Graphics graphics, int hPos, int vPos){
 		graphics.pushState();
         if (XYPreferences.useAdvancedGraphics())
             graphics.setAntialias(SWT.ON);
