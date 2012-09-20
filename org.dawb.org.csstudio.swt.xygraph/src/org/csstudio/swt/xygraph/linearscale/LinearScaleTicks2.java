@@ -321,8 +321,12 @@ public class LinearScaleTicks2 implements ITicksProvider {
 				} else if (p + d.width >= length) {
 					p = length - 1 - d.width;
 				}
-				if (last > p)
+				if (last > p) {
+					if (ticks.indexOf(t) == (imax-1)) {
+						t.setTextPosition((int) Math.ceil(p));
+					}
 					return false;
+				}
 				last = p + d.width;
 				t.setTextPosition((int) Math.ceil(p));
 			}
