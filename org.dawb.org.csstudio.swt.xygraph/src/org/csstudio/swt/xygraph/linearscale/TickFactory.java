@@ -256,7 +256,7 @@ public class TickFactory {
 			isReverse = false;
 		}
 	
-		// tick points to dense do not do anything
+		// tick points too dense to do anything
 		if (bRange.compareTo(EPSILON) < 0) {
 			return 0;
 		}
@@ -315,15 +315,15 @@ public class TickFactory {
 			final double pmax = graphmax + 0.5 * tickUnit;
 			while (p < pmax) {
 				if (!tight || (p >= min && p <= max))
-				if (allowMinMaxOver || p <= max) {
-					Tick newTick = new Tick();
-					if (p == internalGraphmin && overwriteMinAnyway)
-						newTick.setValue(realGraphmin);
-					else
-						newTick.setValue(p);
-					newTick.setText(getTickString(newTick.getValue()));
-					ticks.add(newTick);
-				}
+					if (allowMinMaxOver || p <= max) {
+						Tick newTick = new Tick();
+						if (p == internalGraphmin && overwriteMinAnyway)
+							newTick.setValue(realGraphmin);
+						else
+							newTick.setValue(p);
+						newTick.setText(getTickString(newTick.getValue()));
+						ticks.add(newTick);
+					}
 				double newTickValue = p + tickUnit;
 				if (p == newTickValue)
 					break;
@@ -340,19 +340,19 @@ public class TickFactory {
 					t.setPosition((t.getValue() - lo) / range);
 				}
 			}
-		} else {
+		} else if (tickUnit < 0) {
 			final double pmin = graphmax + 0.5 * tickUnit;
 			while (p > pmin) {
 				if (!tight || (p >= max && p <= min))
-				if (allowMinMaxOver || p <= max) {
-					Tick newTick = new Tick();
-					if (p == internalGraphmin && overwriteMinAnyway)
-						newTick.setValue(realGraphmin);
-					else
-						newTick.setValue(p);
-					newTick.setText(getTickString(newTick.getValue()));
-					ticks.add(newTick);
-				}
+					if (allowMinMaxOver || p <= max) {
+						Tick newTick = new Tick();
+						if (p == internalGraphmin && overwriteMinAnyway)
+							newTick.setValue(realGraphmin);
+						else
+							newTick.setValue(p);
+						newTick.setText(getTickString(newTick.getValue()));
+						ticks.add(newTick);
+					}
 				double newTickValue = p + tickUnit;
 				if (p == newTickValue)
 					break;

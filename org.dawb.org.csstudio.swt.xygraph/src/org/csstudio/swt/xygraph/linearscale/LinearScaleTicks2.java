@@ -225,12 +225,12 @@ public class LinearScaleTicks2 implements ITicksProvider {
 		String format = null;
 
 		// calculate the default decimal format
-		if (Math.abs(max - min) > 0.1)
+		double mantissa = Math.abs(max - min);
+		if (mantissa > 0.1)
 			format = "############.##";
 		else {
 			format = "##.##";
-			double mantissa = Math.abs(max - min);
-			while (mantissa < 1) {
+			while (mantissa < 1 && mantissa > 0) {
 				mantissa *= 10.0;
 				format += "#";
 			}
@@ -284,7 +284,9 @@ public class LinearScaleTicks2 implements ITicksProvider {
 			t.setPosition(length * t.getPosition() + hMargin);
 		}
 		final int imax = ticks.size();
-		if (imax > 1) {
+		if (imax == 0) {
+			return true;
+		} else if (imax > 1) {
 			majorStepInPixel = (ticks.get(imax-1).getPosition() - ticks.get(0).getPosition()) / (imax - 1);
 		}
 
@@ -331,18 +333,14 @@ public class LinearScaleTicks2 implements ITicksProvider {
 				t.setTextPosition((int) Math.ceil(p));
 			}
 		} else {
-			double last = length;
 			for (Tick t : ticks) {
 				final Dimension d = scale.calculateDimension(t.getText());
-				double p = length - t.getPosition() - d.height * 0.5;
+				double p = length - 1 - t.getPosition() - d.height * 0.5;
 				if (p < 0) {
 					p = 0;
 				} else if (p + d.height >= length) {
 					p = length - 1 - d.height;
 				}
-				if (last < p + d.height)
-					return false;
-				last = p;
 				t.setTextPosition((int) Math.ceil(p));
 			}
 		}
@@ -355,7 +353,7 @@ public class LinearScaleTicks2 implements ITicksProvider {
 	private void updateMinorTicks(final int end) {
 		minorPositions.clear();
 
-		if (majorStepInPixel <= 0)
+		if (majorStepInPixel <= 0 || ticks.size() == 0)
 			return;
 
 		int minorTicks;
