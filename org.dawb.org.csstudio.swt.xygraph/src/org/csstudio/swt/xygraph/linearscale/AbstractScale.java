@@ -212,6 +212,10 @@ public abstract class AbstractScale extends Figure{
 
 
     private boolean userDefinedFormat = false;
+
+
+	protected  boolean forceRange;
+
 	/**
      * Gets the state indicating if log scale is enabled.
      * 
@@ -370,7 +374,9 @@ public abstract class AbstractScale extends Figure{
 	    setRange(range.getLower(), range.getUpper());
 	}
 
-    /**set the scale range
+	private static final double ZERO_RANGE_FRACTION = 0.125; // used if difference between min and max is too small
+
+	/**set the scale range
      * @param lower the lower limit
      * @param upper the upper limit
      * @throws IllegalArgumentException  
@@ -381,20 +387,10 @@ public abstract class AbstractScale extends Figure{
         		|| Double.isInfinite(lower) || Double.isInfinite(upper) || Double.isInfinite(upper-lower)) {
             throw new IllegalArgumentException("Illegal range: lower=" + lower + ", upper=" + upper);
         }
-        
-        //in case of lower > upper, reverse them.       
-//        if(lower > upper){
-//        	double temp = lower;        	
-//        	lower = upper;
-//        	upper = temp;
-//        }        
-        
-       // if (min == lower && max == upper) {
-       //     return;
-       // }
 
-        if (lower == upper) {
-        	final double delta = Math.abs(lower)/8.; // make 25% percent different
+        forceRange = lower == upper; 
+        if (forceRange) {
+            final double delta = (lower == 0 ? 1 : Math.abs(lower)) * ZERO_RANGE_FRACTION;
         	upper += delta;
         	lower -= delta;
         	if(Double.isInfinite(upper))
