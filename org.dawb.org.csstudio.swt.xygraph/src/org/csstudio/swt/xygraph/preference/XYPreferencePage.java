@@ -32,10 +32,10 @@ public class XYPreferencePage extends PreferencePage implements IWorkbenchPrefer
 		xyc.add("Original");
 		xyc.add("Mark 2");
 		if (getPreferenceStore().isDefault(XYPreferences.TICKS_PROVIDER)
-				|| XYPreferences.TICKS_PROVIDER_ORIGINAL.equals(getPreferenceStore().getString(XYPreferences.TICKS_PROVIDER)))
-			xyc.select(0);
-		else
+				|| XYPreferences.TICKS_PROVIDER_MARK_2.equals(getPreferenceStore().getString(XYPreferences.TICKS_PROVIDER)))
 			xyc.select(1);
+		else
+			xyc.select(0);
 		return comp;
 	}
 
