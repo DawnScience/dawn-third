@@ -185,23 +185,25 @@ public class LinearScaleTicks2 implements ITicksProvider {
 				: Math.min(8, length / TICKMINDIST_IN_PIXELS_Y);
 		int numTicks = Math.max(2, maximumNumTicks);
 
-		TickFormatting tFormat;
+		final TickFactory tf;
 		if (scale instanceof AbstractScale) {
-			if (((AbstractScale) scale).isAutoFormat()) {
-				tFormat = TickFormatting.plainMode;
+			AbstractScale aScale = (AbstractScale) scale;
+			if (aScale.hasUserDefinedFormat()) {
+				tf = new TickFactory(scale);
+			} else if (aScale.isAutoFormat()) {
+				tf = new TickFactory(TickFormatting.plainMode);
 			} else {
-				String format = ((AbstractScale) scale).getFormatPattern();
+				String format = aScale.getFormatPattern();
 				if (format.contains("E")) {
-					tFormat = TickFormatting.useExponent;
+					tf = new TickFactory(TickFormatting.useExponent);
 				} else {
-					tFormat = TickFormatting.plainMode;
+					tf = new TickFactory(TickFormatting.plainMode);
 				}
 			}
 		} else {
-			tFormat = TickFormatting.plainMode;
+			tf = new TickFactory(TickFormatting.plainMode);
 		}
 
-		final TickFactory tf = new TickFactory(tFormat);
 		final int hMargin = getHeadMargin();
 		final int tMargin = getTailMargin();
 		// loop until labels fit
