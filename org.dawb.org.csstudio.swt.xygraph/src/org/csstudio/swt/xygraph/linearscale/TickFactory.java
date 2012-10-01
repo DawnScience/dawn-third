@@ -43,10 +43,6 @@ public class TickFactory {
 		 * Use SI units (k,M,G,etc.)
 		 */
 		useSIunits,
-		/**
-		 * Use external scale provider
-		 */
-		useCustom;
 	}
 
 	private TickFormatting formatOfTicks;
@@ -57,13 +53,12 @@ public class TickFactory {
 	private double graphmax;
 	private String tickFormat;
 	private boolean overwriteMinAnyway = false;
-	private IScaleProvider scale;
+	private final IScaleProvider scale;
 	
 	/**
 	 * @param format
 	 */
 	public TickFactory(IScaleProvider scale) {
-		formatOfTicks = TickFormatting.useCustom;
 		this.scale = scale;
 	}
 
@@ -72,13 +67,14 @@ public class TickFactory {
 	 */
 	public TickFactory(TickFormatting format) {
 	   formatOfTicks = format;
-	   if (formatOfTicks == TickFormatting.useCustom)
-		   throw new IllegalArgumentException("Use TickFactory(IScaleProvider) constructor");
-
 	   scale = null;
 	}
 
 	private String getTickString(double value) {
+		if (scale != null) {
+			return scale.format(value);
+		}
+
 		String returnString = "";
 		switch (formatOfTicks) {
 		case plainMode:
@@ -116,9 +112,6 @@ public class TickFactory {
 				returnString = String.format("%6.2fT", value * 1E-12);
 			} else if (absValue < 1E18)
 				returnString = String.format("%6.2fP", value * 1E-15);
-			break;
-		case useCustom:
-			returnString = scale.format(value);
 			break;
 		}
 		return returnString;
