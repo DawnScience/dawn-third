@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="org.dawnsci.freehep.views.demo.FreeHepExampleView"
+            id="org.freehep.j3d.view.demo.surface.plot"
+            name="FreeHep Demo"
+            restorable="true">
+      </view>
+   </extension>
+
+</plugin>
