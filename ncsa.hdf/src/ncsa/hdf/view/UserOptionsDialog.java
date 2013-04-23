@@ -18,11 +18,15 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.util.Vector;
 
@@ -50,55 +54,57 @@ import javax.swing.border.TitledBorder;
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public class UserOptionsDialog extends JDialog implements ActionListener {
-    private static final long serialVersionUID = -8521813136101442590L;
+public class UserOptionsDialog extends JDialog implements ActionListener, ItemListener 
+{
+    private static final long     serialVersionUID = -8521813136101442590L;
 
     /**
      * The main HDFView.
      */
-    private final JFrame viewer;
+    private final JFrame          viewer;
 
-    private String H4toH5Path;
-    private JTextField H4toH5Field, UGField, workField, fileExtField,
-            maxMemberField, startMemberField;
-    private JComboBox fontSizeChoice, fontTypeChoice, delimiterChoice,
-             imageOriginChoice, indexBaseChoice;
-    private JComboBox choiceTreeView, choiceMetaDataView, choiceTextView,
-            choiceTableView, choiceImageView, choicePaletteView;
-    private String rootDir, workDir;
-    private JCheckBox checkCurrentUserDir, checkAutoContrast, 
-            checkConvertEnum, checkShowValues;
-    private JButton currentDirButton;
-    private JRadioButton checkReadOnly;
+    private String                H4toH5Path;
+    private JTextField            H4toH5Field, UGField, workField, fileExtField, maxMemberField, startMemberField;
+    private JComboBox             fontSizeChoice, fontTypeChoice, delimiterChoice, imageOriginChoice, indexBaseChoice;
+    private JComboBox             choiceTreeView, choiceMetaDataView, choiceTextView, choiceTableView, choiceImageView,
+    choicePaletteView;
+    private String                rootDir, workDir;
+    private JCheckBox             checkCurrentUserDir, checkAutoContrast, checkConvertEnum, checkShowValues;
+    private JButton               currentDirButton;
+    private JRadioButton          checkReadOnly, checkIndexType, checkIndexOrder, checkIndexNative, checkLibVersion,
+    							  checkReadAll;
 
-    //For the feature:To display groups/attributes in creation order
-    //private JComboBox displayIndexChoice; 
-    
-    private int fontSize;
+    private int                   fontSize;
 
-    private boolean isFontChanged;
+    private boolean               isFontChanged;
 
-    private boolean isUserGuideChanged;
+    private boolean               isUserGuideChanged;
 
-    private boolean isWorkDirChanged;
+    private boolean               isWorkDirChanged;
+
+    /** default index type for files */
+    private static String         indexType;
+
+    /** default index ordering for files */
+    private static String         indexOrder;
 
     /** a list of tree view implementation. */
-    private static Vector treeViews;
+    private static Vector<String> treeViews;
 
     /** a list of image view implementation. */
-    private static Vector imageViews;
+    private static Vector<String> imageViews;
 
     /** a list of tree table implementation. */
-    private static Vector tableViews;
+    private static Vector<String> tableViews;
 
     /** a list of Text view implementation. */
-    private static Vector textViews;
+    private static Vector<String> textViews;
 
     /** a list of metadata view implementation. */
-    private static Vector metaDataViews;
+    private static Vector<String> metaDataViews;
 
     /** a list of palette view implementation. */
-    private static Vector paletteViews;
+    private static Vector<String> paletteViews;
 
     // private JList srbJList;
     // private JTextField srbFields[];
@@ -131,13 +137,15 @@ public class UserOptionsDialog extends JDialog implements ActionListener {
         imageViews = ViewProperties.getImageViewList();
         paletteViews = ViewProperties.getPaletteViewList();
         // srbVector = ViewProperties.getSrbAccount();
+        indexType = ViewProperties.getIndexType();
+        indexOrder = ViewProperties.getIndexOrder();
 
         JPanel contentPane = (JPanel) getContentPane();
         contentPane.setLayout(new BorderLayout(8, 8));
         contentPane.setBorder(BorderFactory.createEmptyBorder(15, 5, 5, 5));
 
         int w = 700 + (ViewProperties.getFontSize() - 12) * 15;
-        int h = 650 + (ViewProperties.getFontSize() - 12) * 15;
+        int h = 550 + (ViewProperties.getFontSize() - 12) * 15;
         contentPane.setPreferredSize(new Dimension(w, h));
 
         JTabbedPane tabbedPane = new JTabbedPane();
@@ -190,13 +198,11 @@ public class UserOptionsDialog extends JDialog implements ActionListener {
     }
 
     private JPanel createGeneralOptionPanel() {
-        String[] fontSizeChoices = { "12", "14", "16", "18", "20", "22", "24",
-                "26", "28", "30", "32", "34", "36", "48" };
+        String[] fontSizeChoices = { "12", "14", "16", "18", "20", "22", "24", "26", "28", "30", "32", "34", "36", "48" };
         fontSizeChoice = new JComboBox(fontSizeChoices);
         fontSizeChoice.setSelectedItem(String.valueOf(ViewProperties.getFontSize()));
 
-        String[] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment()
-        .getAvailableFontFamilyNames();
+        String[] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
         String fname = ViewProperties.getFontType();
         fontTypeChoice = new JComboBox(fontNames);
 
@@ -214,34 +220,28 @@ public class UserOptionsDialog extends JDialog implements ActionListener {
         }
         fontTypeChoice.setSelectedItem(fname);
 
-        String[] delimiterChoices = { ViewProperties.DELIMITER_TAB,
-                ViewProperties.DELIMITER_COMMA, ViewProperties.DELIMITER_SPACE,
-                ViewProperties.DELIMITER_COLON,
-                ViewProperties.DELIMITER_SEMI_COLON };
+        String[] delimiterChoices = { ViewProperties.DELIMITER_TAB, ViewProperties.DELIMITER_COMMA,
+                ViewProperties.DELIMITER_SPACE, ViewProperties.DELIMITER_COLON, ViewProperties.DELIMITER_SEMI_COLON };
         delimiterChoice = new JComboBox(delimiterChoices);
         delimiterChoice.setSelectedItem(ViewProperties.getDataDelimiter());
-        
-        String[] imageOriginChoices = { 
-                ViewProperties.ORIGIN_UL,
-                ViewProperties.ORIGIN_LL,
-                ViewProperties.ORIGIN_UR,
+
+        String[] imageOriginChoices = { ViewProperties.ORIGIN_UL, ViewProperties.ORIGIN_LL, ViewProperties.ORIGIN_UR,
                 ViewProperties.ORIGIN_LR };
         imageOriginChoice = new JComboBox(imageOriginChoices);
         imageOriginChoice.setSelectedItem(ViewProperties.getImageOrigin());
 
-        //-----For the feature:To display groups/attributes in creation order
-        //        String[] displayIndexChoices = {"alphabetical", "creation" };
-        //        displayIndexChoice = new JComboBox(displayIndexChoices);
-        //        displayIndexChoice.setSelectedItem(ViewProperties.getIndexType());
-
         JPanel centerP = new JPanel();
-        centerP.setLayout(new GridLayout(8, 1, 10, 10));
+        GridBagConstraints c = new GridBagConstraints();
+        // natural height, maximum width
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0.5;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        centerP.setLayout(new GridBagLayout());
         centerP.setBorder(new SoftBevelBorder(BevelBorder.LOWERED));
 
         JPanel p0 = new JPanel();
         p0.setLayout(new BorderLayout());
-        p0.add(checkCurrentUserDir = new JCheckBox(
-                "\"Current Working Directory\" or", false), BorderLayout.WEST);
+        p0.add(checkCurrentUserDir = new JCheckBox("\"Current Working Directory\" or", false), BorderLayout.WEST);
         checkCurrentUserDir.addActionListener(this);
         checkCurrentUserDir.setActionCommand("Set current dir to user.dir");
         p0.add(workField = new JTextField(workDir), BorderLayout.CENTER);
@@ -253,13 +253,14 @@ public class UserOptionsDialog extends JDialog implements ActionListener {
         TitledBorder tborder = new TitledBorder("Default Working Directory");
         tborder.setTitleColor(Color.darkGray);
         p0.setBorder(tborder);
-        centerP.add(p0);
+        c.gridx = 0;
+        c.gridy = 0;
+        centerP.add(p0, c);
 
         p0 = new JPanel();
         p0.setLayout(new BorderLayout());
         p0.add(new JLabel("User's Guide:  "), BorderLayout.WEST);
-        p0.add(UGField = new JTextField(ViewProperties.getUsersGuide()),
-                BorderLayout.CENTER);
+        p0.add(UGField = new JTextField(ViewProperties.getUsersGuide()), BorderLayout.CENTER);
         b = new JButton("Browse...");
         b.setActionCommand("Browse UG");
         b.addActionListener(this);
@@ -267,27 +268,25 @@ public class UserOptionsDialog extends JDialog implements ActionListener {
         tborder = new TitledBorder("Help Document");
         tborder.setTitleColor(Color.darkGray);
         p0.setBorder(tborder);
-        centerP.add(p0);
+        c.gridx = 0;
+        c.gridy = 1;
+        centerP.add(p0, c);
 
         p0 = new JPanel();
-        p0.setLayout(new GridLayout(1, 2, 8, 8));
+        p0.setLayout(new GridLayout(1, 3, 8, 8));
 
         JPanel p00 = new JPanel();
         p00.setLayout(new BorderLayout());
         p00.add(new JLabel("Extension: "), BorderLayout.WEST);
-        p00
-        .add(fileExtField = new JTextField(ViewProperties
-                .getFileExtension()), BorderLayout.CENTER);
+        p00.add(fileExtField = new JTextField(ViewProperties.getFileExtension()), BorderLayout.CENTER);
         tborder = new TitledBorder("File Extension");
         tborder.setTitleColor(Color.darkGray);
         p00.setBorder(tborder);
 
         JPanel p01 = new JPanel();
         p01.setLayout(new GridLayout(1, 2, 8, 8));
-        p01.add(checkReadOnly = new JRadioButton("Read Only", ViewProperties
-                .isReadOnly()));
-        JRadioButton rw = new JRadioButton("Read/Write", !ViewProperties
-                .isReadOnly());
+        p01.add(checkReadOnly = new JRadioButton("Read Only", ViewProperties.isReadOnly()));
+        JRadioButton rw = new JRadioButton("Read/Write", !ViewProperties.isReadOnly());
         p01.add(rw);
         ButtonGroup bgrp = new ButtonGroup();
         bgrp.add(checkReadOnly);
@@ -295,10 +294,25 @@ public class UserOptionsDialog extends JDialog implements ActionListener {
         tborder = new TitledBorder("Default File Access Mode");
         tborder.setTitleColor(Color.darkGray);
         p01.setBorder(tborder);
+        
+        JPanel p02 = new JPanel();
+        p02.setLayout(new GridLayout(1, 2, 8, 8));
+        p02.add(checkLibVersion = new JRadioButton("Earliest", ViewProperties.isEarlyLib()));
+        JRadioButton latestLib = new JRadioButton("Latest", !ViewProperties.isReadOnly());
+        p02.add(latestLib);
+        bgrp = new ButtonGroup();
+        bgrp.add(checkLibVersion);
+        bgrp.add(latestLib);
+        tborder = new TitledBorder("Default Lib Version");
+        tborder.setTitleColor(Color.darkGray);
+        p02.setBorder(tborder);
 
         p0.add(p01);
         p0.add(p00);
-        centerP.add(p0);
+        p0.add(p02);
+        c.gridx = 0;
+        c.gridy = 2;
+        centerP.add(p0, c);
 
         p0 = new JPanel();
         p0.setLayout(new GridLayout(1, 2, 8, 8));
@@ -315,7 +329,9 @@ public class UserOptionsDialog extends JDialog implements ActionListener {
         tborder = new TitledBorder("Text Font");
         tborder.setTitleColor(Color.darkGray);
         p0.setBorder(tborder);
-        centerP.add(p0);
+        c.gridx = 0;
+        c.gridy = 3;
+        centerP.add(p0, c);
 
         p0 = new JPanel();
         p0.setLayout(new GridLayout(1, 4, 8, 8));
@@ -341,11 +357,13 @@ public class UserOptionsDialog extends JDialog implements ActionListener {
         p00.add(new JLabel("Image Origin:"), BorderLayout.WEST);
         p00.add(imageOriginChoice, BorderLayout.CENTER);
         p0.add(p00);
-        
+
         tborder = new TitledBorder("Image");
         tborder.setTitleColor(Color.darkGray);
         p0.setBorder(tborder);
-        centerP.add(p0);
+        c.gridx = 0;
+        c.gridy = 4;
+        centerP.add(p0, c);
 
         p0 = new JPanel();
         p0.setLayout(new GridLayout(1, 3, 20, 8));
@@ -365,14 +383,14 @@ public class UserOptionsDialog extends JDialog implements ActionListener {
 
         p00 = new JPanel();
         p00.setLayout(new BorderLayout());
-        
+
         String[] indexBaseChoices = { "0-based", "1-based" };
         indexBaseChoice = new JComboBox(indexBaseChoices);
         if (ViewProperties.isIndexBase1())
-        	indexBaseChoice.setSelectedIndex(1);
+            indexBaseChoice.setSelectedIndex(1);
         else
-        	indexBaseChoice.setSelectedIndex(0);
-        
+            indexBaseChoice.setSelectedIndex(0);
+
         p00.add(new JLabel("Index Base: "), BorderLayout.WEST);
         p00.add(indexBaseChoice, BorderLayout.CENTER);
         p0.add(p00);
@@ -386,44 +404,88 @@ public class UserOptionsDialog extends JDialog implements ActionListener {
         tborder = new TitledBorder("Data");
         tborder.setTitleColor(Color.darkGray);
         p0.setBorder(tborder);
-        centerP.add(p0);
+        c.gridx = 0;
+        c.gridy = 5;
+        centerP.add(p0, c);
 
         p0 = new JPanel();
-        p0.setLayout(new GridLayout(1, 2, 8, 8));
-        p00 = new JPanel();
-        p00.setLayout(new BorderLayout());
-        p00.add(new JLabel("Max Members: "), BorderLayout.WEST);
-
-        p00.add(maxMemberField = new JTextField(String.valueOf(ViewProperties
-                .getMaxMembers())), BorderLayout.CENTER);
-        p0.add(p00);
+        p0.setLayout(new GridLayout(1, 3, 8, 8));
+        
+        int nMax = ViewProperties.getMaxMembers();
+        checkReadAll = new JRadioButton("Open All", (nMax<=0) || (nMax==Integer.MAX_VALUE));
+        checkReadAll.addItemListener(this);
+        p0.add(checkReadAll);
+        
         p00 = new JPanel();
         p00.setLayout(new BorderLayout());
         p00.add(new JLabel("Start Member: "), BorderLayout.WEST);
-        p00.add(startMemberField = new JTextField(String.valueOf(ViewProperties
-                .getStartMembers())), BorderLayout.CENTER);
+        p00.add(startMemberField = new JTextField(String.valueOf(ViewProperties.getStartMembers())),
+                BorderLayout.CENTER);
         p0.add(p00);
-        tborder = new TitledBorder(
-        "Max Number of Members to Load in Each Group");
+
+        p00 = new JPanel();
+        p00.setLayout(new BorderLayout());
+        p00.add(new JLabel("Member Count: "), BorderLayout.WEST);
+        p00.add(maxMemberField = new JTextField(String.valueOf(ViewProperties.getMaxMembers())), BorderLayout.CENTER);
+        p0.add(p00);
+
+      	startMemberField.setEnabled(!checkReadAll.isSelected());
+       	maxMemberField.setEnabled(!checkReadAll.isSelected());
+        
+        tborder = new TitledBorder("Objects to Open");
         tborder.setTitleColor(Color.darkGray);
         p0.setBorder(tborder);
-        centerP.add(p0);
+        c.gridx = 0;
+        c.gridy = 6;
+        centerP.add(p0, c);
 
-        //-----For the feature:To display groups/attributes in creation order
-        //        p0 = new JPanel();
-        //        p0.setLayout(new BorderLayout());
-        //        p0.add(new JLabel("Display Index order:  "), BorderLayout.WEST);
-        //        p0.add(displayIndexChoice, BorderLayout.CENTER);
-        //        tborder = new TitledBorder("Display order of members");
-        //        tborder.setTitleColor(Color.darkGray);
-        //        p0.setBorder(tborder);
-        //        centerP.add(p0);
+        p0 = new JPanel();
+        p0.setLayout(new GridLayout(1, 2, 8, 8));
+
+        JPanel pType = new JPanel();
+        pType.setLayout(new GridLayout(1, 2, 8, 8));
+        checkIndexType = new JRadioButton("By Name", indexType.compareTo("H5_INDEX_NAME") == 0);
+        pType.add(checkIndexType);
+        JRadioButton checkIndexCreateOrder = new JRadioButton("By Creation Order",
+                indexType.compareTo("H5_INDEX_CRT_ORDER") == 0);
+        pType.add(checkIndexCreateOrder);
+        ButtonGroup bTypegrp = new ButtonGroup();
+        bTypegrp.add(checkIndexType);
+        bTypegrp.add(checkIndexCreateOrder);
+        tborder = new TitledBorder("Indexing Type");
+        tborder.setTitleColor(Color.darkGray);
+        pType.setBorder(tborder);
+        p0.add(pType);
+
+        JPanel pOrder = new JPanel();
+        pOrder.setLayout(new GridLayout(1, 3, 8, 8));
+        checkIndexOrder = new JRadioButton("Increments", indexOrder.compareTo("H5_ITER_INC") == 0);
+        pOrder.add(checkIndexOrder);
+        JRadioButton checkIndexDecrement = new JRadioButton("Decrements", indexOrder.compareTo("H5_ITER_DEC") == 0);
+        pOrder.add(checkIndexDecrement);
+        checkIndexNative = new JRadioButton("Native", indexOrder.compareTo("H5_ITER_NATIVE") == 0);
+        pOrder.add(checkIndexNative);
+        ButtonGroup bOrdergrp = new ButtonGroup();
+        bOrdergrp.add(checkIndexOrder);
+        bOrdergrp.add(checkIndexDecrement);
+        bOrdergrp.add(checkIndexNative);
+        tborder = new TitledBorder("Indexing Order");
+        tborder.setTitleColor(Color.darkGray);
+        pOrder.setBorder(tborder);
+        p0.add(pOrder);
+
+        tborder = new TitledBorder("Display Indexing Options");
+        tborder.setTitleColor(Color.darkGray);
+        p0.setBorder(tborder);
+        c.gridx = 0;
+        c.gridy = 7;
+        centerP.add(p0, c);
 
         if (workDir.equals(System.getProperty("user.dir"))) {
-        	checkCurrentUserDir.setSelected(true);
-        	workField.setEnabled(false);
+            checkCurrentUserDir.setSelected(true);
+            workField.setEnabled(false);
         }
-        
+
         return centerP;
     }
 
@@ -566,8 +628,7 @@ public class UserOptionsDialog extends JDialog implements ActionListener {
             setVisible(false);
         }
         else if (cmd.equals("Set current dir to user.dir")) {
-            boolean isCheckCurrentUserDirSelected = checkCurrentUserDir
-                    .isSelected();
+            boolean isCheckCurrentUserDirSelected = checkCurrentUserDir.isSelected();
             workField.setEnabled(!isCheckCurrentUserDirSelected);
             currentDirButton.setEnabled(!isCheckCurrentUserDirSelected);
         }
@@ -631,8 +692,7 @@ public class UserOptionsDialog extends JDialog implements ActionListener {
             H4toH5Field.setText(fname);
         }
         else if (cmd.startsWith("Add Module")) {
-            String newModule = JOptionPane.showInputDialog(this,
-                    "Type the full path of the new module:", cmd,
+            String newModule = JOptionPane.showInputDialog(this, "Type the full path of the new module:", cmd,
                     JOptionPane.PLAIN_MESSAGE);
 
             if ((newModule == null) || (newModule.length() < 1)) {
@@ -649,13 +709,8 @@ public class UserOptionsDialog extends JDialog implements ActionListener {
                     ViewProperties.loadExtClass().loadClass(newModule);
                 }
                 catch (ClassNotFoundException ex2) {
-                    JOptionPane
-                            .showMessageDialog(
-                                    this,
-                                    "Cannot find module:\n "
-                                            + newModule
-                                            + "\nPlease check the module name and classpath.",
-                                    "HDFView", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Cannot find module:\n " + newModule
+                            + "\nPlease check the module name and classpath.", "HDFView", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
             }
@@ -664,8 +719,7 @@ public class UserOptionsDialog extends JDialog implements ActionListener {
                 treeViews.add(newModule);
                 choiceTreeView.addItem(newModule);
             }
-            else if (cmd.endsWith("MetadataView")
-                    && !metaDataViews.contains(newModule)) {
+            else if (cmd.endsWith("MetadataView") && !metaDataViews.contains(newModule)) {
                 metaDataViews.add(newModule);
                 choiceMetaDataView.addItem(newModule);
             }
@@ -673,18 +727,15 @@ public class UserOptionsDialog extends JDialog implements ActionListener {
                 textViews.add(newModule);
                 choiceTextView.addItem(newModule);
             }
-            else if (cmd.endsWith("TableView")
-                    && !tableViews.contains(newModule)) {
+            else if (cmd.endsWith("TableView") && !tableViews.contains(newModule)) {
                 tableViews.add(newModule);
                 choiceTableView.addItem(newModule);
             }
-            else if (cmd.endsWith("ImageView")
-                    && !imageViews.contains(newModule)) {
+            else if (cmd.endsWith("ImageView") && !imageViews.contains(newModule)) {
                 imageViews.add(newModule);
                 choiceImageView.addItem(newModule);
             }
-            else if (cmd.endsWith("PaletteView")
-                    && !paletteViews.contains(newModule)) {
+            else if (cmd.endsWith("PaletteView") && !paletteViews.contains(newModule)) {
                 paletteViews.add(newModule);
                 choicePaletteView.addItem(newModule);
             }
@@ -693,14 +744,11 @@ public class UserOptionsDialog extends JDialog implements ActionListener {
             JComboBox theChoice = (JComboBox) source;
 
             if (theChoice.getItemCount() == 1) {
-                JOptionPane.showMessageDialog(this,
-                        "Cannot delete the last module.", cmd,
-                        JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Cannot delete the last module.", cmd, JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            int reply = JOptionPane.showConfirmDialog(this,
-                    "Do you want to delete the selected module?", cmd,
+            int reply = JOptionPane.showConfirmDialog(this, "Do you want to delete the selected module?", cmd,
                     JOptionPane.YES_NO_OPTION);
             if (reply == JOptionPane.NO_OPTION) {
                 return;
@@ -761,22 +809,17 @@ public class UserOptionsDialog extends JDialog implements ActionListener {
                     + "system (which expects 0-255). It uses some statistics on the pixels \n"
                     + "to prevent outliers from throwing off the gain/bias calculations much.\n\n"
                     + "To compute the gain/bias we... \n"
-                    + "Find the mean and std. deviation of the pixels in the image \n"
-                    + "min = mean - 3 * std.dev. \n"
-                    + "max = mean + 3 * std.dev. \n"
-                    + "small fudge factor because this tends to overshoot a bit \n"
-                    + "Stretch to 0-USHRT_MAX \n"
-                    + "        gain = USHRT_MAX / (max-min) \n"
-                    + "        bias = -min \n"
-                    + "\n"
-                    + "To apply the gain/bias to a pixel, use the formula \n"
-                    + "data[i] = (data[i] + bias) * gain \n"
-                    + "\n"
-//                    + "Finally, for auto-ranging the sliders for gain/bias, we do the following \n"
-//                    + "gain_min = 0 \n"
-//                    + "gain_max = gain * 3.0 \n"
-//                    + "bias_min = -fabs(bias) * 3.0 \n"
-//                    + "bias_max = fabs(bias) * 3.0 \n" 
+                    + "Find the mean and std. deviation of the pixels in the image \n" + "min = mean - 3 * std.dev. \n"
+                    + "max = mean + 3 * std.dev. \n" + "small fudge factor because this tends to overshoot a bit \n"
+                    + "Stretch to 0-USHRT_MAX \n" + "        gain = USHRT_MAX / (max-min) \n"
+                    + "        bias = -min \n" + "\n" + "To apply the gain/bias to a pixel, use the formula \n"
+                    + "data[i] = (data[i] + bias) * gain \n" + "\n"
+                    // +
+                    // "Finally, for auto-ranging the sliders for gain/bias, we do the following \n"
+                    // + "gain_min = 0 \n"
+                    // + "gain_max = gain * 3.0 \n"
+                    // + "bias_min = -fabs(bias) * 3.0 \n"
+                    // + "bias_max = fabs(bias) * 3.0 \n"
                     + "\n\n";
             JOptionPane.showMessageDialog(this, msg);
         }
@@ -816,7 +859,7 @@ public class UserOptionsDialog extends JDialog implements ActionListener {
         if (checkCurrentUserDir.isSelected()) {
             workPath = "user.dir";
         }
-        
+
         if ((workPath != null) && (workPath.length() > 0)) {
             workPath = workPath.trim();
             isWorkDirChanged = !workPath.equals(ViewProperties.getWorkDir());
@@ -833,6 +876,11 @@ public class UserOptionsDialog extends JDialog implements ActionListener {
             ViewProperties.setReadOnly(true);
         else
             ViewProperties.setReadOnly(false);
+        
+        if (checkLibVersion.isSelected())
+            ViewProperties.setEarlyLib(true);
+        else
+            ViewProperties.setEarlyLib(false);        
 
         // set font size
         int fsize = 12;
@@ -858,29 +906,42 @@ public class UserOptionsDialog extends JDialog implements ActionListener {
         ViewProperties.setDataDelimiter((String) delimiterChoice.getSelectedItem());
         ViewProperties.setImageOrigin((String) imageOriginChoice.getSelectedItem());
 
-        //------For the feature:To display groups/attributes in creation order
-        //        // set index type
-        //        ViewProperties.setIndexType((String) displayIndexChoice
-        //                .getSelectedItem());
-        try {
-            int maxsize = Integer.parseInt(maxMemberField.getText());
-            ViewProperties.setMaxMembers(maxsize);
-        }
-        catch (Exception ex) {
+        // set index type
+        if (checkIndexType.isSelected())
+            ViewProperties.setIndexType("H5_INDEX_NAME");
+        else
+            ViewProperties.setIndexType("H5_INDEX_CRT_ORDER");
+
+        // set index order
+        if (checkIndexOrder.isSelected())
+            ViewProperties.setIndexOrder("H5_ITER_INC");
+        else if (checkIndexNative.isSelected())
+            ViewProperties.setIndexOrder("H5_ITER_NATIVE");
+        else
+            ViewProperties.setIndexOrder("H5_ITER_DEC");
+
+        if (checkReadAll.isSelected()) {
+        	ViewProperties.setStartMembers(0);
+        	ViewProperties.setMaxMembers(-1);
+        } else {
+            try {
+                int maxsize = Integer.parseInt(maxMemberField.getText());
+                ViewProperties.setMaxMembers(maxsize);
+            }
+            catch (Exception ex) {
+            }
+
+            try {
+                int startsize = Integer.parseInt(startMemberField.getText());
+                ViewProperties.setStartMembers(startsize);
+            }
+            catch (Exception ex) {
+            }
         }
 
-        try {
-            int startsize = Integer.parseInt(startMemberField.getText());
-            ViewProperties.setStartMembers(startsize);
-        }
-        catch (Exception ex) {
-        }
-
-        Vector[] moduleList = { treeViews, metaDataViews, textViews,
-                tableViews, imageViews, paletteViews };
-        JComboBox[] choiceList = { choiceTreeView, choiceMetaDataView,
-                choiceTextView, choiceTableView, choiceImageView,
-                choicePaletteView };
+        Vector[] moduleList = { treeViews, metaDataViews, textViews, tableViews, imageViews, paletteViews };
+        JComboBox[] choiceList = { choiceTreeView, choiceMetaDataView, choiceTextView, choiceTableView,
+                choiceImageView, choicePaletteView };
         for (int i = 0; i < 6; i++) {
             Object theModule = choiceList[i].getSelectedItem();
             moduleList[i].remove(theModule);
@@ -890,11 +951,11 @@ public class UserOptionsDialog extends JDialog implements ActionListener {
         ViewProperties.setAutoContrast(checkAutoContrast.isSelected());
         ViewProperties.setShowImageValue(checkShowValues.isSelected());
         ViewProperties.setConvertEnum(checkConvertEnum.isSelected());
-        
+
         if (indexBaseChoice.getSelectedIndex() == 0)
-        	ViewProperties.setIndexBase1(false);
+            ViewProperties.setIndexBase1(false);
         else
-        	ViewProperties.setIndexBase1(true);
+            ViewProperties.setIndexBase1(true);
     }
 
     public boolean isFontChanged() {
@@ -908,4 +969,15 @@ public class UserOptionsDialog extends JDialog implements ActionListener {
     public boolean isWorkDirChanged() {
         return isWorkDirChanged;
     }
+
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+    	Object source = e.getSource();
+
+    	if (source.equals(checkReadAll)) {
+          	startMemberField.setEnabled(!checkReadAll.isSelected());
+           	maxMemberField.setEnabled(!checkReadAll.isSelected());
+
+    	}
+	}
 }

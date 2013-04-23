@@ -70,7 +70,6 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import ncsa.hdf.object.Dataset;
-import ncsa.hdf.object.Datatype;
 import ncsa.hdf.object.FileFormat;
 import ncsa.hdf.object.HObject;
 import ncsa.hdf.object.ScalarDS;
@@ -172,7 +171,15 @@ public class DefaultTextView extends JInternalFrame implements TextView,
 
         try {
             text = (String[]) dataset.getData();
-        } catch (Exception ex) { text = null; }
+        } 
+        catch (Exception ex) { 
+            JOptionPane.showMessageDialog(
+                    this,
+                    ex,
+                    "TextView:"+getTitle(),
+                    JOptionPane.ERROR_MESSAGE);
+            text = null; 
+        }
 
         if (text == null) {
             viewer.showStatus("Loading text dataset failed - "
@@ -193,11 +200,11 @@ public class DefaultTextView extends JInternalFrame implements TextView,
         
         String colName = "Data selection:   ["+start[0];
         for (int i=1; i<rank; i++) {
-        	colName += ", "+start[i];
+            colName += ", "+start[i];
         }
         colName += "] ~ ["+(start[0]+count[0]-1);
         for (int i=1; i<rank; i++) {
-        	colName += ", "+(start[i]+count[i]-1);
+            colName += ", "+(start[i]+count[i]-1);
         }  
         colName += "]";
 
@@ -276,7 +283,7 @@ public class DefaultTextView extends JInternalFrame implements TextView,
 
             public Object getValueAt(int row, int column)
             {
-            	return text[row];
+                return text[row];
             }
         };
         
@@ -303,6 +310,7 @@ public class DefaultTextView extends JInternalFrame implements TextView,
                 } // if (source instanceof CellEditor)
             }
         };
+        theTable.setName("TextView");
 
         return theTable;
     }

@@ -64,53 +64,49 @@ import ncsa.hdf.object.HObject;
  * @author Peter X. Cao
  * @version 2.4 9/6/2007
  */
-public class NewTableDataDialog extends JDialog implements ActionListener,
-        ItemListener {
-    private static final long serialVersionUID = -6786877503226330821L;
+public class NewTableDataDialog extends JDialog implements ActionListener, ItemListener {
+    private static final long     serialVersionUID = -6786877503226330821L;
 
-    private static final String[] DATATYPE_NAMES = { "byte (8-bit)", // 0
-            "short (16-bit)", // 1
-            "int (32-bit)", // 2
-            "unsigned byte (8-bit)", // 3
-            "unsigned short (16-bit)", // 4
-            "unsigned int (32-bit)", // 5
-            "long (64-bit)", // 6
-            "float", // 7
-            "double", // 8
-            "string", // 9
-            "enum" // 10
+    private static final String[] DATATYPE_NAMES   = { 
+        "byte (8-bit)", // 0
+        "short (16-bit)", // 1
+        "int (32-bit)", // 2
+        "unsigned byte (8-bit)", // 3
+        "unsigned short (16-bit)", // 4
+        "unsigned int (32-bit)", // 5
+        "long (64-bit)", // 6
+        "float", // 7
+        "double", // 8
+        "string", // 9
+        "enum", // 10
+        "unsigned long (64-bit)" // 11
     };
 
-    private FileFormat fileformat;
+    private FileFormat            fileformat;
 
-    private JComboBox parentChoice, nFieldBox, templateChoice;
-
-    private boolean isH5;
+    private JComboBox             parentChoice, nFieldBox, templateChoice;
 
     /** a list of current groups */
-    private Vector groupList, compoundDSList;
+    private Vector<Object>        groupList, compoundDSList;
 
-    private HObject newObject;
+    private HObject               newObject;
 
-    private final Toolkit toolkit;
+    private final Toolkit         toolkit;
 
-    private final DataView dataView;
+    private int                   numberOfMembers;
 
-    private int numberOfMembers;
+    private JTable                table;
 
-    private JTable table;
+    private DefaultTableModel     tableModel;
 
-    private DefaultTableModel tableModel;
+    private RowEditorModel        rowEditorModel;
 
-    private RowEditorModel rowEditorModel;
+    private DefaultCellEditor     cellEditor;
 
-    private DefaultCellEditor cellEditor;
-
-    private JTextField nameField, currentSizeField, maxSizeField,
-            chunkSizeField;
-    private JComboBox compressionLevel, rankChoice, memberTypeChoice;
-    private JCheckBox checkCompression;
-    private JRadioButton checkContinguous, checkChunked;
+    private JTextField            nameField, currentSizeField, maxSizeField, chunkSizeField;
+    private JComboBox             compressionLevel, rankChoice, memberTypeChoice;
+    private JCheckBox             checkCompression;
+    private JRadioButton          checkContinguous, checkChunked;
 
     /**
      * Constructs NewTableDataDialog with specified list of possible parent
@@ -123,23 +119,21 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
      * @param objs
      *            the list of all objects.
      */
-    public NewTableDataDialog(JFrame owner, Group pGroup, List objs) {
+    public NewTableDataDialog(JFrame owner, Group pGroup, List<?> objs) {
         super(owner, "New Compound Dataset...", true);
 
         newObject = null;
-        dataView = null;
         numberOfMembers = 2;
         fileformat = pGroup.getFileFormat();
 
         memberTypeChoice = new JComboBox(DATATYPE_NAMES);
         cellEditor = new DefaultCellEditor(memberTypeChoice);
         rowEditorModel = new RowEditorModel(numberOfMembers, cellEditor);
-        String[] colNames = { "Name", "Datatype",
-                "Array size / String length / Enum names" };
+        String[] colNames = { "Name", "Datatype", "Array size / String length / Enum names" };
         tableModel = new DefaultTableModel(colNames, numberOfMembers);
         table = new JTable(tableModel) {
             private static final long serialVersionUID = 7141605060652738476L;
-            RowEditorModel rm = rowEditorModel;
+            RowEditorModel            rm               = rowEditorModel;
 
             @Override
             public TableCellEditor getCellEditor(int row, int col) {
@@ -152,17 +146,15 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
                 return cellEditor;
             }
         };
+        table.setName("CompoundDataset");
         table.setRowSelectionAllowed(false);
         table.setColumnSelectionAllowed(false);
 
         // set cell height for large fonts
-        int cellRowHeight = Math.max(16, table.getFontMetrics(table.getFont())
-                .getHeight());
+        int cellRowHeight = Math.max(16, table.getFontMetrics(table.getFont()).getHeight());
         table.setRowHeight(cellRowHeight);
 
         toolkit = Toolkit.getDefaultToolkit();
-        isH5 = pGroup.getFileFormat().isThisType(
-                FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5));
 
         parentChoice = new JComboBox();
         String[] memberSizes = new String[100];
@@ -171,16 +163,17 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
         }
 
         nFieldBox = new JComboBox(memberSizes);
+        nFieldBox.setName("numbermembers");
         nFieldBox.setEditable(true);
         nFieldBox.addActionListener(this);
         nFieldBox.setActionCommand("Change number of members");
         nFieldBox.setSelectedItem(String.valueOf(numberOfMembers));
 
-        groupList = new Vector(objs.size());
+        groupList = new Vector<Object>(objs.size());
         Object obj = null;
-        Iterator iterator = objs.iterator();
+        Iterator<?> iterator = objs.iterator();
 
-        compoundDSList = new Vector(objs.size());
+        compoundDSList = new Vector<Object>(objs.size());
 
         while (iterator.hasNext()) {
             obj = iterator.next();
@@ -191,8 +184,7 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
                     parentChoice.addItem(HObject.separator);
                 }
                 else {
-                    parentChoice.addItem(g.getPath() + g.getName()
-                            + HObject.separator);
+                    parentChoice.addItem(g.getPath() + g.getName() + HObject.separator);
                 }
             }
             else if (obj instanceof CompoundDS) {
@@ -201,6 +193,7 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
         }
 
         templateChoice = new JComboBox(compoundDSList);
+        templateChoice.setName("templateChoice");
         templateChoice.setSelectedIndex(-1);
         templateChoice.addItemListener(this);
 
@@ -208,8 +201,7 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
             parentChoice.setSelectedItem(HObject.separator);
         }
         else {
-            parentChoice.setSelectedItem(pGroup.getPath() + pGroup.getName()
-                    + HObject.separator);
+            parentChoice.setSelectedItem(pGroup.getPath() + pGroup.getName() + HObject.separator);
         }
 
         JPanel contentPane = (JPanel) getContentPane();
@@ -220,11 +212,13 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
         contentPane.setPreferredSize(new Dimension(w, h));
 
         JButton okButton = new JButton("   Ok   ");
+        okButton.setName("OK");
         okButton.setActionCommand("Ok");
         okButton.setMnemonic(KeyEvent.VK_O);
         okButton.addActionListener(this);
 
         JButton cancelButton = new JButton("Cancel");
+        cancelButton.setName("Cancel");
         cancelButton.setMnemonic(KeyEvent.VK_C);
         cancelButton.setActionCommand("Cancel");
         cancelButton.addActionListener(this);
@@ -241,6 +235,7 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
         tmpP = new JPanel();
         tmpP.setLayout(new GridLayout(3, 1));
         tmpP.add(nameField = new JTextField());
+        nameField.setName("datasetname");
         tmpP.add(parentChoice);
         tmpP.add(templateChoice);
         namePanel.add(tmpP, BorderLayout.CENTER);
@@ -372,7 +367,6 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
     }
 
     public void actionPerformed(ActionEvent e) {
-        Object source = e.getSource();
         String cmd = e.getActionCommand();
 
         if (cmd.equals("Ok")) {
@@ -380,8 +374,7 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
                 newObject = createCompoundDS();
             }
             catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, ex, getTitle(),
-                        JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, ex, getTitle(), JOptionPane.ERROR_MESSAGE);
             }
 
             if (newObject != null) {
@@ -397,8 +390,7 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
             int n = 0;
 
             try {
-                n = Integer.valueOf((String) nFieldBox.getSelectedItem())
-                        .intValue();
+                n = Integer.valueOf((String) nFieldBox.getSelectedItem()).intValue();
             }
             catch (Exception ex) {
             }
@@ -561,8 +553,7 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
                 int idx = compression.indexOf("GZIP: level = ");
                 int clevel = -1;
                 try {
-                    clevel = Integer.parseInt(compression.substring(idx + 14,
-                            idx + 15));
+                    clevel = Integer.parseInt(compression.substring(idx + 14, idx + 15));
                 }
                 catch (NumberFormatException ex) {
                     clevel = -1;
@@ -585,8 +576,25 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
                 int typeIdx = -1;
                 int tclass = mTypes[i].getDatatypeClass();
                 int tsize = mTypes[i].getDatatypeSize();
+                int tsigned = mTypes[i].getDatatypeSign();
+                if (tclass == Datatype.CLASS_ARRAY) {
+                    tclass = mTypes[i].getBasetype().getDatatypeClass();
+                    tsize = mTypes[i].getBasetype().getDatatypeSize();
+                    tsigned = mTypes[i].getBasetype().getDatatypeSign();
+                }
+                if (tclass == Datatype.CLASS_CHAR) {
+                    if (tsigned == Datatype.SIGN_NONE) {
+                        if (tsize == 1) {
+                            typeIdx = 3;
+                        }
+                    }
+                    else {
+                        if (tsize == 1) {
+                            typeIdx = 0;
+                        }
+                    }
+                }
                 if (tclass == Datatype.CLASS_INTEGER) {
-                    int tsigned = mTypes[i].getDatatypeSign();
                     if (tsigned == Datatype.SIGN_NONE) {
                         if (tsize == 1) {
                             typeIdx = 3;
@@ -596,6 +604,9 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
                         }
                         else if (tsize == 4) {
                             typeIdx = 5;
+                        }
+                        else {
+                            typeIdx = 11;
                         }
                     }
                     else {
@@ -627,7 +638,6 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
                 else if (tclass == Datatype.CLASS_ENUM) {
                     typeIdx = 10;
                 }
-
                 if (typeIdx < 0) {
                     continue;
                 }
@@ -705,60 +715,49 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
             String typeName = (String) table.getValueAt(i, 1);
             Datatype type = null;
             if (DATATYPE_NAMES[0].equals(typeName)) {
-                type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 1,
-                        Datatype.NATIVE, Datatype.NATIVE);
+                type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.NATIVE);
             }
             else if (DATATYPE_NAMES[1].equals(typeName)) {
-                type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 2,
-                        Datatype.NATIVE, Datatype.NATIVE);
+                type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 2, Datatype.NATIVE, Datatype.NATIVE);
             }
             else if (DATATYPE_NAMES[2].equals(typeName)) {
-                type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 4,
-                        Datatype.NATIVE, Datatype.NATIVE);
+                type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.NATIVE);
             }
             else if (DATATYPE_NAMES[3].equals(typeName)) {
-                type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 1,
-                        Datatype.NATIVE, Datatype.SIGN_NONE);
+                type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 1, Datatype.NATIVE, Datatype.SIGN_NONE);
             }
             else if (DATATYPE_NAMES[4].equals(typeName)) {
-                type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 2,
-                        Datatype.NATIVE, Datatype.SIGN_NONE);
+                type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 2, Datatype.NATIVE, Datatype.SIGN_NONE);
             }
             else if (DATATYPE_NAMES[5].equals(typeName)) {
-                type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 4,
-                        Datatype.NATIVE, Datatype.SIGN_NONE);
+                type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 4, Datatype.NATIVE, Datatype.SIGN_NONE);
             }
             else if (DATATYPE_NAMES[6].equals(typeName)) {
-                type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 8,
-                        Datatype.NATIVE, Datatype.NATIVE);
+                type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 8, Datatype.NATIVE, Datatype.NATIVE);
             }
             else if (DATATYPE_NAMES[7].equals(typeName)) {
-                type = fileformat.createDatatype(Datatype.CLASS_FLOAT, 4,
-                        Datatype.NATIVE, Datatype.NATIVE);
+                type = fileformat.createDatatype(Datatype.CLASS_FLOAT, 4, Datatype.NATIVE, Datatype.NATIVE);
             }
             else if (DATATYPE_NAMES[8].equals(typeName)) {
-                type = fileformat.createDatatype(Datatype.CLASS_FLOAT, 8,
-                        Datatype.NATIVE, Datatype.NATIVE);
+                type = fileformat.createDatatype(Datatype.CLASS_FLOAT, 8, Datatype.NATIVE, Datatype.NATIVE);
             }
             else if (DATATYPE_NAMES[9].equals(typeName)) {
-                type = fileformat.createDatatype(Datatype.CLASS_STRING, order,
-                        Datatype.NATIVE, Datatype.NATIVE);
+                type = fileformat.createDatatype(Datatype.CLASS_STRING, order, Datatype.NATIVE, Datatype.NATIVE);
             }
-            else if (DATATYPE_NAMES[10].equals(typeName)) // enum
-            {
-                type = fileformat.createDatatype(Datatype.CLASS_ENUM, 4,
-                        Datatype.NATIVE, Datatype.NATIVE);
-                if ((orderStr == null) || (orderStr.length() < 1)
-                        || orderStr.endsWith("...")) {
+            else if (DATATYPE_NAMES[10].equals(typeName)) { // enum
+                type = fileformat.createDatatype(Datatype.CLASS_ENUM, 4, Datatype.NATIVE, Datatype.NATIVE);
+                if ((orderStr == null) || (orderStr.length() < 1) || orderStr.endsWith("...")) {
                     toolkit.beep();
-                    JOptionPane.showMessageDialog(this,
-                            "Invalid member values: " + orderStr, getTitle(),
+                    JOptionPane.showMessageDialog(this, "Invalid member values: " + orderStr, getTitle(),
                             JOptionPane.ERROR_MESSAGE);
                     return null;
                 }
                 else {
                     type.setEnumMembers(orderStr);
                 }
+            }
+            else if (DATATYPE_NAMES[11].equals(typeName)) {
+                type = fileformat.createDatatype(Datatype.CLASS_INTEGER, 8, Datatype.NATIVE, Datatype.SIGN_NONE);
             }
             else {
                 throw new IllegalArgumentException("Invalid data type.");
@@ -767,13 +766,11 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
         } // for (int i=0; i<n; i++)
 
         rank = rankChoice.getSelectedIndex() + 1;
-        StringTokenizer st = new StringTokenizer(currentSizeField.getText(),
-                "x");
+        StringTokenizer st = new StringTokenizer(currentSizeField.getText(), "x");
         if (st.countTokens() < rank) {
             toolkit.beep();
-            JOptionPane.showMessageDialog(this,
-                    "Number of values in the current dimension size is less than "
-                            + rank, getTitle(), JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Number of values in the current dimension size is less than " + rank,
+                    getTitle(), JOptionPane.ERROR_MESSAGE);
             return null;
         }
 
@@ -787,17 +784,15 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
             }
             catch (NumberFormatException ex) {
                 toolkit.beep();
-                JOptionPane.showMessageDialog(this, "Invalid dimension size: "
-                        + currentSizeField.getText(), getTitle(),
-                        JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Invalid dimension size: " + currentSizeField.getText(),
+                        getTitle(), JOptionPane.ERROR_MESSAGE);
                 return null;
             }
 
             if (l <= 0) {
                 toolkit.beep();
-                JOptionPane.showMessageDialog(this,
-                        "Dimension size must be greater than zero.",
-                        getTitle(), JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Dimension size must be greater than zero.", getTitle(),
+                        JOptionPane.ERROR_MESSAGE);
                 return null;
             }
 
@@ -807,9 +802,8 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
         st = new StringTokenizer(maxSizeField.getText(), "x");
         if (st.countTokens() < rank) {
             toolkit.beep();
-            JOptionPane.showMessageDialog(this,
-                    "Number of values in the max dimension size is less than "
-                            + rank, getTitle(), JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Number of values in the max dimension size is less than " + rank,
+                    getTitle(), JOptionPane.ERROR_MESSAGE);
             return null;
         }
 
@@ -822,17 +816,14 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
             }
             catch (NumberFormatException ex) {
                 toolkit.beep();
-                JOptionPane
-                        .showMessageDialog(this, "Invalid max dimension size: "
-                                + maxSizeField.getText(), getTitle(),
-                                JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Invalid max dimension size: " + maxSizeField.getText(),
+                        getTitle(), JOptionPane.ERROR_MESSAGE);
                 return null;
             }
 
             if (l < -1) {
                 toolkit.beep();
-                JOptionPane.showMessageDialog(this,
-                        "Dimension size cannot be less than -1.", getTitle(),
+                JOptionPane.showMessageDialog(this, "Dimension size cannot be less than -1.", getTitle(),
                         JOptionPane.ERROR_MESSAGE);
                 return null;
             }
@@ -848,9 +839,8 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
             st = new StringTokenizer(chunkSizeField.getText(), "x");
             if (st.countTokens() < rank) {
                 toolkit.beep();
-                JOptionPane.showMessageDialog(this,
-                        "Number of values in the chunk size is less than "
-                                + rank, getTitle(), JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Number of values in the chunk size is less than " + rank,
+                        getTitle(), JOptionPane.ERROR_MESSAGE);
                 return null;
             }
 
@@ -864,17 +854,14 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
                 }
                 catch (NumberFormatException ex) {
                     toolkit.beep();
-                    JOptionPane.showMessageDialog(this,
-                            "Invalid chunk dimension size: "
-                                    + chunkSizeField.getText(), getTitle(),
-                            JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Invalid chunk dimension size: " + chunkSizeField.getText(),
+                            getTitle(), JOptionPane.ERROR_MESSAGE);
                     return null;
                 }
 
                 if (l < 1) {
                     toolkit.beep();
-                    JOptionPane.showMessageDialog(this,
-                            "Chunk size cannot be less than 1.", getTitle(),
+                    JOptionPane.showMessageDialog(this, "Chunk size cannot be less than 1.", getTitle(),
                             JOptionPane.ERROR_MESSAGE);
                     return null;
                 }
@@ -890,13 +877,9 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
 
             if (tchunksize >= tdimsize) {
                 toolkit.beep();
-                int status = JOptionPane
-                        .showConfirmDialog(
-                                this,
-                                "Chunk size is equal/greater than the current size. "
-                                        + "\nAre you sure you want to set chunk size to "
-                                        + chunkSizeField.getText() + "?",
-                                getTitle(), JOptionPane.YES_NO_OPTION);
+                int status = JOptionPane.showConfirmDialog(this, "Chunk size is equal/greater than the current size. "
+                        + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?", getTitle(),
+                        JOptionPane.YES_NO_OPTION);
                 if (status == JOptionPane.NO_OPTION) {
                     return null;
                 }
@@ -904,12 +887,9 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
 
             if (tchunksize == 1) {
                 toolkit.beep();
-                int status = JOptionPane
-                        .showConfirmDialog(
-                                this,
-                                "Chunk size is one, which may cause large memory overhead for large dataset."
-                                        + "\nAre you sure you want to set chunk size to "
-                                        + chunkSizeField.getText() + "?",
+                int status = JOptionPane.showConfirmDialog(this,
+                        "Chunk size is one, which may cause large memory overhead for large dataset."
+                                + "\nAre you sure you want to set chunk size to " + chunkSizeField.getText() + "?",
                                 getTitle(), JOptionPane.YES_NO_OPTION);
                 if (status == JOptionPane.NO_OPTION) {
                     return null;
@@ -924,12 +904,12 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
         }
 
         if (checkChunked.isSelected()) {
-            obj = fileformat.createCompoundDS(dname, pgroup, dims, maxdims,
-                    chunks, gzip, mNames, mDatatypes, mOrders, null);
+            obj = fileformat.createCompoundDS(dname, pgroup, dims, maxdims, chunks, gzip, mNames, mDatatypes, mOrders,
+                    null);
         }
         else {
-            obj = fileformat.createCompoundDS(dname, pgroup, dims, maxdims,
-                    null, -1, mNames, mDatatypes, mOrders, null);
+            obj = fileformat
+                    .createCompoundDS(dname, pgroup, dims, maxdims, null, -1, mNames, mDatatypes, mOrders, null);
         }
 
         return obj;
@@ -946,15 +926,15 @@ public class NewTableDataDialog extends JDialog implements ActionListener,
     }
 
     private class RowEditorModel {
-        private Hashtable data;
+        private Hashtable<Integer, TableCellEditor> data;
 
         public RowEditorModel() {
-            data = new Hashtable();
+            data = new Hashtable<Integer, TableCellEditor>();
         }
 
         // all rows has the same cell editor
         public RowEditorModel(int rows, TableCellEditor ed) {
-            data = new Hashtable();
+            data = new Hashtable<Integer, TableCellEditor>();
             for (int i = 0; i < rows; i++) {
                 data.put(new Integer(i), ed);
             }
