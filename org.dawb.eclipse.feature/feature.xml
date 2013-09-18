@@ -129,7 +129,7 @@ This Agreement is governed by the laws of the State of New York and the intellec
          id="org.eclipse.emf.common.ui"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="2.7.0.v20130125-0826"
          unpack="false"/>
 
    <plugin
