@@ -1115,7 +1115,7 @@ public class H5File extends FileFormat {
         HObject obj = null;
 
         if ((path == null) || (path.length() <= 0)) {
-            System.err.println("(path == null) || (path.length() <= 0)");
+            //System.err.println("(path == null) || (path.length() <= 0)");
             return null;
         }
 
