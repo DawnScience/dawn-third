@@ -437,7 +437,7 @@ org.apache.commons.math.random:
          unpack="false"/>
 
    <plugin
-         id="com.springsource.org.apache.commons.lang"
+         id="org.apache.commons.lang"
          download-size="0"
          install-size="0"
          version="0.0.0"
