@@ -402,10 +402,10 @@ org.apache.commons.math.random:
       <import plugin="org.eclipse.ui.editors"/>
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="com.springsource.org.apache.commons.lang"/>
-      <import plugin="com.springsource.slf4j.org.apache.commons.logging"/>
       <import plugin="org.eclipse.core.commands"/>
       <import plugin="org.eclipse.jface"/>
       <import plugin="org.eclipse.swt"/>
+      <import plugin="jcl.over.slf4j"/>
    </requires>
 
    <plugin
