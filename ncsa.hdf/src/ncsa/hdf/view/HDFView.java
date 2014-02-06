@@ -100,6 +100,8 @@ import ncsa.hdf.object.ScalarDS;
 public class HDFView extends JFrame implements ViewManager, ActionListener, ChangeListener, DropTargetListener {
     private static final long     serialVersionUID = 2211017444445918998L;
 
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HDFView.class);
+
     /** a list of tree view implementation. */
     private static List<String>   treeViews;
 
@@ -123,7 +125,7 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
 
     private static final String   aboutHDFView     = "HDF Viewer, " + "Version " + ViewProperties.VERSION + "\n"
             + "For " + System.getProperty("os.name") + "\n\n"
-            + "Copyright " + '\u00a9' + " 2006-2012 The HDF Group.\n"
+            + "Copyright " + '\u00a9' + " 2006-2013 The HDF Group.\n"
             + "All rights reserved.";
 
     private static final String   JAVA_COMPILER    = "jdk 1.7";
@@ -173,7 +175,7 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
     /** the string buffer holding the status message */
     private final StringBuffer    message;
 
-    /** the string buffer holding the meadata information */
+    /** the string buffer holding the metadata information */
     private final StringBuffer    metadata;
 
     private final Toolkit         toolkit;
@@ -211,8 +213,9 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
         this.setName("hdfview");
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
+        
         // set the module class jar files to the class path
+    	log.debug("root is {}", root);
 
         rootDir = root;
         currentFile = null;
@@ -233,7 +236,7 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
             props.load();
         }
         catch (Exception ex) {
-            ;
+        	log.debug("failed to load ViewProperties from {}", rootDir);
         }
 
         // recentFiles = ViewProperties.getMRF();
@@ -241,6 +244,7 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
         if (currentDir == null) {
             currentDir = System.getProperty("user.dir");
         }
+        log.info("CurrentDir is {}", currentDir);
 
         treeViews = ViewProperties.getTreeViewList();
         metaDataViews = ViewProperties.getMetaDataViewList();
@@ -333,7 +337,7 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
             }
         }
         catch (Exception ex) {
-            ;
+        	log.debug("Failed to load Font properties");
         }
 
         // need to call pack() before open any file so that
@@ -361,6 +365,7 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
                         urlBar.setSelectedIndex(0);
                     }
                     catch (Exception ex2) {
+                    	log.info("Failed to update urlBar with {}", currentFile);
                     }
                 }
                 catch (Exception ex) {
@@ -370,6 +375,7 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
             else {
                 currentDir = theFile.getAbsolutePath();
             }
+            log.info("CurrentDir is {}", currentDir);
         }
 
         if (FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4) == null) {
@@ -467,6 +473,7 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
             this.setIconImage(((ImageIcon) ViewProperties.getHdfIcon()).getImage());
         }
         catch (Exception ex) {
+        	log.debug("Failed to getImage");
         }
 
         this.setJMenuBar(menuBar = createMenuBar());
@@ -511,6 +518,8 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
         mainPane.add(splitPane, BorderLayout.CENTER);
         mainPane.setPreferredSize(d);
         mainPane.setName("mainpane");
+        
+        log.info("MainWindow created");
     }
 
     private JMenuBar createMenuBar() {
@@ -739,6 +748,7 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
         item.addActionListener(this);
         menu.add(item);
 
+        log.info("MenuBar created");
         return mbar;
     }
 
@@ -795,6 +805,7 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
             button.setEnabled(false);
         }
 
+        log.info("ToolBar created");
         return tbar;
     }
 
@@ -982,6 +993,8 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
                 catch (Throwable ex2) {
                     String msg = "Failed to open file " + filename + "\n" + ex2;
                     toolkit.beep();
+                    currentFile = null;
+                    urlBar.setSelectedIndex(-1);
                     JOptionPane.showMessageDialog(this, msg, getTitle(), JOptionPane.ERROR_MESSAGE);
                 }
             }
@@ -1300,7 +1313,7 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
                     tmpFile = new File(ugPath);
                     if (!(tmpFile.exists())) {
                         // use the online copy
-                        ugPath = "http://www.hdfgroup.org/hdf-java-html/hdfview/UsersGuide/index.html";
+                        ugPath = "http://www.hdfgroup.org/products/java/hdf-java-html/hdfview/UsersGuide/index.html";
                     }
                     ViewProperties.setUsersGuide(ugPath);
                 }
@@ -1410,7 +1423,6 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
             treeView.closeFile(theFile);
         }
         catch (Exception ex) {
-            ;
         }
         theFile = null;
         attributeArea.setText("");
@@ -1470,6 +1482,7 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
                         urlBar.setSelectedIndex(0);
                     }
                     catch (Exception ex) {
+                    	log.debug("Unable to update urlBar:", ex);
                     }
 
                 }
@@ -1542,6 +1555,7 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
         if (dataView == null) {
             return;
         }
+        log.trace("addDataView: start");
 
         if (!(dataView instanceof JInternalFrame)) {
             toolkit.beep();
@@ -1574,6 +1588,7 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
 
             return;
         }
+        log.trace("addDataView: not already displayed");
 
         JInternalFrame frame = (JInternalFrame) dataView;
         contentPane.add(frame);
@@ -1595,11 +1610,9 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
 
         }
         String fullPath = dataObject.getPath() + dataObject.getName();
-        String cmd = "SHOW WINDOW" + dataObject.getFID() + fullPath; // make the
-        // window
-        // to be
-        // uniquie:
-        // fid+path
+        String cmd = "SHOW WINDOW" + dataObject.getFID() + fullPath; 
+        // make the window to be unique: fid+path
+        log.trace("addDataView: cmd={}", cmd);
 
         frame.setName(cmd); // data windows are identified by full path the file
         // id
@@ -1630,6 +1643,7 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
 
         Dimension d = contentPane.getSize();
         frame.setSize(d.width - 60, d.height - 60);
+        log.trace("addDataView: finish");
 
         frame.show();
     }
@@ -1696,6 +1710,7 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
             return;
         }
 
+        log.trace("showMetaData: start");
         metadata.setLength(0);
         metadata.append(obj.getName());
 
@@ -1712,15 +1727,18 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
         metadata.append(")");
 
         if (obj instanceof Group) {
+            log.trace("showMetaData: instanceof Group");
             Group g = (Group) obj;
             metadata.append("\n    Group size = ");
             metadata.append(g.getMemberList().size());
         }
         else if (obj instanceof Dataset) {
+            log.trace("showMetaData: instanceof Dataset");
             Dataset d = (Dataset) obj;
             if (d.getRank() <= 0) {
                 d.init();
             }
+            log.trace("showMetaData: inited");
 
             metadata.append("\n    ");
             if (d instanceof ScalarDS) {
@@ -1742,13 +1760,17 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
                 }
             }
         } // else if (obj instanceof Dataset)
+        else {
+        	log.debug("obj not instanceof Group or Dataset");
+        }
 
         List<?> attrList = null;
         try {
+            log.trace("showMetaData: getMetadata");
             attrList = obj.getMetadata();
         }
         catch (Exception ex) {
-            ex.printStackTrace();
+        	log.debug("getMetadata failure: ", ex);
         }
 
         if (attrList == null) {
@@ -1756,10 +1778,12 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
         }
         else {
             int n = attrList.size();
+            log.trace("showMetaData: append {} attributes", n);
             metadata.append("\n    Number of attributes = ");
             metadata.append(n);
 
             for (int i = 0; i < n; i++) {
+                log.trace("showMetaData: append Object[{}]", i);
                 Object attrObj = attrList.get(i);
                 if (!(attrObj instanceof Attribute)) {
                     continue;
@@ -1774,6 +1798,7 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
 
         attributeArea.setText(metadata.toString());
         attributeArea.setCaretPosition(0);
+        log.trace("showMetaData: finish");
     }
 
     /**
@@ -2000,6 +2025,7 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
                 out.close();
             }
             catch (Exception ex2) {
+            	log.debug("remote file:", ex2);
             }
             return null;
         }
@@ -2013,17 +2039,20 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
             }
         }
         catch (Exception ex) {
+        	log.debug("remote file:", ex);
         }
 
         try {
             in.close();
         }
         catch (Exception ex2) {
+        	log.debug("remote file:", ex2);
         }
         try {
             out.close();
         }
         catch (Exception ex2) {
+        	log.debug("remote file:", ex2);
         }
 
         setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.DEFAULT_CURSOR));
@@ -2123,21 +2152,31 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
      * </pre>
      */
     public static void main(String args[]) {
-        try {
-            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-        }
-        catch (Exception e) {
-        }
+//        try {
+//            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+//        }
+//        catch (Exception e) {
+//        }
 
+//    	try {
+//    		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+//    	}
+//    	catch (Exception e) {
+//    	}
+
+    	
         String rootDir = System.getProperty("user.dir");
         File tmpFile = null;
-        int i = 0, j = -1, W = 0, H = 0, X = 0, Y = 0;
+        int i = 0;
+        int j = args.length;
+        int W = 0, H = 0, X = 0, Y = 0;
 
         for (i = 0; i < args.length; i++) {
             if ("-root".equalsIgnoreCase(args[i])) {
+                j--;
                 try {
+                    j--;
                     tmpFile = new File(args[++i]);
-                    j = i + 1;
 
                     if (tmpFile.isDirectory()) {
                         rootDir = tmpFile.getPath();
@@ -2150,10 +2189,11 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
                 }
             }
             else if ("-g".equalsIgnoreCase(args[i]) || "-geometry".equalsIgnoreCase(args[i])) {
+                j--;
                 // -geometry WIDTHxHEIGHT+XOFF+YOFF
                 try {
                     String geom = args[++i];
-                    j = i + 1;
+                    j--;
 
                     int idx = 0;
                     int idx0 = geom.lastIndexOf('-');
@@ -2199,7 +2239,7 @@ public class HDFView extends JFrame implements ViewManager, ActionListener, Chan
         Vector<File> flist = new Vector<File>();
         tmpFile = null;
         if (j >= 0) {
-            for (i = j; i < args.length; i++) {
+            for (i=args.length-j; i < args.length; i++) {
                 tmpFile = new File(args[i]);
                 if (tmpFile.exists() && (tmpFile.isFile() || tmpFile.isDirectory())) {
                     flist.add(new File(tmpFile.getAbsolutePath()));

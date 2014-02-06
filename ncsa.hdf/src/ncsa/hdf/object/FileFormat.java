@@ -61,6 +61,8 @@ public abstract class FileFormat extends File {
      */
     private static final long                    serialVersionUID   = -4700692313888420796L;
 
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileFormat.class);
+
     /**
      * File first time access flag for open file. With this access flag, added
      * to the regular value, indicates this file has no existing state.
@@ -155,7 +157,7 @@ public abstract class FileFormat extends File {
      * @see #getFileFormats()
      * @see #removeFileFormat(String)
      */
-    private static final Map<String, FileFormat> FileList           = new Hashtable<String, FileFormat>(10);
+    private static final Map<String, FileFormat> FileList = new Hashtable<String, FileFormat>(10);
 
     /**
      * A list of file extensions for the supported file formats. This list of
@@ -163,7 +165,7 @@ public abstract class FileFormat extends File {
      * FileList, but is provided as a convenience for applications who may
      * choose to process only those files with recognized extensions.
      */
-    private static String                        extensions         = "hdf, h4, hdf5, h5";
+    private static String extensions         = "hdf, h4, hdf5, h5, nc, fits";
 
     /***************************************************************************
      * Sizing information and class metadata
@@ -208,7 +210,7 @@ public abstract class FileFormat extends File {
      * list.
      */
     static {
-        // add default HDF4 modules
+        // add HDF4 to default modules
         if (FileFormat.getFileFormat(FILE_TYPE_HDF4) == null) {
             try {
                 Class fileclass = Class.forName("ncsa.hdf.object.h4.H4File");
@@ -218,11 +220,11 @@ public abstract class FileFormat extends File {
                 }
             }
             catch (Throwable err) {
-                ;
+                log.debug("FILE_TYPE_HDF4 instance failure: ", err);
             }
         }
 
-        // add default HDF5 modules
+        // add HDF4 to default modules
         if (FileFormat.getFileFormat(FILE_TYPE_HDF5) == null) {
             try {
                 Class fileclass = Class.forName("ncsa.hdf.object.h5.H5File");
@@ -232,9 +234,38 @@ public abstract class FileFormat extends File {
                 }
             }
             catch (Throwable err) {
-                ;
+                log.debug("FILE_TYPE_HDF5 instance failure: ", err);
             }
         }
+        
+        // add NetCDF to default modules
+        if (FileFormat.getFileFormat("NetCDF") == null) {
+            try {
+                Class fileclass = Class.forName("ncsa.hdf.object.nc2.NC2File");
+                FileFormat fileformat = (FileFormat) fileclass.newInstance();
+                if (fileformat != null) {
+                    FileFormat.addFileFormat("NetCDF", fileformat);
+                }
+            }
+            catch (Throwable err) {
+                log.debug("NetCDF instance failure: ", err);
+            }
+        }
+        
+        // add Fits to default modules
+        if (FileFormat.getFileFormat("Fits") == null) {
+            try {
+                Class fileclass = Class.forName("ncsa.hdf.object.fits.FitsFile");
+                FileFormat fileformat = (FileFormat) fileclass.newInstance();
+                if (fileformat != null) {
+                    FileFormat.addFileFormat("Fits", fileformat);
+                }
+            }
+            catch (Throwable err) {
+                log.debug("FITS instance failure: ", err);
+            }
+        }
+        
     }
 
     /***************************************************************************
@@ -275,7 +306,8 @@ public abstract class FileFormat extends File {
                 fullFileName = this.getAbsolutePath();
             }
             catch (Exception ex) {
-            }
+                log.debug("File {} getAbsolutePath failure: ", filename, ex);
+           }
         }
         isReadOnly = false;
     }
@@ -328,7 +360,7 @@ public abstract class FileFormat extends File {
         }
     }
 
-    /**
+	/**
      * Returns the FileFormat with specified key from the list of supported
      * formats.
      * <p>
@@ -534,6 +566,7 @@ public abstract class FileFormat extends File {
                     fileFormat = knownFormat.createInstance(filename, WRITE);
                 }
                 catch (Exception ex) {
+                    log.debug("File {} createInstance failure: ", filename, ex);
                 }
                 break;
             }
@@ -1089,6 +1122,45 @@ public abstract class FileFormat extends File {
      */
     public abstract Datatype createDatatype(int tclass, int tsize, int torder, int tsign, String name) throws Exception;
 
+    /**
+     * Creates a named datatype in a file.
+     * <p>
+     * The following code creates a named datatype in a file.
+     * 
+     * <pre>
+     * H5File file = (H5File) h5file.createInstance(&quot;test_hdf5.h5&quot;, FileFormat.WRITE);
+     *                                                                                 H5Datatype dtype = file.createDatatype(
+     *                                                                                                          Datatype.CLASS_INTEGER,
+     *                                                                                                          4,
+     *                                                                                                          Datatype.NATIVE,
+     *                                                                                                          Datatype.NATIVE,
+     *                                                                                                          basetype,
+     *                                                                                                          &quot;Native Integer&quot;);
+     * </pre>
+     * 
+     * @param tclass
+     *            class of datatype, e.g. Datatype.CLASS_INTEGER
+     * @param tsize
+     *            size of the datatype in bytes, e.g. 4 for 32-bit integer.
+     * @param torder
+     *            order of the byte endianing, Datatype.ORDER_LE.
+     * @param tsign
+     *            signed or unsigned of an integer, Datatype.SIGN_NONE.
+     * @param tbase
+     *            the base datatype of the new datatype
+     * @param name
+     *            name of the datatype to create, e.g. "Native Integer".
+     * @return The new datatype if successful; otherwise returns null.
+     * @throws Exception
+     *             The exceptions thrown vary depending on the implementing
+     *             class.
+     */
+    public Datatype createDatatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, String name) throws Exception
+    {
+        // Derived classes must override this function to use base type option
+        return createDatatype(tclass, tsize, torder, tsign, name);
+    }
+
     // REVIEW DOCS for createDatatype(). Check and document exceptions.
 
     /***************************************************************************
@@ -1137,6 +1209,42 @@ public abstract class FileFormat extends File {
      *             class.
      */
     public abstract Datatype createDatatype(int tclass, int tsize, int torder, int tsign) throws Exception;
+
+    /**
+     * Creates a new datatype in memory.
+     * <p>
+     * The following code creates an instance of H5Datatype in memory.
+     * 
+     * <pre>
+     * H5File file = (H5File) h5file.createInstance(&quot;test_hdf5.h5&quot;, FileFormat.WRITE);
+     *                                                                                 H5Datatype dtype = file.createDatatype(
+     *                                                                                                          Datatype.CLASS_INTEGER,
+     *                                                                                                          4,
+     *                                                                                                          Datatype.NATIVE,
+     *                                                                                                          Datatype.NATIVE,
+     *                                                                                                          basetype);
+     * </pre>
+     * 
+     * @param tclass
+     *            class of datatype, e.g. Datatype.CLASS_INTEGER
+     * @param tsize
+     *            size of the datatype in bytes, e.g. 4 for 32-bit integer.
+     * @param torder
+     *            order of the byte endian, e.g. Datatype.ORDER_LE.
+     * @param tsign
+     *            signed or unsigned of an integer, Datatype.SIGN_NONE.
+     * @param tbase
+     *            the base datatype of the new datatype
+     * @return The new datatype object if successful; otherwise returns null.
+     * @throws Exception
+     *             The exceptions thrown vary depending on the implementing
+     *             class.
+     */
+    public Datatype createDatatype(int tclass, int tsize, int torder, int tsign, Datatype tbase) throws Exception
+    {
+        // Derived classes must override this function to use base type option
+        return createDatatype(tclass, tsize, torder, tsign);
+    }
 
     // REVIEW DOCS for createDatatype(). Check and document exceptions.
 
@@ -1282,10 +1390,10 @@ public abstract class FileFormat extends File {
             String[] memberNames, Datatype[] memberDatatypes, int[] memberSizes, Object data) throws Exception
             // REVIEW DOCS for createCompoundDS(). Check and document exceptions.
             {
-        // If the implementing subclass doesn't have this method then that
-        // format doesn't support Compound DataSets and we throw an
-        // exception.
-        throw new UnsupportedOperationException("Dataset FileFormat.createCompoundDS(...) is not implemented.");
+		    	// If the implementing subclass doesn't have this method then that
+		    	// format doesn't support Compound DataSets and we throw an
+		    	// exception.
+		    	throw new UnsupportedOperationException("Dataset FileFormat.createCompoundDS(...) is not implemented.");
             }
 
     /**
@@ -1719,8 +1827,8 @@ public abstract class FileFormat extends File {
      * 
      * @param file
      *            the file containing the object
-     * @param oid
-     *            the path the full path of the object to search for
+     * @param path
+     *            the full path of the object to search for
      * @return the object that has the given path; otherwise returns null
      */
     public final static HObject findObject(FileFormat file, String path) {
@@ -1853,6 +1961,21 @@ public abstract class FileFormat extends File {
      *             class.
      */
     public HObject createLink(Group linkGroup, String name, Object currentObj) throws Exception {
+        throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
+    }
+
+    /**
+     * Export dataset.
+     * 
+     * @param file_export_name
+     *            The file name to export data into.
+     * @param file_name
+     *            The name of the HDF5 file containing the dataset.
+     * @param object_path
+     *            The full path of the dataset to be exported.
+     * @throws Exception
+     */
+    public void exportDataset(String file_export_name, String file_name, String object_path, int binary_order) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
     }
 

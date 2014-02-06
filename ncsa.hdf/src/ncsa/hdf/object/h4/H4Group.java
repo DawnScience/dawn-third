@@ -43,6 +43,8 @@ public class H4Group extends Group
      */
     private static final long serialVersionUID = 3785240955078867900L;
 
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H4Group.class);
+
     /**
      * The list of attributes of this data object. Members of the list are
      * instance of Attribute.
@@ -89,20 +91,23 @@ public class H4Group extends Group
             try {  
                 nAttributes =HDFLibrary.Vnattrs(vgid);
                 nMembersInFile = HDFLibrary.Vntagrefs(vgid);
-             } catch (Exception ex) {nAttributes = 0;}
+            } 
+            catch (Exception ex) {
+            	nAttributes = 0;
+            }
             close(vgid);
         }
         
-        return (nAttributes>0);
+        return (nAttributes > 0);
     }
     
     // Implementing DataFormat
     public List getMetadata() throws HDFException
     {
-        if (attributeList != null)
-        {
+        if (attributeList != null) {
             return attributeList;
-        } else {
+        } 
+        else {
             attributeList = new Vector();
         }
 
@@ -115,18 +120,18 @@ public class H4Group extends Group
 
         try {
             n = HDFLibrary.Vnattrs(vgid);
+            
             boolean b = false;
             String[] attrName = new String[1];
-            int[] attrInfo = new int[3];
-            for (int i=0; i<n; i++)
-            {
+            int[] attrInfo = new int[5];
+            for (int i=0; i<n; i++) {
                 attrName[0] = "";
                 try {
                     b = HDFLibrary.Vattrinfo(vgid, i, attrName, attrInfo);
                     // mask off the litend bit
                     attrInfo[0] = attrInfo[0] & (~HDFConstants.DFNT_LITEND);
-                } catch (HDFException ex)
-                {
+                } 
+                catch (HDFException ex) {
                     b = false;
                 }
 
@@ -139,26 +144,26 @@ public class H4Group extends Group
                 attributeList.add(attr);
 
                 Object buf = H4Datatype.allocateArray(attrInfo[0], attrInfo[1]);
+                
                 try {
                     HDFLibrary.Vgetattr(vgid, i, buf);
-                } catch (HDFException ex)
-                {
+                } 
+                catch (HDFException ex) {
+                	ex.printStackTrace();
                     buf = null;
                 }
 
-                if (buf != null)
-                {
+                if (buf != null) {
                     if ((attrInfo[0] == HDFConstants.DFNT_CHAR) ||
-                        (attrInfo[0] ==  HDFConstants.DFNT_UCHAR8))
-                    {
+                        (attrInfo[0] ==  HDFConstants.DFNT_UCHAR8)) {
                         buf = Dataset.byteToString((byte[])buf, attrInfo[1]);
                     }
 
                     attr.setValue(buf);
                 }
             }
-        } finally
-        {
+        } 
+        finally {
             close(vgid);
         }
 
@@ -180,6 +185,7 @@ public class H4Group extends Group
         }
 
         attributeList.add(info);
+        nAttributes = attributeList.size();
     }
 
 
@@ -195,18 +201,17 @@ public class H4Group extends Group
         // try to open with write permission
         try {
             vgid = HDFLibrary.Vattach(getFID(), (int)oid[1], "w");
-        } catch (HDFException ex)
-        {
+        } 
+        catch (HDFException ex) {
             vgid = -1;
         }
 
         // try to open with read-only permission
-        if (vgid < 0)
-        {
+        if (vgid < 0) {
             try {
                 vgid = HDFLibrary.Vattach(getFID(), (int)oid[1], "r");
-            } catch (HDFException ex)
-            {
+            } 
+            catch (HDFException ex) {
                 vgid = -1;
             }
         }
@@ -218,8 +223,12 @@ public class H4Group extends Group
     @Override
     public void close(int vgid)
     {
-        try { HDFLibrary.Vdetach(vgid); }
-        catch (Exception ex) { ; }
+        try { 
+        	HDFLibrary.Vdetach(vgid); 
+        }
+        catch (Exception ex) {
+        	log.debug("close.Vdetach:", ex);
+        }
     }
 
     /**
@@ -261,8 +270,7 @@ public class H4Group extends Group
         int ref = HDFLibrary.VQueryref(gid);
         int tag = HDFLibrary.VQuerytag(gid);
 
-        if (!pgroup.isRoot())
-        {
+        if (!pgroup.isRoot()) {
             // add the dataset to the parent group
             int pid = pgroup.open();
             if (pid < 0) {
@@ -274,8 +282,12 @@ public class H4Group extends Group
             pgroup.close(pid);
         }
 
-        try { HDFLibrary.Vdetach(gid); }
-        catch (Exception ex) { ; }
+        try { 
+        	HDFLibrary.Vdetach(gid); 
+        }
+        catch (Exception ex) {
+        	log.debug("create.Vdetach:", ex);
+        }
 
         long[] oid = {tag, ref};
         group = new H4Group(file, name, path, pgroup, oid);

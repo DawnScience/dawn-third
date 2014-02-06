@@ -72,6 +72,8 @@ import ncsa.hdf.object.ScalarDS;
 public class DefaultMetaDataView extends JDialog implements ActionListener, MetaDataView {
     private static final long serialVersionUID = 7891048909810508761L;
 
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultMetaDataView.class);
+
     /**
      * The main HDFView.
      */
@@ -130,9 +132,11 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
         tabbedPane = new JTabbedPane();
         // get the metadata information before add GUI components */
         try {
+            log.trace("DefaultMetaDataView: start");
             hObject.getMetadata();
         }
         catch (Exception ex) {
+        	log.debug("get the metadata information before add GUI components:", ex);
         }
         tabbedPane.addTab("General", createGeneralPropertyPanel());
         tabbedPane.addTab("Attributes", createAttributePanel());
@@ -229,6 +233,7 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
             pgroup = (Group) hObject.getFileFormat().get(hObject.getPath());
         }
         catch (Exception ex) {
+        	log.debug("parent group:", ex);
         }
         if (pgroup == null) {
             JOptionPane.showMessageDialog(this, "Parent group is null.", getTitle(), JOptionPane.ERROR_MESSAGE);
@@ -344,7 +349,7 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
             obj.removeMetadata(attr);
         }
         catch (Exception ex) {
-            ;
+        	log.debug("delete an attribute from a data object:", ex);
         }
 
         attrTableModel.removeRow(idx);
@@ -656,6 +661,7 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
 
         JPanel rp = new JPanel();
         rp.setLayout(new GridLayout(4, 1));
+        log.trace("createDatasetInfoPanel: start");
 
         if (d.getRank() <= 0) {
             d.init();
@@ -663,6 +669,7 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
         JTextField txtf = new JTextField("" + d.getRank());
         txtf.setEditable(false);
         rp.add(txtf);
+        log.trace("createDatasetInfoPanel inited");
 
         String dimStr = null;
         String maxDimStr = null;
@@ -793,7 +800,7 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
             } // if (n > 0)
         } // if (d instanceof Compound)
 
-        // add compression and data lauoyt information
+        // add compression and data layout information
         // try { d.getMetadata(); } catch (Exception ex) {}
         String chunkInfo = "";
         long[] chunks = d.getChunkSize();
@@ -842,6 +849,7 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
         bPanel.add(rp, BorderLayout.CENTER);
 
         panel.add(bPanel, BorderLayout.SOUTH);
+        log.trace("createDatasetInfoPanel: finish");
 
         return panel;
     }
@@ -862,6 +870,7 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
         FileFormat theFile = hObject.getFileFormat();
         JPanel bPanel = new JPanel();
         JButton b = new JButton(" Add ");
+        b.setName("Add");
         b.setMnemonic('A');
         b.addActionListener(this);
         b.setActionCommand("Add attribute");
@@ -871,6 +880,7 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
         if (isH5) {
             // deleting is not supported by HDF4
             b = new JButton("Delete");
+            b.setName("Delete");
             b.setMnemonic('D');
             b.addActionListener(this);
             b.setActionCommand("Delete attribute");
@@ -994,7 +1004,13 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
                 }
             }
 
-            attrTable.setValueAt(name, i, 0);
+            if (attr.getProperty("field") !=null) {
+            	String fieldInfo = " {Field: "+attr.getProperty("field")+"}";
+            	attrTable.setValueAt(name+fieldInfo, i, 0);
+            } 
+            else
+                attrTable.setValueAt(name, i, 0);
+            
             attrTable.setValueAt(attr.toString(", "), i, 1);
             attrTable.setValueAt(type, i, 2);
             attrTable.setValueAt(size, i, 3);
@@ -1105,6 +1121,7 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
         // if (col != 1) {
         // return; // can only change attribute value
         // }
+		log.trace("updateAttributeValue:start value={}[{},{}]", newValue, row, col);
 
         String attrName = (String) attrTable.getValueAt(row, 0);
         List<?> attrList = null;
@@ -1139,6 +1156,7 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
                 NT = cName.charAt(cIndex + 1);
             }
             boolean isUnsigned = attr.isUnsigned();
+    		log.debug("updateAttributeValue:start array_length={} cName={} NT={} isUnsigned={}", array_length, cName, NT, isUnsigned);
 
             double d = 0;
             String theToken = null;
@@ -1221,6 +1239,7 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
                         break;
                     }
                     case 'J':
+                        long lvalue = 0;
                         if (isUnsigned) {
                             if (theToken != null) {
                                 String theValue = theToken;
@@ -1230,7 +1249,9 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
                                     JOptionPane.showMessageDialog(getOwner(), "Data is out of range[" + min + ", " + max
                                             + "]: " + theToken, getTitle(), JOptionPane.ERROR_MESSAGE);
                                 }
-                                Array.setLong(data, i, big.longValue());
+                                lvalue = big.longValue();
+                        		log.trace("updateAttributeValue: big.longValue={}", lvalue);
+                                Array.setLong(data, i, lvalue);
                             }
                             else
                                 Array.set(data, i, (Object)theToken);
@@ -1242,8 +1263,9 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
                                 JOptionPane.showMessageDialog(getOwner(), "Data is out of range[" + min + ", " + max
                                         + "]: " + theToken, getTitle(), JOptionPane.ERROR_MESSAGE);
                             }
-                
-                            Array.setLong(data, i, (long) d);
+                            lvalue = (long)d;
+                    		log.trace("updateAttributeValue: longValue={}", lvalue);
+                            Array.setLong(data, i, lvalue);
                         }
                         break;
                     case 'F':
@@ -1338,11 +1360,13 @@ public class DefaultMetaDataView extends JDialog implements ActionListener, Meta
                 }
             }
             catch (Exception ex) {
+            	log.debug("raf write:", ex);
             }
             try {
                 raf.close();
             }
             catch (Exception ex) {
+            	log.debug("raf close:", ex);
             }
 
             JOptionPane.showMessageDialog(this, "Saving user block is successful.", getTitle(),

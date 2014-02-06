@@ -39,12 +39,10 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
-import java.awt.image.DirectColorModel;
+import java.awt.image.DataBufferInt;
 import java.awt.image.FilteredImageSource;
 import java.awt.image.ImageFilter;
 import java.awt.image.ImageProducer;
-import java.awt.image.IndexColorModel;
-import java.awt.image.MemoryImageSource;
 import java.awt.image.PixelGrabber;
 import java.awt.image.RGBImageFilter;
 import java.beans.PropertyChangeEvent;
@@ -56,6 +54,7 @@ import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Array;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -92,7 +91,6 @@ import javax.swing.text.NumberFormatter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 
-import ncsa.hdf.object.CompoundDS;
 import ncsa.hdf.object.Datatype;
 import ncsa.hdf.object.Group;
 import ncsa.hdf.object.HObject;
@@ -133,6 +131,8 @@ import ncsa.hdf.view.ViewProperties.BITMASK_OP;
 public class DefaultImageView extends JInternalFrame implements ImageView,
         ActionListener {
     private static final long serialVersionUID = -6534336542813587242L;
+
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultImageView.class);
 
     /** Horizontal direction to flip an image. */
     public static final int FLIP_HORIZONTAL = 0;
@@ -232,7 +232,7 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
 
     private long curFrame = 0, maxFrame = 1;
 
-    private MemoryImageSource memoryImageSource;
+    private BufferedImage bufferedImage;
 
 //    private AutoContrastSlider autoContrastSlider;
 
@@ -259,6 +259,8 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
     
     /* image origin: 0-UL, 1-LL, 2-UR, 3-LR */
     private int origin = 0;
+    
+    private List<Integer> invalidValueIndex;
 
     /**
      * Constructs an ImageView.
@@ -304,12 +306,12 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
         toolkit = Toolkit.getDefaultToolkit();
         rotateRelatedItems = new Vector(10);
         imageScroller = null;
-        memoryImageSource = null;
         gainBias = null;
         gainBias_current = null;
         autoGainData = null;
         contrastSlider = null;
         bitmask = null;
+        invalidValueIndex = new ArrayList<Integer>();
         
         String origStr = ViewProperties.getImageOrigin();
         if (ViewProperties.ORIGIN_LL.equalsIgnoreCase(origStr))
@@ -410,12 +412,15 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
         }
 
         // set title
-        StringBuffer sb = new StringBuffer("ImageView <"+ViewProperties.getImageOrigin()+">  -  ");
-        sb.append(hobject.getName());
-        sb.append("  -  ");
+        StringBuffer sb = new StringBuffer(hobject.getName());
+        sb.append("  at  ");
         sb.append(hobject.getPath());
-        sb.append("  -  ");
-        sb.append(dataset.getFile());
+        sb.append("  [");
+        sb.append(dataset.getFileFormat().getName());
+        sb.append("  in  ");
+        sb.append(dataset.getFileFormat().getParent());
+        sb.append("]");
+        
         setTitle(sb.toString());
 
         frameTitle = sb.toString();
@@ -464,6 +469,34 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
 
         setJMenuBar(createMenuBar());
         viewer.showStatus(sb.toString());
+        
+        int titleJustification = TitledBorder.LEFT;
+        int titlePosition = TitledBorder.TOP;
+        String orgin = ViewProperties.getImageOrigin();
+        if (orgin.equalsIgnoreCase(ViewProperties.ORIGIN_UR))
+        	titleJustification = TitledBorder.RIGHT;
+        else if (orgin.equalsIgnoreCase(ViewProperties.ORIGIN_LL))
+            titlePosition = TitledBorder.BOTTOM;
+        else if (orgin.equalsIgnoreCase(ViewProperties.ORIGIN_LR)) {
+            titleJustification = TitledBorder.RIGHT;
+            titlePosition = TitledBorder.BOTTOM;
+        }
+        
+        String originTag = "(0,0)";
+        if (ViewProperties.isIndexBase1())
+        	originTag = "(1,1)";
+        
+        Border border = BorderFactory.createCompoundBorder(
+                BorderFactory.createRaisedBevelBorder(), BorderFactory
+                        .createTitledBorder(BorderFactory
+                                .createLineBorder(Color.lightGray, 1),
+                                originTag,
+                                titleJustification, titlePosition,
+                                this.getFont(), Color.black));
+        contentPane.setBorder(border);
+        
+//        if (imageComponent.getParent() !=null)
+//        	imageComponent.getParent().setBackground(Color.black);
     }
 
     private JMenuBar createMenuBar() {
@@ -610,7 +643,7 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
         menu.add(item);
 
         JMenu contourMenu = new JMenu("Contour");
-        for (int i = 3; i < 10; i++) {
+        for (int i = 3; i < 10; i=i+2) {
             item = new JMenuItem(String.valueOf(i));
             item.addActionListener(this);
             item.setActionCommand("Contour " + i);
@@ -922,6 +955,7 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
      * @throws OutOfMemoryError
      */
     private void getIndexedImage() throws Exception, OutOfMemoryError {
+
         if (imagePalette==null)
             imagePalette = dataset.getPalette();
         
@@ -937,19 +971,7 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
         data = dataset.getData();
         if (bitmask != null) {
             if (Tools.applyBitmask(data, bitmask, bitmaskOP)) {
-                String opName = "Extract bits ";
-                if (bitmaskOP==ViewProperties.BITMASK_OP.AND)
-                    opName = "Apply bitwise AND ";
-                
-                Border border = BorderFactory.createCompoundBorder(
-                        BorderFactory.createRaisedBevelBorder(), BorderFactory
-                                .createTitledBorder(BorderFactory
-                                        .createLineBorder(Color.BLUE, 1),
-                                        opName + bitmask,
-                                        TitledBorder.RIGHT, TitledBorder.TOP,
-                                        this.getFont(), Color.RED));
                 doAutoGainContrast = false;
-                this.setBorder(border);
             }
         }
 
@@ -974,8 +996,8 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
         if (isAutoContrastFailed) {
             doAutoGainContrast = false;
             imageByteData = Tools.getBytes(data, dataRange, w, h, !dataset
-                    .isDefaultImageOrder(), dataset.getFillValue(),
-                    convertByteData, imageByteData);
+                    .isDefaultImageOrder(), dataset.getFilteredImageValues(),
+                    convertByteData, imageByteData, invalidValueIndex);
         } else if (dataRange!= null && dataRange[0]==dataRange[1]) {
             Tools.findMinMax(data, dataRange, null);
         }
@@ -1004,13 +1026,15 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
         // reload data
         dataset.clearData();
         data = dataset.getData();
-
-        // converts raw data to image data
-        imageByteData = Tools.getBytes(data, dataRange, dataset.getFillValue(),
-                imageByteData);
+        
 
         int w = dataset.getWidth();
         int h = dataset.getHeight();
+
+        // converts raw data to image data
+        imageByteData = Tools.getBytes(data, dataRange, w, h, false, dataset.getFilteredImageValues(),
+                imageByteData);
+
 
         image = createTrueColorImage(imageByteData, isPlaneInterlace, w, h);
     }
@@ -1118,13 +1142,11 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
             Class theClass = Class.forName(viewName);
             if ("ncsa.hdf.view.DefaultPaletteView".equals(viewName)) {
                 Object[] initargs = { viewer, this };
-                PaletteView theView = (PaletteView) Tools.newInstance(theClass,
-                        initargs);
+                Tools.newInstance(theClass, initargs);
             }
             else {
                 Object[] initargs = { this };
-                PaletteView theView = (PaletteView) Tools.newInstance(theClass,
-                        initargs);
+                Tools.newInstance(theClass, initargs);
             }
         }
         catch (Exception ex) {
@@ -1205,10 +1227,6 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
     private void flip(int direction) {
         ImageFilter filter = new FlipFilter(direction);
 
-        if (filter == null) {
-            return;
-        }
-
         if (applyImageFilter(filter)) {
             // taggle flip flag
             if (direction == FLIP_HORIZONTAL) {
@@ -1244,24 +1262,7 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
 
     // implementing ImageObserver
     private void contour(int level) {
-        ImageFilter filter = new ContourFilter(level);
-
-        if (filter == null) {
-            return;
-        }
-
-        applyImageFilter(filter);
-    }
-
-    // implementing ImageObserver
-    private void brightness(int blevel, int clevel) {
-        ImageFilter filter = new BrightnessFilter(blevel, clevel);
-
-        if (filter == null) {
-            return;
-        }
-
-        applyImageFilter(filter);
+    	applyImageFilter(new ContourFilter(level));
     }
 
     /** Apply contrast/brightness to unsigned short integer */
@@ -1283,37 +1284,27 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
         // updateUI(); //bug !!! on Windows. gives NullPointerException at
         // javax.swing.plaf.basic.BasicInternalFrameUI$BorderListener.mousePressed(BasicInternalFrameUI.java:693)
     }
-
-    /**
-     * This method returns true if the specified image has transparent pixels.
-     * 
-     * @param image
-     *            the image to be check if has alpha.
-     * @return true if the image has alpha setting.
-     */
-    private boolean hasAlpha(Image image) {
-        if (image == null) {
-            return false;
+    
+    /** change alpha value for a given list of pixel locations */
+    private void adjustAlpha(BufferedImage img, int alpha, List<Integer> idx)
+    {
+    	if (img==null || idx.size()<=0)
+    		return;
+    	
+        final int[] pixels = ( (DataBufferInt) img.getRaster().getDataBuffer() ).getData();
+        int len = pixels.length;
+        
+        alpha = alpha << 24;
+        for (Integer i : idx) {
+        	if (i<len)
+        	    pixels[i] = alpha | (pixels[i] & 0x00ffffff);
         }
-
-        // If buffered image, the color model is readily available
-        if (image instanceof BufferedImage) {
-            BufferedImage bimage = (BufferedImage) image;
-            return bimage.getColorModel().hasAlpha();
-        }
-
-        // Use a pixel grabber to retrieve the image's color model;
-        // grabbing a single pixel is usually sufficient
-        PixelGrabber pg = new PixelGrabber(image, 0, 0, 1, 1, false);
-        try {
-            pg.grabPixels();
-        }
-        catch (InterruptedException e) {
-        }
-        ColorModel cm = pg.getColorModel();
-
-        return cm.hasAlpha();
+        
+        // for test only
+        // final int[] pixels = ( (DataBufferInt) img.getRaster().getDataBuffer() ).getData();
+        // for (int i=0; i<pixels.length/2; i++) pixels[i] = (pixels[i] & 0x60ffffff);
     }
+   
 
     /**
      * This method returns a buffered image with the contents of an image.
@@ -1431,6 +1422,7 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
             viewer.showStatus("File size (bytes): " + size);
         }
         catch (Exception ex) {
+        	log.debug("File {} size:", choosedFile.getName(), ex);
         }
     }
 
@@ -1515,6 +1507,7 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
                         treeView.addObject(obj, pgroup);
                     }
                     catch (Exception ex) {
+                    	log.debug("Write selection to image:", ex);
                     }
                 }
 
@@ -1584,7 +1577,10 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
                 
                 try {
                     out = new PrintWriter(new BufferedWriter(new FileWriter(choosedFile)));
-                } catch (Exception ex) { out = null; }
+                } 
+                catch (Exception ex) { 
+                	out = null; 
+                }
                 
                 if (out == null)
                     return;
@@ -1592,11 +1588,9 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
                 int cols = 3;
                 int rows = 256;
                 int rgb = 0;
-                for (int i=0; i<rows; i++)
-                {
+                for (int i=0; i<rows; i++) {
                     out.print(i);
-                    for (int j=0; j<cols; j++)
-                    {
+                    for (int j=0; j<cols; j++) {
                         out.print(' ');
                         rgb = imagePalette[j][i];
                         if (rgb<0) rgb += 256;
@@ -1712,8 +1706,7 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
             		}
                     
                     Tools.findMinMax(theData, minmax, dataset.getFillValue());
-                    if (Tools.computeStatistics(theData, stat, dataset
-                            .getFillValue()) > 0) {
+                    if (Tools.computeStatistics(theData, stat, dataset.getFillValue()) > 0) {
                         String statistics = "Min                      = "
                                 + minmax[0] + "\nMax                      = "
                                 + minmax[1] + "\nMean                     = "
@@ -1856,8 +1849,7 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
                 }
             }
         }
-        else // indexed image
-        {
+        else { // indexed image
             for (int i = 0; i < rows; i++) {
                 idx_src = (r0 + i) * w + c0;
                 System.arraycopy(data, idx_src, selectedData, idx_dst, cols);
@@ -1920,7 +1912,8 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
                 rc++;
             }
             
-        } else {
+        } 
+        else {
             if (origin == 1)
                 flip(FLIP_VERTICAL);
             else if (origin == 2)
@@ -2003,49 +1996,16 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
      *            the height of the image.
      * @return the image.
      */
-    public Image createIndexedImage(byte[] imageData, byte[][] palette, int w,
-            int h) {
-        Image theImage = null;
-
-        IndexColorModel colorModel = new IndexColorModel(8, // bits - the number
-                                                            // of bits each
-                                                            // pixel occupies
-                256, // size - the size of the color component arrays
-                palette[0], // r - the array of red color components
-                palette[1], // g - the array of green color components
-                palette[2]); // b - the array of blue color components
-
-        if (memoryImageSource == null) {
-            memoryImageSource = new MemoryImageSource(w, h, colorModel,
-                    imageData, 0, w);
-        }
-        else {
-            memoryImageSource.newPixels(imageData, colorModel, 0, w);
-        }
-
-        theImage = Toolkit.getDefaultToolkit().createImage(memoryImageSource);
-
-        return theImage;
+    private Image createIndexedImage(byte[] imageData, byte[][] palette, int w, int h) 
+    {
+    	bufferedImage = (BufferedImage)Tools.createIndexedImage(bufferedImage, imageData, palette, w, h);
+        adjustAlpha(bufferedImage, 0, invalidValueIndex);        
+      
+        return bufferedImage;
     }
-
+    
     /**
      * Creates a true color image.
-     * <p>
-     * DirectColorModel is used to construct the image from raw data. The
-     * DirectColorModel model is similar to an X11 TrueColor visual, which has
-     * the following parameters: <br>
-     * 
-     * <pre>
-     * Number of bits:        32
-     *             Red mask:              0x00ff0000
-     *             Green mask:            0x0000ff00
-     *             Blue mask:             0x000000ff
-     *             Alpha mask:            0xff000000
-     *             Color space:           sRGB
-     *             isAlphaPremultiplied:  False
-     *             Transparency:          Transparency.TRANSLUCENT
-     *             transferType:          DataBuffer.TYPE_INT
-     * </pre>
      * <p>
      * The data may be arranged in one of two ways: by pixel or by plane. In
      * both cases, the dataset will have a dataspace with three dimensions,
@@ -2076,52 +2036,35 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
      *            the height of the image.
      * @return the image.
      */
-    public Image createTrueColorImage(byte[] imageData, boolean planeInterlace,
-            int w, int h) {
-        Image theImage = null;
-        int imgSize = w * h;
-        int packedImageData[] = new int[imgSize];
-        int pixel = 0, idx = 0, r = 0, g = 0, b = 0;
+    private Image createTrueColorImage(byte[] imageData, boolean planeInterlace,
+            int w, int h) 
+    {
+
+        if (bufferedImage == null)
+            bufferedImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        
+        final int[] pixels = ( (DataBufferInt) bufferedImage.getRaster().getDataBuffer() ).getData();
+        int len = pixels.length;
+
+        int idx = 0, r = 0, g = 0, b = 0;
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
-                pixel = r = g = b = 0;
                 if (planeInterlace) {
-                    r = (int) imageData[idx];
-                    g = (int) imageData[imgSize + idx];
-                    b = (int) imageData[imgSize * 2 + idx];
+                    r = ((int)imageData[idx] & 0xff)<<16;
+                    g = ((int)imageData[len + idx] & 0xff)<<8;
+                    b = ((int)imageData[len * 2 + idx] & 0xff);
                 }
                 else {
-                    r = (int) imageData[idx * 3];
-                    g = (int) imageData[idx * 3 + 1];
-                    b = (int) imageData[idx * 3 + 2];
+                    r = ((int)imageData[idx * 3] & 0xff)<<16;
+                    g = ((int)imageData[idx * 3 + 1] & 0xff)<<8;
+                    b = ((int)imageData[idx * 3 + 2] & 0xff);
                 }
+                pixels[idx++] = 0xff000000 | r | g | b;
+            } 
+        } 
 
-                r = (r << 16) & 0x00ff0000;
-                g = (g << 8) & 0x0000ff00;
-                b = b & 0x000000ff;
-
-                // bits packed into alpha (1), red (r), green (g) and blue (b)
-                // as 11111111rrrrrrrrggggggggbbbbbbbb
-                pixel = 0xff000000 | r | g | b;
-                packedImageData[idx++] = pixel;
-            } // for (int j=0; j<w; j++)
-        } // for (int i=0; i<h; i++)
-
-        DirectColorModel dcm = (DirectColorModel) ColorModel.getRGBdefault();
-
-        if (memoryImageSource == null) {
-            memoryImageSource = new MemoryImageSource(w, h, dcm,
-                    packedImageData, 0, w);
-        }
-        else {
-            memoryImageSource.newPixels(packedImageData, dcm, 0, w);
-        }
-
-        theImage = Toolkit.getDefaultToolkit().createImage(memoryImageSource);
-
-        packedImageData = null;
-
-        return theImage;
+        adjustAlpha(bufferedImage, 0, invalidValueIndex);        
+        return bufferedImage;
     }
 
     private boolean applyImageFilter(ImageFilter filter) {
@@ -2146,16 +2089,15 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
     private void applyDataRange(double[] newRange) {
         if (doAutoGainContrast && gainBias!= null) {
             applyAutoGain(gainBias_current, newRange);
-        } else {
+        } 
+        else {
             int w = dataset.getWidth();
             int h = dataset.getHeight();
 
-            // imageByteData = Tools.getBytes(data, newRange,
-            // dataset.getFillValue(), imageByteData);
-
+            invalidValueIndex.clear(); // data range changed. need to reset invalid values
             imageByteData = Tools.getBytes(data, newRange, w, h, !dataset
-                    .isDefaultImageOrder(), dataset.getFillValue(), true,
-                    null);
+                    .isDefaultImageOrder(), dataset.getFilteredImageValues(), true,
+                    null, invalidValueIndex);
 
             image = createIndexedImage(imageByteData, imagePalette, w, h);
             setImage(image);
@@ -2296,13 +2238,14 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
         public void paint(Graphics g) {
             if (g instanceof Graphics2D && (zoomFactor<0.99)) {
                 Graphics2D g2 = (Graphics2D) g;
-
+                
                 g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
                         RenderingHints.VALUE_INTERPOLATION_BILINEAR);
                 Image scaledImg = multiBiliner(image, imageSize.width, imageSize.height, true);
                 g2.drawImage(scaledImg, 0, 0, imageSize.width, imageSize.height, this);
                 
-            } else
+            } 
+            else
                 g.drawImage(image, 0, 0, imageSize.width, imageSize.height, this);
             
             if ((selectedArea.width > 0) && (selectedArea.height > 0)) {
@@ -2402,8 +2345,8 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
                 Thread.sleep(20);
             }
             catch (Exception ex) {
+            	log.debug("thread sleep:", ex);
             }
-
             currentPosition = e.getPoint();
 
             if ((e.getModifiersEx() & InputEvent.SHIFT_DOWN_MASK) == InputEvent.SHIFT_DOWN_MASK) {
@@ -2941,8 +2884,18 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
             defaultRGB = ColorModel.getRGBdefault();
 
             levelColors = new int[9];
+          levelColors[0] = Color.red.getRGB();
+          levelColors[1] = Color.green.getRGB();
+          levelColors[2] = Color.blue.getRGB();
+          levelColors[3] = Color.magenta.getRGB();
+          levelColors[4] = Color.orange.getRGB();
+          levelColors[5] = Color.cyan.getRGB();
+          levelColors[6] = Color.black.getRGB();
+          levelColors[7] = Color.pink.getRGB();
+          levelColors[8] = Color.yellow.getRGB();
+          
 
-            if (theLevel < 1) {
+          if (theLevel < 1) {
                 theLevel = 1;
             }
             else if (theLevel > 9) {
@@ -2952,17 +2905,7 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
             level = theLevel;
             levels = new int[level];
 
-            levelColors[0] = Color.white.getRGB();
-            levelColors[1] = Color.red.getRGB();
-            levelColors[2] = Color.yellow.getRGB();
-            levelColors[3] = Color.blue.getRGB();
-            levelColors[4] = Color.orange.getRGB();
-            levelColors[5] = Color.green.getRGB();
-            levelColors[6] = Color.cyan.getRGB();
-            levelColors[7] = Color.pink.getRGB();
-            levelColors[8] = Color.gray.getRGB();
-
-            int dx = 255 / level;
+            int dx = 128 / level;
             for (int i = 0; i < level; i++) {
                 levels[i] = (i + 1) * dx;
             }
@@ -3270,7 +3213,7 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
     } // private class RotateFilter
 
     /**
-     * Makes animaion for 3D images.
+     * Makes animation for 3D images.
      */
     private class Animation extends JDialog implements ActionListener, Runnable {
         private static final long serialVersionUID = 6717628496771098250L;
@@ -3336,10 +3279,10 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
 
             numberOfImages = (int) dims[selectedIndex[2]];
             frames = new Image[numberOfImages];
-            MemoryImageSource mir = memoryImageSource;
+            BufferedImage mir = bufferedImage;
             try {
                 for (int i = 0; i < numberOfImages; i++) {
-                    memoryImageSource = null; // each animation image has its
+                    bufferedImage = null; // each animation image has its
                                               // own image resource
                     start[selectedIndex[2]] = i;
 
@@ -3353,7 +3296,7 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
 
                     byteData = new byte[size];
                     
-                    byteData=Tools.getBytes(data3d, dataRange, w, h, false, dataset.getFillValue(),
+                    byteData=Tools.getBytes(data3d, dataRange, w, h, false, dataset.getFilteredImageValues(),
                             true, byteData);
                     
                     frames[i] = createIndexedImage(byteData, imagePalette, w, h);
@@ -3361,7 +3304,7 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
             }
             finally {
                 // set back to original state
-                memoryImageSource = mir;
+                bufferedImage = mir;
                 System.arraycopy(tstart, 0, start, 0, rank);
                 System.arraycopy(tselected, 0, selected, 0, rank);
                 System.arraycopy(tstride, 0, stride, 0, rank);
@@ -3468,6 +3411,7 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
                     Thread.sleep(sleepTime);
                 }
                 catch (InterruptedException e) {
+                	log.debug("Thread.sleep({}):", sleepTime, e);
                 }
             }
         } // public void run() {
@@ -3475,9 +3419,11 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
 
     private class DataRangeDialog extends JDialog implements ActionListener,
             ChangeListener, PropertyChangeListener {
+    	final int NTICKS = 10;
+    	double tickRatio = 1;
         final int W = 500, H = 400;
         double[] minmax_current = {0, 0};
-        double min, max;
+        double min, max, min_org, max_org;
         final double[] minmax_previous = {0, 0};
         final double[] minmax_dist = {0,0};
         JSlider minSlider, maxSlider;
@@ -3486,7 +3432,7 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
         public DataRangeDialog(JFrame theOwner, double[] minmaxCurrent, 
                 double[] minmaxOriginal, final int[] dataDist) 
         {
-            super(theOwner, "Image Vaule Range", true);
+            super(theOwner, "Image Value Range", true);
 
             Tools.findMinMax(dataDist, minmax_dist, null);
             
@@ -3505,9 +3451,11 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
             
             minmax_previous[0] = min = minmax_current[0];
             minmax_previous[1] = max = minmax_current[1];
+            min_org = originalRange[0];
+            max_org = originalRange[1];
             
-            int tickSpace = (int) (minmaxOriginal[1]-minmaxOriginal[0]) / 10;
-
+            tickRatio = (max_org-min_org)/(double)NTICKS;
+            
             final DecimalFormat numberFormat = new DecimalFormat("#.##E0");
             NumberFormatter formatter = new NumberFormatter(numberFormat);
             formatter.setMinimum(new Double(min));
@@ -3520,17 +3468,17 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
             maxField.addPropertyChangeListener(this);
             maxField.setValue(new Double(max));
 
-            minSlider = new JSlider(JSlider.HORIZONTAL, (int)minmaxOriginal[0], (int)minmaxOriginal[1], (int) min);
-            minSlider.setMajorTickSpacing(tickSpace);
+            minSlider = new JSlider(JSlider.HORIZONTAL, 0, NTICKS, 0);
+            minSlider.setMajorTickSpacing(1);
             minSlider.setPaintTicks(true);
-            minSlider.setPaintLabels(true);
+            minSlider.setPaintLabels(false);
             minSlider.addChangeListener(this);
             minSlider.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
-            maxSlider = new JSlider(JSlider.HORIZONTAL, (int)minmaxOriginal[0], (int)minmaxOriginal[1], (int) max);
-            maxSlider.setMajorTickSpacing(tickSpace);
+            maxSlider = new JSlider(JSlider.HORIZONTAL, 0, NTICKS, NTICKS);
+            maxSlider.setMajorTickSpacing(1);
             maxSlider.setPaintTicks(true);
-            maxSlider.setPaintLabels(true);
+            maxSlider.setPaintLabels(false);
             maxSlider.addChangeListener(this);
             maxSlider.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
@@ -3628,7 +3576,7 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
             contentPane.add(confirmP, BorderLayout.SOUTH);
             contentPane.add(new JLabel(" "), BorderLayout.NORTH);
 
-            if ((max-min) < 2) {
+            if (min==max) {
                 minSlider.setEnabled(false);
                 maxSlider.setEnabled(false);
             }
@@ -3692,7 +3640,7 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
                     slider.setValue((int)value);
                 }
 
-                minField.setValue(new Double(value));
+                minField.setValue(new Double(value*tickRatio+min_org));
             }
             else if (slider.equals(maxSlider)) {
                 double minValue = minSlider.getValue();
@@ -3700,7 +3648,7 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
                     value = minValue;
                     slider.setValue((int)value);
                 }
-                maxField.setValue(new Double(value));
+                maxField.setValue(new Double(value*tickRatio+min_org));
             }
         }
 
@@ -3717,26 +3665,21 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
                 }
                 double value = num.doubleValue();
 
-                if (source.equals(minField) && (minSlider != null)
-                        && minSlider.isEnabled()) {
-                    int maxValue = maxSlider.getValue();
-                    if (value > maxValue) {
-                        value = maxValue;
+                if (source.equals(minField) && (minSlider != null) && minSlider.isEnabled()) {
+                     if (value > max_org) {
+                        value = max_org;
                         minField.setText(String.valueOf(value));
                     }
-                    //minmax[0] = value;
 
-                    minSlider.setValue((int) value);
+                    minSlider.setValue((int) ((value-min_org)/tickRatio));
                 }
-                else if (source.equals(maxField) && (maxSlider != null)
-                        && minSlider.isEnabled()) {
-                    int minValue = minSlider.getValue();
-                    if (value < minValue) {
-                        value = minValue;
+                else if (source.equals(maxField) && (maxSlider != null)  && minSlider.isEnabled()) {
+                    if (value < min_org) {
+                        value = min_org;
                         maxField.setText(String.valueOf(value));
                     }
                     //minmax[1] = value;
-                    maxSlider.setValue((int) value);
+                    maxSlider.setValue((int) ((value-min_org)/tickRatio));
                 }
             }
         }
@@ -3924,7 +3867,7 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
         }
 
         private void applyBrightContrast(int blevel, int clevel) {
-            // do not separate autodain and simple contrast process
+            // do not separate autogain and simple contrast process
 //            ImageFilter filter = new BrightnessFilter(blevel, clevel);
 //            image = createImage(new FilteredImageSource(imageProducer, filter));
 //            imageComponent.setImage(image);
@@ -3935,7 +3878,8 @@ public class DefaultImageView extends JInternalFrame implements ImageView,
                 autoGainBias[0] = gainBias[0]*(1+((double)clevel)/100.0);
                 autoGainBias[1] = gainBias[1]*(1+((double)blevel)/100.0);
                 applyAutoGain(autoGainBias, null);
-            } else {
+            } 
+            else {
                 ImageFilter filter = new BrightnessFilter(blevel, clevel);
                 image = createImage(new FilteredImageSource(imageProducer, filter));
                 imageComponent.setImage(image);

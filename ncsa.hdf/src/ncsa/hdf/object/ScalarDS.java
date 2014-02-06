@@ -14,6 +14,10 @@
 
 package ncsa.hdf.object;
 
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
+
 /**
  * A scalar dataset is a multiple dimension array of scalar points. The Datatype
  * of a scalar dataset must be an atomic datatype. Common datatypes of scalar
@@ -30,15 +34,16 @@ package ncsa.hdf.object;
  * @author Peter X. Cao
  */
 public abstract class ScalarDS extends Dataset {
-    // The following constant strings are copied from
-    // http://hdf.ncsa.uiuc.edu/HDF5/doc/ADGuide/ImageSpec.html
-    // to make the defination consistent with the image specs.
-
     /**
      * 
      */
     private static final long serialVersionUID = 8925371455928203981L;
 
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ScalarDS.class);
+
+    // The following constant strings are copied from
+    // http://hdf.ncsa.uiuc.edu/HDF5/doc/ADGuide/ImageSpec.html
+    // to make the definition consistent with the image specs.
     /**
      * Indicates that the pixel RGB values are contiguous.
      */
@@ -99,6 +104,8 @@ public abstract class ScalarDS extends Dataset {
 
     /** The fill value of the dataset. */
     protected Object fillValue = null;
+    
+    private List<Number> filteredImageValues;    
 
     /** Flag to indicate if the dataset is displayed as an image */
     protected boolean isImageDisplay;
@@ -153,6 +160,7 @@ public abstract class ScalarDS extends Dataset {
         isImageDisplay = false;
         isDefaultImageOrder = true;
         isFillValueConverted = false;
+        filteredImageValues = new Vector<Number>();
     }
 
     /*
@@ -178,21 +186,24 @@ public abstract class ScalarDS extends Dataset {
     public Object convertFromUnsignedC() {
         // keep a copy of original buffer and the converted buffer
         // so that they can be reused later to save memory
+		log.trace("convertFromUnsignedC: start");
         if ((data != null) && isUnsigned && !unsignedConverted) {
+    		log.debug("convertFromUnsignedC: convert");
             originalBuf = data;
             convertedBuf = convertFromUnsignedC(originalBuf, convertedBuf);
             data = convertedBuf;
             unsignedConverted = true;
             
             if (fillValue != null) {
-                if(!isFillValueConverted){
-                fillValue = convertFromUnsignedC(fillValue, null);
-                isFillValueConverted = true;
+                if(!isFillValueConverted) {
+	                fillValue = convertFromUnsignedC(fillValue, null);
+	                isFillValueConverted = true;
                 }
             }
                 
         }
 
+		log.trace("convertFromUnsignedC: finish");
         return data;
     }
 
@@ -368,6 +379,46 @@ public abstract class ScalarDS extends Dataset {
             enumConverted = false;
         }
     }
+    
+    /**
+     * Sets data range for an image.
+     * 
+     * @param min the data range start.
+     * @param max the data range end.
+     */
+    public final void setImageDataRange(double min, double max) {
+        if (max<=min)
+        	return;
+
+        if (imageDataRange==null)
+        	imageDataRange = new double[2];
+
+        imageDataRange[0] = min;
+        imageDataRange[1] = max;
+    }    
+    
+    /**
+     * Add a value that will be filtered out in image
+     * @param x value to be filtered
+     */
+    public void addFilteredImageValue(Number x) {
+    	
+    	Iterator<Number> it = filteredImageValues.iterator();
+    	while (it.hasNext()) {
+    		if (it.next().toString().equals(x.toString()))
+    			return;
+    	}
+    	
+ 	    filteredImageValues.add(x);
+    }
+    
+    /**
+     * get a list of values that will be filtered out in image
+     */
+    public List<Number> getFilteredImageValues() {
+    	return filteredImageValues;
+    }
+    
 
     /**
      * Returns true if this dataset is a true color image.

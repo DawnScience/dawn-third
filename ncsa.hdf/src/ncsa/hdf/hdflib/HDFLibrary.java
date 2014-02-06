@@ -13,6 +13,9 @@ package ncsa.hdf.hdflib;
 
 import java.io.File;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  *  This is the Java interface for the HDF 4.1 library.
  *  <p>
@@ -223,7 +226,9 @@ public class HDFLibrary implements java.io.Serializable
 
     public final static String HDFPATH_PROPERTY_KEY = "ncsa.hdf.hdflib.HDFLibrary.hdflib";
 
-    private final static String JHI_VERSION= "2.6";
+    private final static Logger log = LoggerFactory.getLogger(HDFLibrary.class);
+
+    private final static String JHI_VERSION= "2.10";
     private static boolean isLibraryLoaded = false;
 
     static { loadH4Lib(); }
@@ -233,39 +238,62 @@ public class HDFLibrary implements java.io.Serializable
         if (isLibraryLoaded) // load only once
             return;
         
+        // first try loading library via full path
         String filename = System.getProperty(HDFPATH_PROPERTY_KEY, null);
-      
-        if ((filename != null) && (filename.length() > 0))
-        {
-            File h5dll = new File(filename);
-            if (h5dll.exists() && h5dll.canRead() && h5dll.isFile()) {
+        if ((filename != null) && (filename.length() > 0)) {
+            File h4dll = new File(filename);
+            if (h4dll.exists() && h4dll.canRead() && h4dll.isFile()) {
                 try {
                     System.load(filename);
                     isLibraryLoaded = true;
-                    } catch (Throwable err) { isLibraryLoaded = false; }
-            } else {
+                    } 
+                catch (Throwable err) { 
+                	isLibraryLoaded = false; 
+                }
+                finally {
+                	log.info("HDF4 library: ");
+                	log.debug(filename);
+                	log.info((isLibraryLoaded ? "" : " NOT")
+                            + " successfully loaded.");
+                }
+            } 
+            else {
                 isLibraryLoaded = false;
                 throw (new UnsatisfiedLinkError("Invalid HDF4 library, "+filename));
             }
         }
         
-        if (!isLibraryLoaded)
-        {
+        // else load standard library
+        if (!isLibraryLoaded) {
+            String mappedName = null;
+            String s_libraryName = "jhdf";
             try {
+                mappedName = System.mapLibraryName(s_libraryName);
                 System.loadLibrary("jhdf");
                 isLibraryLoaded = true;
-            } catch (Throwable err) { isLibraryLoaded = false; }
+            } 
+            catch (Throwable err) { 
+            	isLibraryLoaded = false; 
+            }
+            finally {
+            	log.info("HDF4 library: " + s_libraryName);
+            	log.debug(" resolved to: " + mappedName + "; ");
+            	log.info((isLibraryLoaded ? "" : " NOT")
+                        + " successfully loaded from java.library.path");
+            }
         }
 
         try { 
             HDFLibrary.HDdont_atexit();
-        } catch (HDFException e) {
+        } 
+        catch (HDFException e) {
             System.exit(1);
         }
         
         /* Important!  Exit quietly */
     }
 
+    @Deprecated
     public static final String getJHIVersion() { return JHI_VERSION; }
 
     public  static int Hopen(String filename) throws HDFException {
@@ -1786,7 +1814,13 @@ public class HDFLibrary implements java.io.Serializable
      */
     public static native boolean SDsetcompress( int id, int type, HDFCompInfo cinfo) throws HDFException;
 
+    /**
+ *  @deprecated As of HDF 4.2.9, replaced by {@link #SDgetcompinfo(int, HDFCompInfo)}
+     */
+    @Deprecated
     public static native boolean SDgetcompress( int id, HDFCompInfo cinfo) throws HDFException;
+
+    public static native boolean SDgetcompinfo( int id, HDFCompInfo cinfo) throws HDFException;
 
     public static native boolean SDsetaccesstype( int id, int accesstype ) throws HDFException;
 
@@ -2479,10 +2513,26 @@ public class HDFLibrary implements java.io.Serializable
      *
      *
      *  @return name[0] = name, argv[0] = data_type, argv[1] = count,
-     *  argv[2] = size
+     *  argv[2] = size, argv[3] = nfields, argv[4] = refnum
      */
-    public static native boolean  Vattrinfo( int id, int index, String[] name, int[] argv) throws HDFException;
+    public static boolean  Vattrinfo( int id, int index, String[] name, int[] argv) throws HDFException
+    {
+    	boolean retval;
+    	
+    	int[] _argv = new int[5];
+    	
+    	retval = _Vattrinfo(id, index, name, _argv);
+    	
+    	int n = Math.min(argv.length, 5);
+    	for (int i=0; i<n; i++)
+    		argv[i] = _argv[i];
+    	
+    	return retval;
+    	
+    }
+    private static native boolean _Vattrinfo( int id, int index, String[] name, int[] argv) throws HDFException;
 
+    
     public static native int  Vfindattr(int id,  String name) throws HDFException;
 
     /**

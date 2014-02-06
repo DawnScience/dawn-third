@@ -38,6 +38,8 @@ public abstract class Dataset extends HObject {
      */
     private static final long serialVersionUID    = -3360885430038261178L;
 
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Dataset.class);
+
     /**
      * The memory buffer that holds the raw data of the dataset.
      */
@@ -93,12 +95,12 @@ public abstract class Dataset extends HObject {
     /**
      * Array that contains the indices of the dimensions selected for display.
      * <p>
-     * <B>selectedIndex[] is provied for two purpose:</B>
+     * <B>selectedIndex[] is provided for two purpose:</B>
      * <OL>
      * <LI>
      * selectedIndex[] is used to indicate the order of dimensions for display,
      * i.e. selectedIndex[0] = row, selectedIndex[1] = column and
-     * selectedIndex[2] = depth. For example, for a four dimesion dataset, if
+     * selectedIndex[2] = depth. For example, for a four dimension dataset, if
      * selectedIndex[] is {1, 2, 3}, then dim[1] is selected as row index,
      * dim[2] is selected as column index and dim[3] is selected as depth index.
      * <LI>
@@ -108,7 +110,7 @@ public abstract class Dataset extends HObject {
      * spreadsheet/image with a third dimension that the 2D spreadsheet/image is
      * cut from). For dataset with more than three dimensions, we need
      * selectedIndex[] to store which three dimensions are chosen for display.
-     * For example, for a four dimesion dataset, if selectedIndex[] = {1, 2, 3},
+     * For example, for a four dimension dataset, if selectedIndex[] = {1, 2, 3},
      * then dim[1] is selected as row index, dim[2] is selected as column index
      * and dim[3] is selected as depth index. dim[0] is not selected. Its
      * location is fixed at 0 by default.
@@ -287,7 +289,7 @@ public abstract class Dataset extends HObject {
     }
 
     /**
-     * Returns the array that contins the dimension sizes of the dataset.
+     * Returns the array that contains the dimension sizes of the dataset.
      * 
      * @return the dimension sizes of the dataset.
      */
@@ -298,7 +300,7 @@ public abstract class Dataset extends HObject {
     }
 
     /**
-     * Returns the array that contins the max dimension sizes of the dataset.
+     * Returns the array that contains the max dimension sizes of the dataset.
      * 
      * @return the max dimension sizes of the dataset.
      */
@@ -459,7 +461,7 @@ public abstract class Dataset extends HObject {
      * Reads the data from file.
      * <p>
      * read() reads the data from file to a memory buffer and returns the memory
-     * buffer. The dataset object does not hold the memobry buffer. To store the
+     * buffer. The dataset object does not hold the memory buffer. To store the
      * memory buffer in the dataset object, one must call getData().
      * <p>
      * By default, the whole dataset is read into memory. Users can also select
@@ -485,7 +487,7 @@ public abstract class Dataset extends HObject {
      * <pre>
      * int rank = dataset.getRank(); // number of dimension of the dataset
      * long[] dims = dataset.getDims(); // the dimension sizes of the dataset
-     * long[] selected = dataset.getSelectedDims(); // the selected size of the dataet
+     * long[] selected = dataset.getSelectedDims(); // the selected size of the dataset
      * long[] start = dataset.getStartDims(); // the off set of the selection
      * long[] stride = dataset.getStride(); // the stride of the dataset
      * int[] selectedIndex = dataset.getSelectedIndex(); // the selected dimensions for
@@ -512,7 +514,7 @@ public abstract class Dataset extends HObject {
      * selected[1] = dims[1] / stride[1];
      * selected[2] = dims[1] / stride[2];
      * 
-     * // when dataset.getData() is called, the slection above will be used since
+     * // when dataset.getData() is called, the selection above will be used since
      * // the dimension arrays are passed by reference. Changes of these arrays
      * // outside the dataset object directly change the values of these array
      * // in the dataset object.
@@ -522,11 +524,11 @@ public abstract class Dataset extends HObject {
      * short, int, float, double or String type based on the datatype of the
      * dataset.
      * <p>
-     * For CompoundDS, the meory data object is an java.util.List object. Each
+     * For CompoundDS, the memory data object is an java.util.List object. Each
      * element of the list is a data array that corresponds to a compound field.
      * <p>
      * For example, if compound dataset "comp" has the following nested
-     * structure, and memeber datatypes
+     * structure, and member datatypes
      * 
      * <pre>
      * comp --> m01 (int)
@@ -538,11 +540,11 @@ public abstract class Dataset extends HObject {
      * </pre>
      * 
      * getData() returns a list of six arrays: {int[], float[], char[],
-     * Stirng[], long[] and double[]}.
+     * String[], long[] and double[]}.
      * 
      * @return the data read from file.
      * 
-     * @see {@link #getData()}
+     * @see #getData()
      */
     public abstract Object read() throws Exception, OutOfMemoryError;
 
@@ -699,6 +701,7 @@ public abstract class Dataset extends HObject {
      */
     public final Object getData() throws Exception, OutOfMemoryError {
         if (!isDataLoaded) {
+            log.trace("getData: read");
             data = read(); // load the data;
             originalBuf = data;
             isDataLoaded = true;
@@ -706,6 +709,7 @@ public abstract class Dataset extends HObject {
             for (int j = 0; j < selectedDims.length; j++) {
                 nPoints *= selectedDims[j];
             }
+            log.trace("getData: read {}", nPoints);
         }
 
         return data;
@@ -970,6 +974,7 @@ public abstract class Dataset extends HObject {
         String cname = data_class.getName();
         char dname = cname.charAt(cname.lastIndexOf("[") + 1);
         int size = Array.getLength(data_in);
+        log.debug("convertFromUnsignedC: cname={} dname={} size={}", cname, dname, size);
 
         if (dname == 'B') {
             short[] sdata = null;
@@ -1021,7 +1026,7 @@ public abstract class Dataset extends HObject {
         }
         else {
             data_out = data_in;
-            // Java does not support unsigned long
+            log.debug("convertFromUnsignedC: Java does not support unsigned long");
         }
 
         return data_out;
@@ -1073,6 +1078,7 @@ public abstract class Dataset extends HObject {
         String cname = data_class.getName();
         char dname = cname.charAt(cname.lastIndexOf("[") + 1);
         int size = Array.getLength(data_in);
+        log.debug("convertToUnsignedC: cname={} dname={} size={}", cname, dname, size);
 
         if (dname == 'S') {
             byte[] bdata = null;
@@ -1118,7 +1124,7 @@ public abstract class Dataset extends HObject {
         }
         else {
             data_out = data_in;
-            // Java does not support unsigned long
+            log.debug("convertToUnsignedC: Java does not support unsigned long");
         }
 
         return data_out;
@@ -1158,6 +1164,7 @@ public abstract class Dataset extends HObject {
         }
 
         int n = bytes.length / length;
+        log.debug("byteToString: n={} from length of {}", n, length);
         // String bigstr = new String(bytes);
         String[] strArray = new String[n];
         String str = null;
@@ -1213,7 +1220,7 @@ public abstract class Dataset extends HObject {
 
         int size = strings.length;
         byte[] bytes = new byte[size * length];
-
+        log.debug("stringToByte: size={} length={}", size, length);
         StringBuffer strBuff = new StringBuffer(length);
         for (int i = 0; i < size; i++) {
             // initialize the string with spaces

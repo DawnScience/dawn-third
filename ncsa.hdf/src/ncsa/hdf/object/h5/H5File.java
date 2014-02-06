@@ -86,6 +86,8 @@ import ncsa.hdf.object.ScalarDS;
 public class H5File extends FileFormat {
     private static final long      serialVersionUID = 6247335559471526045L;
 
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5File.class);
+
     /**
      * the file access flag. Valid values are HDF5Constants.H5F_ACC_RDONLY,
      * HDF5Constants.H5F_ACC_RDWR and HDF5Constants.H5F_ACC_CREAT.
@@ -179,7 +181,6 @@ public class H5File extends FileFormat {
     public H5File(String fileName, int access) {
         // Call FileFormat ctor to set absolute path name
         super(fileName);
-
         libver = new int[2];
         attrFlag = false;
 
@@ -304,27 +305,32 @@ public class H5File extends FileFormat {
 
             }
             catch (Exception ex) {
+            	log.debug("Attribute[{}] failure: ", i, ex);
             }
 
             try {
                 H5.H5Sclose(asid);
             }
             catch (Exception ex) {
+            	log.debug("H5Sclose failure: ", ex);
             }
             try {
                 H5.H5Tclose(atid);
             }
             catch (Exception ex) {
+            	log.debug("H5Tclose failure: ", ex);
             }
             try {
                 H5.H5Aclose(aid_src);
             }
             catch (Exception ex) {
+            	log.debug("src H5Aclose failure: ", ex);
             }
             try {
                 H5.H5Aclose(aid_dst);
             }
             catch (Exception ex) {
+            	log.debug("dst H5Aclose failure: ", ex);
             }
 
         } // for (int i=0; i<num_attr; i++)
@@ -393,20 +399,25 @@ public class H5File extends FileFormat {
         List<Attribute> attributeList = null;
         int aid = -1, sid = -1, tid = -1;
         H5O_info_t obj_info = null;
+    	log.trace("getAttribute: start");
 
         try {
             obj_info = H5.H5Oget_info(objID);
         }
-        catch (Exception ex) {}
+        catch (Exception ex) {
+        	log.debug("H5Oget_info failure: ", ex);
+        }
         if (obj_info.num_attrs <= 0) {
             return (attributeList = new Vector<Attribute>());
         }
 
         int n = (int) obj_info.num_attrs;
         attributeList = new Vector<Attribute>(n);
+    	log.debug("getAttribute: num_attrs={}", n);
 
         for (int i = 0; i < n; i++) {
             long lsize = 1;
+        	log.trace("getAttribute: attribute[{}]", i);
 
             try {
                 aid = H5.H5Aopen_by_idx(objID, ".", idx_type, order, i, HDF5Constants.H5P_DEFAULT,
@@ -425,6 +436,7 @@ public class H5File extends FileFormat {
                 }
                 String[] nameA = { "" };
                 H5.H5Aget_name(aid, H5File.attrNameLen, nameA);
+            	log.trace("getAttribute: attribute[{}] is {}", i, nameA);
 
                 int tmptid = -1;
                 try {
@@ -435,11 +447,14 @@ public class H5File extends FileFormat {
                     try {
                         H5.H5Tclose(tmptid);
                     }
-                    catch (Exception ex) {}
+                    catch (Exception ex) {
+                    	log.debug("H5Tclose failure: ", ex);
+                    }
                 }
                 Datatype attrType = new H5Datatype(tid);
                 Attribute attr = new Attribute(nameA[0], attrType, dims);
                 attributeList.add(attr);
+            	log.debug("getAttribute: attribute[{}] Datatype={}", i, attrType.getDatatypeDescription());
 
                 boolean is_variable_str = false;
                 boolean isVLEN = false;
@@ -452,15 +467,12 @@ public class H5File extends FileFormat {
                 try {
                     is_variable_str = H5.H5Tis_variable_str(tid);
                 }
-                catch (Exception ex) {}
-                try {
-                    isVLEN = ( tclass == HDF5Constants.H5T_VLEN);
+                catch (Exception ex) {
+                	log.debug("H5Tis_variable_str failure: ", ex);
                 }
-                catch (Exception ex) {}
-                try {
-                    isCompound = ( tclass == HDF5Constants.H5T_COMPOUND);
-                }
-                catch (Exception ex) {}
+                isVLEN = ( tclass == HDF5Constants.H5T_VLEN);
+                isCompound = ( tclass == HDF5Constants.H5T_COMPOUND);
+            	log.debug("getAttribute: attribute[{}] has size={} isCompound={} isScalar={} is_variable_str={} isVLEN={}", i, lsize, isCompound, isScalar, is_variable_str, isVLEN);
 
                 // retrieve the attribute value
                 if (lsize <= 0) {
@@ -475,6 +487,7 @@ public class H5File extends FileFormat {
                         strs[j] = "";
                     }
                     try {
+                    	log.trace("getAttribute: attribute[{}] H5AreadVL", i);
                         H5.H5AreadVL(aid, tid, strs);
                     }
                     catch (Exception ex) {ex.printStackTrace();}
@@ -491,6 +504,7 @@ public class H5File extends FileFormat {
                         try {
                             tmptid1 = H5.H5Tget_super(tid);
                             tmptid2 = H5.H5Tget_native_type(tmptid1);
+                        	log.trace("getAttribute: attribute[{}] H5Aread ARRAY", i);
                             H5.H5Aread(aid, tmptid2, value);
                         }
                         catch (Exception ex) {ex.printStackTrace();}
@@ -498,22 +512,29 @@ public class H5File extends FileFormat {
                             try {
                                 H5.H5Tclose(tmptid1);
                             }
-                            catch (Exception ex) {}
+                            catch (Exception ex) {
+                            	log.debug("tid1 H5Tclose failure: ", ex);
+                            }
                             try {
                                 H5.H5Tclose(tmptid2);
                             }
-                            catch (Exception ex) {}
+                            catch (Exception ex) {
+                            	log.debug("tid2 H5Tclose failure: ", ex);
+                            }
                         }
                     }
                     else {
+                    	log.trace("getAttribute: attribute[{}] H5Aread", i);
                         H5.H5Aread(aid, tid, value);
                     }
 
                     int typeClass = H5.H5Tget_class(tid);
                     if (typeClass == HDF5Constants.H5T_STRING) {
+                    	log.trace("getAttribute: attribute[{}] byteToString", i);
                         value = Dataset.byteToString((byte[]) value, H5.H5Tget_size(tid));
                     }
                     else if (typeClass == HDF5Constants.H5T_REFERENCE) {
+                    	log.trace("getAttribute: attribute[{}] byteToLong", i);
                         value = HDFNativeData.byteToLong((byte[]) value);
                     }
                 }
@@ -521,23 +542,32 @@ public class H5File extends FileFormat {
                 attr.setValue(value);
 
             }
-            catch (HDF5Exception ex) {}
+            catch (HDF5Exception ex) {
+            	log.debug("Attribute[{}] inspection failure: ", i, ex);
+            }
             finally {
                 try {
                     H5.H5Tclose(tid);
                 }
-                catch (HDF5Exception ex) {}
+                catch (Exception ex) {
+                	log.debug("H5Tclose[{}] failure: ", i, ex);
+                }
                 try {
                     H5.H5Sclose(sid);
                 }
-                catch (HDF5Exception ex) {}
+                catch (Exception ex) {
+                	log.debug("H5Sclose[{}] failure: ", i, ex);
+                }
                 try {
                     H5.H5Aclose(aid);
                 }
-                catch (HDF5Exception ex) {}
+                catch (Exception ex) {
+                	log.debug("H5Aclose[{}] failure: ", i, ex);
+                }
             }
         } // for (int i=0; i<obj_info.num_attrs; i++)
 
+    	log.trace("getAttribute: finish");
         return attributeList;
     }
 
@@ -725,7 +755,7 @@ public class H5File extends FileFormat {
             if (newObj instanceof ScalarDS) {
                 ScalarDS sd = (ScalarDS) newObj;
                 did = sd.open();
-                if (did > 0) {
+                if (did >= 0) {
                     try {
                         tid = H5.H5Dget_type(did);
                         if (H5.H5Tequal(tid, HDF5Constants.H5T_STD_REF_OBJ)) {
@@ -733,12 +763,14 @@ public class H5File extends FileFormat {
                         }
                     }
                     catch (Exception ex) {
+                    	log.debug("ScalarDS reference  failure: ", ex);
                     }
                     finally {
                         try {
                             H5.H5Tclose(tid);
                         }
                         catch (Exception ex) {
+                        	log.debug("ScalarDS reference H5Tclose failure: ", ex);
                         }
                     }
                 }
@@ -751,41 +783,46 @@ public class H5File extends FileFormat {
         int sid = -1, size = 0, rank = 0;
         int n = refDatasets.size();
         for (int i = 0; i < n; i++) {
+        	log.trace("Update the references in the scalar datasets in the dest file");
             d = (H5ScalarDS) refDatasets.get(i);
             byte[] buf = null;
             long[] refs = null;
 
             try {
                 did = d.open();
-                tid = H5.H5Dget_type(did);
-                sid = H5.H5Dget_space(did);
-                rank = H5.H5Sget_simple_extent_ndims(sid);
-                size = 1;
-                if (rank > 0) {
-                    long[] dims = new long[rank];
-                    H5.H5Sget_simple_extent_dims(sid, dims, null);
-                    for (int j = 0; j < rank; j++) {
-                        size *= (int) dims[j];
-                    }
-                    dims = null;
+                if(did >= 0) {
+	                tid = H5.H5Dget_type(did);
+	                sid = H5.H5Dget_space(did);
+	                rank = H5.H5Sget_simple_extent_ndims(sid);
+	                size = 1;
+	                if (rank > 0) {
+	                    long[] dims = new long[rank];
+	                    H5.H5Sget_simple_extent_dims(sid, dims, null);
+	                    for (int j = 0; j < rank; j++) {
+	                        size *= (int) dims[j];
+	                    }
+	                    dims = null;
+	                }
+	
+	                buf = new byte[size * 8];
+	                H5.H5Dread(did, tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, buf);
+	
+	                // update the ref values
+	                refs = HDFNativeData.byteToLong(buf);
+	                size = refs.length;
+	                for (int j = 0; j < size; j++) {
+	                    long[] theOID = oidMap.get(String.valueOf(refs[j]));
+	                    if (theOID != null) {
+	                        refs[j] = theOID[0];
+	                    }
+	                }
+	
+	                // write back to file
+	                H5.H5Dwrite(did, tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, refs);
                 }
-
-                buf = new byte[size * 8];
-                H5.H5Dread(did, tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, buf);
-
-                // update the ref values
-                refs = HDFNativeData.byteToLong(buf);
-                size = refs.length;
-                for (int j = 0; j < size; j++) {
-                    long[] theOID = oidMap.get(String.valueOf(refs[j]));
-                    if (theOID != null) {
-                        refs[j] = theOID[0];
-                    }
+                else {
+                	log.debug("dest file dataset failed to open");
                 }
-
-                // write back to file
-                H5.H5Dwrite(did, tid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, refs);
-
             }
             catch (Exception ex) {
                 continue;
@@ -795,16 +832,19 @@ public class H5File extends FileFormat {
                     H5.H5Tclose(tid);
                 }
                 catch (Exception ex) {
+                	log.debug("H5ScalarDS reference[{}] H5Tclose failure: ", i, ex);
                 }
                 try {
                     H5.H5Sclose(sid);
                 }
                 catch (Exception ex) {
+                	log.debug("H5ScalarDS reference[{}] H5Sclose failure: ", i, ex);
                 }
                 try {
                     H5.H5Dclose(did);
                 }
                 catch (Exception ex) {
+                	log.debug("H5ScalarDS reference[{}] H5Dclose failure: ", i, ex);
                 }
             }
 
@@ -838,6 +878,7 @@ public class H5File extends FileFormat {
         }
 
         ver += vers[0] + "." + vers[1] + "." + vers[2];
+		log.info("libversion is {}", ver);
 
         return ver;
     }
@@ -902,14 +943,13 @@ public class H5File extends FileFormat {
             	H5.H5Pset_libver_bounds(fapl, HDF5Constants.H5F_LIBVER_LATEST, HDF5Constants.H5F_LIBVER_LATEST);
             }
             
-            int fileid = H5.H5Fcreate(filename, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                    fapl);
+            int fileid = H5.H5Fcreate(filename, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, fapl);
             try {
                 H5.H5Pclose(fapl);
                 H5.H5Fclose(fileid);
             }
             catch (HDF5Exception ex) {
-                ;
+            	log.debug("H5 file, {} failure: ", filename, ex);
             }
         }
 
@@ -985,6 +1025,7 @@ public class H5File extends FileFormat {
                 H5.H5Pclose(fapl);
             }
             catch (Exception e) {
+            	log.debug("libver bounds H5Pclose failure: ", e);
             }
         }
     }
@@ -1007,9 +1048,13 @@ public class H5File extends FileFormat {
      */
     @Override
     public void close() throws HDF5Exception {
+    	if(fid < 0) {
+    		log.debug("file {} is not open", fullFileName);
+    		return;
+    	}
         // The current working directory may be changed at Dataset.read()
         // by H5Dchdir_ext()by this file to make it work for external
-        // datasets. We need to set it back to the orginal current working
+        // datasets. We need to set it back to the original current working
         // directory (when hdf-java application started) before the file
         // is closed/opened. Otherwise, relative path, e.g. "./test.h5" may
         // not work
@@ -1050,6 +1095,7 @@ public class H5File extends FileFormat {
                             H5.H5Dclose(oids[i]);
                         }
                         catch (Exception ex2) {
+                        	log.debug("Object[{}] H5Dclose failure: ", i, ex2);
                         }
                     }
                     else if (HDF5Constants.H5I_GROUP == type) {
@@ -1057,6 +1103,7 @@ public class H5File extends FileFormat {
                             H5.H5Gclose(oids[i]);
                         }
                         catch (Exception ex2) {
+                        	log.debug("Object[{}] H5Gclose failure: ", i, ex2);
                         }
                     }
                     else if (HDF5Constants.H5I_DATATYPE == type) {
@@ -1064,6 +1111,7 @@ public class H5File extends FileFormat {
                             H5.H5Tclose(oids[i]);
                         }
                         catch (Exception ex2) {
+                        	log.debug("Object[{}] H5Tclose failure: ", i, ex2);
                         }
                     }
                     else if (HDF5Constants.H5I_ATTR == type) {
@@ -1071,24 +1119,28 @@ public class H5File extends FileFormat {
                             H5.H5Aclose(oids[i]);
                         }
                         catch (Exception ex2) {
+                        	log.debug("Object[{}] H5Aclose failure: ", i, ex2);
                         }
                     }
                 } // for (int i=0; i<n; i++)
             } // if ( n>0)
         }
         catch (Exception ex) {
+        	log.debug("close open objects failure: ", ex);
         }
 
         try {
             H5.H5Fflush(fid, HDF5Constants.H5F_SCOPE_GLOBAL);
         }
         catch (Exception ex) {
+        	log.debug("H5Fflush failure: ", ex);
         }
 
         try {
             H5.H5Fclose(fid);
         }
         catch (Exception ex) {
+        	log.debug("H5Fclose failure: ", ex);
         }
 
         // Set fid to -1 but don't reset rootNode
@@ -1115,7 +1167,7 @@ public class H5File extends FileFormat {
         HObject obj = null;
 
         if ((path == null) || (path.length() <= 0)) {
-            //System.err.println("(path == null) || (path.length() <= 0)");
+            System.err.println("(path == null) || (path.length() <= 0)");
             return null;
         }
 
@@ -1182,6 +1234,7 @@ public class H5File extends FileFormat {
                             H5.H5Dclose(did);
                         }
                         catch (Exception ex) {
+                        	log.debug("{} H5Dclose failure: ", path, ex);
                         }
                     }
                 }
@@ -1204,6 +1257,7 @@ public class H5File extends FileFormat {
                             H5.H5Gclose(gid);
                         }
                         catch (Exception ex) {
+                        	log.debug("{} H5Gclose failure: ", path, ex);
                         }
                     }
                 }
@@ -1219,7 +1273,7 @@ public class H5File extends FileFormat {
             }
         }
         catch (Exception ex) {
-            System.err.println("Exception finding obj");
+            log.debug("Exception finding obj {}", path);
             obj = null;
         }
         finally {
@@ -1229,6 +1283,7 @@ public class H5File extends FileFormat {
                     H5.H5Fclose(fid);
                 }
                 catch (Exception ex) {
+                	log.debug("[] H5Fclose failure: ", path, ex);
                 }
                 fid = fid_before_open;
             }
@@ -1245,12 +1300,24 @@ public class H5File extends FileFormat {
      */
     @Override
     public Datatype createDatatype(int tclass, int tsize, int torder, int tsign, String name) throws Exception {
+        return createDatatype(tclass, tsize, torder, tsign, null, name);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see ncsa.hdf.object.FileFormat#createDatatype(int, int, int, int, Datatype,
+     * java.lang.String)
+     */
+    @Override
+    public Datatype createDatatype(int tclass, int tsize, int torder, int tsign, Datatype tbase, String name) throws Exception {
         int tid = -1;
         H5Datatype dtype = null;
 
         try {
-            H5Datatype t = (H5Datatype) createDatatype(tclass, tsize, torder, tsign);
-            tid = t.toNative();
+            H5Datatype t = (H5Datatype) createDatatype(tclass, tsize, torder, tsign, tbase);
+            if((tid = t.toNative()) < 0)
+            	throw new Exception("toNative failed");
 
             H5.H5Tcommit(fid, name, tid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
                     HDF5Constants.H5P_DEFAULT);
@@ -1265,9 +1332,7 @@ public class H5File extends FileFormat {
 
         }
         finally {
-            if (tid > 0) {
-                H5.H5Tclose(tid);
-            }
+            H5.H5Tclose(tid);
         }
 
         return dtype;
@@ -1295,6 +1360,15 @@ public class H5File extends FileFormat {
     @Override
     public Datatype createDatatype(int tclass, int tsize, int torder, int tsign) throws Exception {
         return new H5Datatype(tclass, tsize, torder, tsign);
+    }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see ncsa.hdf.object.FileFormat#createDatatype(int, int, int, int, Datatype)
+     */
+    @Override
+    public Datatype createDatatype(int tclass, int tsize, int torder, int tsign, Datatype tbase) throws Exception {
+        return new H5Datatype(tclass, tsize, torder, tsign, tbase);
     }
 
     /*
@@ -1371,6 +1445,7 @@ public class H5File extends FileFormat {
             dataset.setIsImage(true);
         }
         catch (Exception ex) {
+        	log.debug("{} createImageAttributtes failure: ", name, ex);
         }
 
         return dataset;
@@ -1393,7 +1468,7 @@ public class H5File extends FileFormat {
      * group creation properties list, gplist.
      * 
      * @see ncsa.hdf.object.h5.H5Group#create(java.lang.String,
-     *      ncsa.hdf.object.Group, int)
+     *      ncsa.hdf.object.Group, int...)
      * 
      */
     public Group createGroup(String name, Group pgroup, int... gplist) throws Exception {
@@ -1463,7 +1538,7 @@ public class H5File extends FileFormat {
      *            The name of the link.
      * @param currentObj
      *            The existing object the new link will reference.
-     * @param type
+     * @param lType
      *            The type of link to be created. It can be a hard link, a soft
      *            link or an external link.
      * @return The object pointed to by the new link if successful; otherwise
@@ -1547,7 +1622,7 @@ public class H5File extends FileFormat {
      * @param currentObj
      *            The name of the object the new link will reference. The object
      *            doesn't have to exist.
-     * @param type
+     * @param lType
      *            The type of link to be created.
      * @return The H5Link object pointed to by the new link if successful;
      *         otherwise returns null.
@@ -1713,78 +1788,82 @@ public class H5File extends FileFormat {
             return;
         }
 
-        try {
-            tid = attr.getType().toNative();
-            sid = H5.H5Screate_simple(attr.getRank(), attr.getDataDims(), null);
+        if((tid = attr.getType().toNative()) >= 0) {
+        	try {
+        		sid = H5.H5Screate_simple(attr.getRank(), attr.getDataDims(), null);
 
-            if (attrExisted) {
-                aid = H5.H5Aopen_by_name(objID, obj_name, name, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-            }
-            else {
-                aid = H5.H5Acreate(objID, name, tid, sid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-            }
+        		if (attrExisted) {
+        			aid = H5.H5Aopen_by_name(objID, obj_name, name, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+        		}
+        		else {
+        			aid = H5.H5Acreate(objID, name, tid, sid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+        		}
 
-            // update value of the attribute
-            Object attrValue = attr.getValue();
-            if (attrValue != null) {
-                boolean isVlen = (H5.H5Tget_class(tid) == HDF5Constants.H5T_VLEN || H5.H5Tis_variable_str(tid));
-                if (isVlen) {
-                    throw (new HDF5Exception("Writing variable-length attributes is not supported"));
-                }
+        		// update value of the attribute
+        		Object attrValue = attr.getValue();
+        		if (attrValue != null) {
+        			boolean isVlen = (H5.H5Tget_class(tid) == HDF5Constants.H5T_VLEN || H5.H5Tis_variable_str(tid));
+        			if (isVlen) {
+        				throw (new HDF5Exception("Writing variable-length attributes is not supported"));
+        			}
 
-                if (attr.getType().getDatatypeClass() == Datatype.CLASS_REFERENCE && attrValue instanceof String) { // reference
-                    // is
-                    // a
-                    // path+name
-                    // to
-                    // the
-                    // object
-                    attrValue = H5.H5Rcreate(getFID(), (String) attrValue, HDF5Constants.H5R_OBJECT, -1);
-                }
-                else if (Array.get(attrValue, 0) instanceof String) {
-                    int size = H5.H5Tget_size(tid);
-                    int len = ((String[]) attrValue).length;
-                    byte[] bval = Dataset.stringToByte((String[]) attrValue, size);
-                    if (bval != null && bval.length == size * len) {
-                        bval[bval.length - 1] = 0;
-                        attrValue = bval;
-                    }
-                }
+        			if (attr.getType().getDatatypeClass() == Datatype.CLASS_REFERENCE && attrValue instanceof String) { 
+        				// reference is a path+name to the object
+        				attrValue = H5.H5Rcreate(getFID(), (String) attrValue, HDF5Constants.H5R_OBJECT, -1);
+        			}
+        			else if (Array.get(attrValue, 0) instanceof String) {
+        				int size = H5.H5Tget_size(tid);
+        				int len = ((String[]) attrValue).length;
+        				byte[] bval = Dataset.stringToByte((String[]) attrValue, size);
+        				if (bval != null && bval.length == size * len) {
+        					bval[bval.length - 1] = 0;
+        					attrValue = bval;
+        				}
+        			}
 
-                try {
-                    /*
-                     * must use native type to write attribute data to file (see
-                     * bug 1069)
-                     */
-                    int tmptid = tid;
-                    tid = H5.H5Tget_native_type(tmptid);
-                    try {
-                        H5.H5Tclose(tmptid);
-                    }
-                    catch (HDF5Exception ex) {
-                    }
-                    H5.H5Awrite(aid, tid, attrValue);
-                }
-                catch (Exception ex) {
-                }
-            } // if (attrValue != null) {
+        			try {
+        				/*
+        				 * must use native type to write attribute data to file (see
+        				 * bug 1069)
+        				 */
+        				int tmptid = tid;
+        				tid = H5.H5Tget_native_type(tmptid);
+        				try {
+        					H5.H5Tclose(tmptid);
+        				}
+        				catch (Exception ex) {
+        					log.debug("{} writeAttribute H5Tclose failure: ", name, ex);
+        				}
+        				H5.H5Awrite(aid, tid, attrValue);
+        			}
+        			catch (Exception ex) {
+        				log.debug("{} writeAttribute native type failure: ", name, ex);
+        			}
+        		} // if (attrValue != null) {
+        	}
+        	finally {
+        		try {
+        			H5.H5Tclose(tid);
+        		}
+        		catch (Exception ex) {
+        			log.debug("{} writeAttribute H5Tclose failure: ", name, ex);
+        		}
+        		try {
+        			H5.H5Sclose(sid);
+        		}
+        		catch (Exception ex) {
+        			log.debug("{} writeAttribute H5Sclose failure: ", name, ex);
+        		}
+        		try {
+        			H5.H5Aclose(aid);
+        		}
+        		catch (Exception ex) {
+        			log.debug("{} writeAttribute H5Aclose failure: ", name, ex);
+        		}
+        	}
         }
-        finally {
-            try {
-                H5.H5Tclose(tid);
-            }
-            catch (HDF5Exception ex) {
-            }
-            try {
-                H5.H5Sclose(sid);
-            }
-            catch (HDF5Exception ex) {
-            }
-            try {
-                H5.H5Aclose(aid);
-            }
-            catch (HDF5Exception ex) {
-            }
+        else {
+        	log.debug("{} writeAttribute toNative failure: ", name);
         }
 
         obj.close(objID);
@@ -2089,44 +2168,54 @@ public class H5File extends FileFormat {
                 if (!hasLoop) {
                 	nTotal = depth_first(node, nTotal);
                 }
-            } else if (skipLoad) {
+            } 
+            else if (skipLoad) {
             	continue;
             }
             else if (obj_type == HDF5Constants.H5O_TYPE_DATASET) {
                 int did = -1, tid = -1, tclass = -1;
                 try {
                     did = H5.H5Dopen(fid, fullPath + obj_name, HDF5Constants.H5P_DEFAULT);
-                    tid = H5.H5Dget_type(did);
-
-                    tclass = H5.H5Tget_class(tid);
-                    if ((tclass == HDF5Constants.H5T_ARRAY) || (tclass == HDF5Constants.H5T_VLEN)) {
-                        // for ARRAY, the type is determined by the base type
-                        int btid = H5.H5Tget_super(tid);
-                        int tmpclass = H5.H5Tget_class(btid);
-
-                        // cannot deal with ARRAY of COMPOUND in compound table
-                        // viewer
-                        if (tmpclass != HDF5Constants.H5T_COMPOUND) tclass = H5.H5Tget_class(btid);
-
-                        try {
-                            H5.H5Tclose(btid);
-                        }
-                        catch (HDF5Exception ex) {
-                        }
+                    if(did >= 0) {
+	                    tid = H5.H5Dget_type(did);
+	
+	                    tclass = H5.H5Tget_class(tid);
+	                    if ((tclass == HDF5Constants.H5T_ARRAY) || (tclass == HDF5Constants.H5T_VLEN)) {
+	                        // for ARRAY, the type is determined by the base type
+	                        int btid = H5.H5Tget_super(tid);
+	                        int tmpclass = H5.H5Tget_class(btid);
+	
+	                        // cannot deal with ARRAY of COMPOUND in compound table
+	                        // viewer
+	                        if (tmpclass != HDF5Constants.H5T_COMPOUND) tclass = H5.H5Tget_class(btid);
+	
+	                        try {
+	                            H5.H5Tclose(btid);
+	                        }
+	                        catch (Exception ex) {
+	                        	log.debug("depth_first[{}] {} dataset access H5Tclose failure: ", i, obj_name, ex);
+	                        }
+	                    }
+                    }
+                    else {
+                    	log.debug("depth_first[{}] {} dataset open failure", i, obj_name);
                     }
                 }
-                catch (HDF5Exception ex) {
+                catch (Exception ex) {
+                	log.debug("depth_first[{}] {} dataset access failure: ", i, obj_name, ex);
                 }
                 finally {
                     try {
                         H5.H5Tclose(tid);
                     }
-                    catch (HDF5Exception ex) {
+                    catch (Exception ex) {
+                    	log.debug("depth_first[{}] {} dataset access H5Tclose failure: ", i, obj_name, ex);
                     }
                     try {
                         H5.H5Dclose(did);
                     }
-                    catch (HDF5Exception ex) {
+                    catch (Exception ex) {
+                    	log.debug("depth_first[{}] {} dataset access H5Dclose failure: ", i, obj_name, ex);
                     }
                 }
                 Dataset d = null;
@@ -2149,7 +2238,8 @@ public class H5File extends FileFormat {
                 node = new DefaultMutableTreeNode(t);
                 pnode.add(node);
                 pgroup.addToMemberList(t);
-            } else if (obj_type == HDF5Constants.H5O_TYPE_UNKNOWN) {
+            } 
+            else if (obj_type == HDF5Constants.H5O_TYPE_UNKNOWN) {
                 H5Link link = new H5Link(this, obj_name, fullPath, oid);
 
                 node = new DefaultMutableTreeNode(link);
@@ -2291,37 +2381,46 @@ public class H5File extends FileFormat {
                 int did = -1, tid = -1, tclass = -1;
                 try {
                     did = H5.H5Dopen(fid, fullPath + obj_name, HDF5Constants.H5P_DEFAULT);
-                    tid = H5.H5Dget_type(did);
-
-                    tclass = H5.H5Tget_class(tid);
-                    if ((tclass == HDF5Constants.H5T_ARRAY) || (tclass == HDF5Constants.H5T_VLEN)) {
-                        // for ARRAY, the type is determined by the base type
-                        int btid = H5.H5Tget_super(tid);
-                        int tmpclass = H5.H5Tget_class(btid);
-
-                        // cannot deal with ARRAY of COMPOUND in compound table
-                        // viewer
-                        if (tmpclass != HDF5Constants.H5T_COMPOUND) tclass = H5.H5Tget_class(btid);
-
-                        try {
-                            H5.H5Tclose(btid);
-                        }
-                        catch (HDF5Exception ex) {
-                        }
+                    if(did >= 0) {
+	                    tid = H5.H5Dget_type(did);
+	
+	                    tclass = H5.H5Tget_class(tid);
+	                    if ((tclass == HDF5Constants.H5T_ARRAY) || (tclass == HDF5Constants.H5T_VLEN)) {
+	                        // for ARRAY, the type is determined by the base type
+	                        int btid = H5.H5Tget_super(tid);
+	                        int tmpclass = H5.H5Tget_class(btid);
+	
+	                        // cannot deal with ARRAY of COMPOUND in compound table
+	                        // viewer
+	                        if (tmpclass != HDF5Constants.H5T_COMPOUND) tclass = H5.H5Tget_class(btid);
+	
+	                        try {
+	                            H5.H5Tclose(btid);
+	                        }
+	                        catch (Exception ex) {
+	                        	log.debug("depth_first_old[{}] {} dataset access H5Tclose failure: ", i, obj_name, ex);
+	                        }
+	                    }
+                    }
+                    else {
+                    	log.debug("depth_first_old[{}] {} dataset open failure", i, obj_name);
                     }
                 }
                 catch (HDF5Exception ex) {
+                	log.debug("depth_first_old[{}] {} dataset access failure: ", i, obj_name, ex);
                 }
                 finally {
                     try {
                         H5.H5Tclose(tid);
                     }
-                    catch (HDF5Exception ex) {
+                    catch (Exception ex) {
+                    	log.debug("depth_first_old[{}] {} dataset access H5Tclose failure: ", i, obj_name, ex);
                     }
                     try {
                         H5.H5Dclose(did);
                     }
-                    catch (HDF5Exception ex) {
+                    catch (Exception ex) {
+                    	log.debug("depth_first_old[{}] {} dataset access H5Tclose failure: ", i, obj_name, ex);
                     }
                 }
                 Dataset d = null;
@@ -2379,12 +2478,14 @@ public class H5File extends FileFormat {
                 H5.H5Ocopy(srcdid, ".", dstdid, dstName, ocp_plist_id, HDF5Constants.H5P_DEFAULT);
             }
             catch (Exception ex) {
+            	log.debug("copyDataset {} failure: ", dname, ex);
             }
             finally {
                 try {
                     H5.H5Pclose(ocp_plist_id);
                 }
                 catch (Exception ex) {
+                	log.debug("copyDataset {} H5Pclose failure: ", dname, ex);
                 }
             }
 
@@ -2403,11 +2504,13 @@ public class H5File extends FileFormat {
                 srcDataset.close(srcdid);
             }
             catch (Exception ex) {
+            	log.debug("copyDataset {} srcDataset.close failure: ", dname, ex);
             }
             try {
                 pgroup.close(dstdid);
             }
             catch (Exception ex) {
+            	log.debug("copyDataset {} pgroup.close failure: ", dname, ex);
             }
         }
 
@@ -2415,10 +2518,10 @@ public class H5File extends FileFormat {
     }
 
     /**
-     * Constructs a dataset for specified dataset idenfitier.
+     * Constructs a dataset for specified dataset identifier.
      * 
      * @param did
-     *            the dataset idenfifier
+     *            the dataset identifier
      * @param name
      *            the name of the dataset
      * @param path
@@ -2428,34 +2531,41 @@ public class H5File extends FileFormat {
      */
     private Dataset getDataset(int did, String name, String path) throws HDF5Exception {
         Dataset dataset = null;
-        int tid = -1, tclass = -1;
-        try {
-            tid = H5.H5Dget_type(did);
-            tclass = H5.H5Tget_class(tid);
-            if (tclass == HDF5Constants.H5T_ARRAY) {
-                // for ARRAY, the type is determined by the base type
-                int btid = H5.H5Tget_super(tid);
-                tclass = H5.H5Tget_class(btid);
-                try {
-                    H5.H5Tclose(btid);
-                }
-                catch (HDF5Exception ex) {
-                }
-            }
-        }
-        finally {
-            try {
-                H5.H5Tclose(tid);
-            }
-            catch (HDF5Exception ex) {
-            }
-        }
-
-        if (tclass == HDF5Constants.H5T_COMPOUND) {
-            dataset = new H5CompoundDS(this, name, path);
+        if(did >= 0) {
+	        int tid = -1, tclass = -1;
+	        try {
+	            tid = H5.H5Dget_type(did);
+	            tclass = H5.H5Tget_class(tid);
+	            if (tclass == HDF5Constants.H5T_ARRAY) {
+	                // for ARRAY, the type is determined by the base type
+	                int btid = H5.H5Tget_super(tid);
+	                tclass = H5.H5Tget_class(btid);
+	                try {
+	                    H5.H5Tclose(btid);
+	                }
+	                catch (Exception ex) {
+	                	log.debug("getDataset {} H5Tclose failure: ", name, ex);
+	                }
+	            }
+	        }
+	        finally {
+	            try {
+	                H5.H5Tclose(tid);
+	            }
+	            catch (Exception ex) {
+	            	log.debug("getDataset {} H5Tclose failure: ", name, ex);
+	            }
+	        }
+	
+	        if (tclass == HDF5Constants.H5T_COMPOUND) {
+	            dataset = new H5CompoundDS(this, name, path);
+	        }
+	        else {
+	            dataset = new H5ScalarDS(this, name, path);
+	        }
         }
         else {
-            dataset = new H5ScalarDS(this, name, path);
+        	log.debug("getDataset id failure");
         }
 
         return dataset;
@@ -2498,6 +2608,7 @@ public class H5File extends FileFormat {
                 H5.H5Ocopy(tid_src, ".", gid_dst, dstName, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
             }
             catch (Exception ex) {
+            	log.debug("copyDatatype {} H5Ocopy failure: ", dstName, ex);
             }
             datatype = new H5Datatype(pgroup.getFileFormat(), dstName, path);
 
@@ -2509,11 +2620,13 @@ public class H5File extends FileFormat {
                 srcType.close(tid_src);
             }
             catch (Exception ex) {
+            	log.debug("copyDatatype {} srcType.close failure: ", dstName, ex);
             }
             try {
                 pgroup.close(gid_dst);
             }
             catch (Exception ex) {
+            	log.debug("copyDatatype {} pgroup.close failure: ", dstName, ex);
             }
         }
 
@@ -2557,7 +2670,7 @@ public class H5File extends FileFormat {
                 H5.H5Ocopy(srcgid, ".", dstgid, dstName, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
             }
             catch (Exception ex) {
-                ex.printStackTrace();
+            	log.debug("copyGroup {} H5Ocopy failure: ", dstName, ex);
             }
 
             group = new H5Group(pgroup.getFileFormat(), dstName, path, pgroup);
@@ -2578,11 +2691,13 @@ public class H5File extends FileFormat {
                 srcGroup.close(srcgid);
             }
             catch (Exception ex) {
+            	log.debug("copyGroup {} srcGroup.close failure: ", dstName, ex);
             }
             try {
                 pgroup.close(dstgid);
             }
             catch (Exception ex) {
+            	log.debug("copyGroup {} pgroup.close failure: ", dstName, ex);
             }
         }
 
@@ -2636,12 +2751,14 @@ public class H5File extends FileFormat {
         try {
             group_info = H5.H5Gget_info(gid);
         }
-        catch (HDF5Exception ex) {
+        catch (Exception ex) {
+        	log.debug("getGroup {} H5Gget_info failure: ", name, ex);
         }
         try {
             oid = H5.H5Oopen(gid, thisFullName, HDF5Constants.H5P_DEFAULT);
         }
-        catch (HDF5Exception ex) {
+        catch (Exception ex) {
+        	log.debug("getGroup {} H5Oopen failure: ", name, ex);
         }
 
         // retrieve only the immediate members of the group, do not follow
@@ -2654,7 +2771,7 @@ public class H5File extends FileFormat {
                         .H5Oget_info_by_idx(oid, thisFullName, indexType, indexOrder, i, HDF5Constants.H5P_DEFAULT);
             }
             catch (HDF5Exception ex) {
-                ex.printStackTrace();
+            	log.debug("getGroup[{}] {} name,info failure: ", i, name, ex);
                 // do not stop if accessing one member fails
                 continue;
             }
@@ -2682,7 +2799,8 @@ public class H5File extends FileFormat {
                     try {
                         H5.H5Dclose(did);
                     }
-                    catch (HDF5Exception ex) {
+                    catch (Exception ex) {
+                    	log.debug("getGroup[{}] {} H5Dclose failure: ", i, name, ex);
                     }
                 }
                 group.addToMemberList(d);
@@ -2695,7 +2813,8 @@ public class H5File extends FileFormat {
         try {
             if (oid >= 0) H5.H5Oclose(oid);
         }
-        catch (HDF5Exception ex) {
+        catch (Exception ex) {
+        	log.debug("getGroup {} H5Oclose failure: ", name, ex);
         }
         return group;
     }
@@ -2716,11 +2835,17 @@ public class H5File extends FileFormat {
             return null;
         }
 
+        if (obj.getFullName().equals("/")) {
+            return null;
+        }
+
         H5L_info_t link_info = null;
         try {
             link_info = H5.H5Lget_info(obj.getFID(), obj.getFullName(), HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
+        	log.debug("H5Lget_info {} failure: ", obj.getFullName());
+        	log.trace("H5Lget_info {} failure: ", obj.getFullName(), err);
         }
         if (link_info != null) {
             if ((link_info.type == HDF5Constants.H5L_TYPE_SOFT) || (link_info.type == HDF5Constants.H5L_TYPE_EXTERNAL)) {
@@ -2728,17 +2853,31 @@ public class H5File extends FileFormat {
                     H5.H5Lget_val(obj.getFID(), obj.getFullName(), link_value, HDF5Constants.H5P_DEFAULT);
                 }
                 catch (Exception ex) {
-                    ex.printStackTrace();
+                	log.debug("H5Lget_val {} failure: ", obj.getFullName(), ex);
                 }
                 if (link_info.type == HDF5Constants.H5L_TYPE_SOFT)
                     targetObjName = link_value[0];
                 else if (link_info.type == HDF5Constants.H5L_TYPE_EXTERNAL) {
-
                     targetObjName = link_value[1] + FileFormat.FILE_OBJ_SEP + link_value[0];
                 }
             }
         }
         return targetObjName;
+    }
+
+    /**
+     * Export dataset.
+     * 
+     * @param file_export_name
+     *            The file name to export data into.
+     * @param file_name
+     *            The name of the HDF5 file containing the dataset.
+     * @param object_path
+     *            The full path of the dataset to be exported.
+     * @throws Exception
+     */
+    public void exportDataset(String file_export_name, String file_name, String object_path, int binary_order) throws Exception {
+        H5.H5export_dataset(file_export_name, file_name, object_path, binary_order);
     }
 
     /**

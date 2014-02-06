@@ -16,6 +16,9 @@ package ncsa.hdf.object;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * An attribute is a (name, value) pair of metadata attached to a primary data
@@ -32,7 +35,7 @@ import java.math.BigInteger;
  * elements.
  * 
  * <pre>
- * // Example of creatinge a new attribute
+ * // Example of creating a new attribute
  * // The name of the new attribute
  * String name = "Data range";
  * // Creating an unsigned 1-byte integer datatype
@@ -59,6 +62,8 @@ import java.math.BigInteger;
  */
 public class Attribute implements Metadata {
     private static final long serialVersionUID = 2072473407027648309L;
+    
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Attribute.class);
 
     /** The name of the attribute. */
     private final String      name;
@@ -74,6 +79,9 @@ public class Attribute implements Metadata {
 
     /** The value of the attribute. */
     private Object            value;
+    
+    /** additional information and properties for the attribute */
+    private Map<String, Object>  properties;
 
     /** Flag to indicate if the datatype is an unsigned integer. */
     private boolean           isUnsigned;
@@ -159,6 +167,7 @@ public class Attribute implements Metadata {
         type = attrType;
         dims = attrDims;
         value = null;
+        properties = new HashMap();
         rank = 0;
 
         if (dims != null) {
@@ -189,7 +198,32 @@ public class Attribute implements Metadata {
     public Object getValue() {
         return value;
     }
+    
+    /**
+     * set a property for the attribute. 
+     */
+    public void setProperty(String key, Object value) 
+    {
+    	properties.put(key, value);
+    }
+    
+    /**
+     * get a property for a given key. 
+     */
+    public Object getProperty(String key) 
+    {
+    	return properties.get(key);
+    }
 
+    /**
+     * get all property keys. 
+     */
+    public Collection<String> getPropertyKeys() 
+    {
+    	return properties.keySet();
+    }
+
+    
     /**
      * Sets the value of the attribute. It returns null if failed to retrieve
      * the name from file.
@@ -262,7 +296,7 @@ public class Attribute implements Metadata {
     /**
      * Return the name of the attribute.
      * 
-     * @see toString(String delimiter)
+     * @see #toString(String delimiter)
      */
     @Override
     public String toString() {
@@ -290,6 +324,7 @@ public class Attribute implements Metadata {
         if (value == null) {
             return null;
         }
+    	log.trace("toString: start");
 
         Class<? extends Object> valClass = value.getClass();
 
@@ -305,6 +340,7 @@ public class Attribute implements Metadata {
         if (is_unsigned) {
             String cname = valClass.getName();
             char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+        	log.debug("toString: is_unsigned with cname={} dname={}", cname, dname);
 
             switch (dname) {
                 case 'B':
@@ -356,9 +392,9 @@ public class Attribute implements Metadata {
                     }
                     break;
                 case 'J':
-                    String theValue = "";
                     long[] larray = (long[]) value;
                     Long l = (Long) larray[0];
+                    String theValue = Long.toString(l);
                     if (l < 0) {
                         l = (l << 1) >>> 1;
                         BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
@@ -370,6 +406,7 @@ public class Attribute implements Metadata {
                     for (int i = 1; i < n; i++) {
                         sb.append(delimiter);
                         l = (Long) larray[i];
+                        theValue = Long.toString(l);
                         if (l < 0) {
                             l = (l << 1) >>> 1;
                             BigInteger big1 = new BigInteger("9223372036854775808"); // 2^65
@@ -397,6 +434,7 @@ public class Attribute implements Metadata {
             }
         }
 
+    	log.trace("toString: finish");
         return sb.toString();
     }
 }
