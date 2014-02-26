@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension-point id="org.dawnsci.usagedata.gathering.monitors" name="Usage Data Monitors" schema="schema/org.dawnsci.usagedata.gathering.monitors.exsd"/>
+   <extension-point id="org.dawnsci.usagedata.listeners.event" name="Event Listener" schema="schema/org.dawnsci.usagedata.listeners.event.exsd"/>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="org.dawnsci.usagedata.internal.gathering.Startup"></startup>
+   </extension>
+   <extension
+         point="org.dawnsci.usagedata.gathering.monitors">
+      <monitor
+            class="org.dawnsci.usagedata.internal.gathering.monitors.PartUsageMonitor">
+      </monitor>
+      <monitor
+            class="org.dawnsci.usagedata.internal.gathering.monitors.BundleUsageMonitor">
+      </monitor>
+      <monitor
+            class="org.dawnsci.usagedata.internal.gathering.monitors.CommandUsageMonitor">
+      </monitor>
+      <monitor
+            class="org.dawnsci.usagedata.internal.gathering.monitors.SystemInfoMonitor">
+      </monitor>
+      <monitor
+            class="org.dawnsci.usagedata.internal.gathering.monitors.LogMonitor">
+      </monitor>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="org.dawnsci.usagedata.internal.gathering.settings.UsageDataCapturePreferenceInitializer">
+      </initializer>
+   </extension>
+
+</plugin>
