@@ -4,8 +4,7 @@
       label="Usage Data Collector"
       version="1.4.0.qualifier"
       provider-name="Eclipse Packaging Project"
-      license-feature="org.eclipse.platform"
-      license-feature-version="3.7.0.qualifier">
+      license-feature="org.eclipse.platform">
 
    <description url="http://www.dawnsci.org/documentation/usagecollector">
       The Usage Data Collector collects information
