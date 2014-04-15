@@ -17,11 +17,15 @@ import org.eclipse.jface.preference.IPreferenceStore;
 public class UsageDataRecordingPreferenceInitializer extends AbstractPreferenceInitializer {
 	@Override
 	public void initializeDefaultPreferences() {
+		String defaultAskToUpload = System.getProperty(UsageDataRecordingSettings.ASK_TO_UPLOAD_KEY, String.valueOf(UsageDataRecordingSettings.ASK_TO_UPLOAD_DEFAULT));
+		String defaultUploadPeriod = System.getProperty(UsageDataRecordingSettings.UPLOAD_PERIOD_KEY, String.valueOf(UsageDataRecordingSettings.UPLOAD_PERIOD_DEFAULT));
+		String defaultFilterEcplise = System.getProperty(UsageDataRecordingSettings.FILTER_ECLIPSE_BUNDLES_ONLY_KEY, "false");
+		String defaultNonBundleEvent = System.getProperty(UsageDataRecordingSettings.FILTER_NON_BUNDLE_EVENT_ONLY_KEY, "true");
 		IPreferenceStore preferenceStore = UsageDataRecordingActivator.getDefault().getPreferenceStore();
-		preferenceStore.setDefault(UsageDataRecordingSettings.UPLOAD_PERIOD_KEY, UsageDataRecordingSettings.UPLOAD_PERIOD_DEFAULT);
-		preferenceStore.setDefault(UsageDataRecordingSettings.ASK_TO_UPLOAD_KEY, UsageDataRecordingSettings.ASK_TO_UPLOAD_DEFAULT);
-		preferenceStore.setDefault(UsageDataRecordingSettings.FILTER_ECLIPSE_BUNDLES_ONLY_KEY, false);
-		preferenceStore.setDefault(UsageDataRecordingSettings.FILTER_NON_BUNDLE_EVENT_ONLY_KEY, true);
+		preferenceStore.setDefault(UsageDataRecordingSettings.UPLOAD_PERIOD_KEY, defaultUploadPeriod);
+		preferenceStore.setDefault(UsageDataRecordingSettings.ASK_TO_UPLOAD_KEY, defaultAskToUpload);
+		preferenceStore.setDefault(UsageDataRecordingSettings.FILTER_ECLIPSE_BUNDLES_ONLY_KEY, defaultFilterEcplise);
+		preferenceStore.setDefault(UsageDataRecordingSettings.FILTER_NON_BUNDLE_EVENT_ONLY_KEY, defaultNonBundleEvent);
 	}
 
 }
