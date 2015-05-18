@@ -4,7 +4,7 @@ Bundle-Name: Media
 Bundle-SymbolicName: org.monte.media
 Bundle-Version: 0.7.7.qualifier
 Bundle-Vendor: http://www.randelshofer.ch
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: lib/jai_core.jar,
  lib/jmf.jar,
  .

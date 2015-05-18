@@ -74,4 +74,4 @@ Export-Package: Acme,
  org.jmol.viewer,
  org.openscience.jmol.app,
  org.openscience.jmol.app.webexport
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7

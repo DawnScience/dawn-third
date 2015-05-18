@@ -4,7 +4,7 @@ Bundle-Name: Aparapi
 Bundle-SymbolicName: com.amd.aparapi;singleton:=true
 Bundle-Version: 1.0.0.20120506
 Export-Package: com.amd.aparapi;version="1.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-NativeCode: lib/win32-x86/aparapi_x86.dll;
  osname=Win32; processor=x86,
  lib/win32-x86_64/aparapi_x86_64.dll;
