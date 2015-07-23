@@ -82,12 +82,12 @@ public class H4Group extends Group
 
     /*
      * (non-Javadoc)
-     * @see ncsa.hdf.object.DataFormat#hasAttribute()
+     * @see hdf.object.DataFormat#hasAttribute()
      */
     public boolean hasAttribute () 
     { 
         if (nAttributes < 0) {
-            int vgid = open();
+            int vgid = (int) open();
             try {  
                 nAttributes =HDFLibrary.Vnattrs(vgid);
                 nMembersInFile = HDFLibrary.Vntagrefs(vgid);
@@ -111,7 +111,7 @@ public class H4Group extends Group
             attributeList = new Vector();
         }
 
-        int vgid = open();
+        int vgid = (int) open();
         if (vgid <= 0) {
             return attributeList;
         }
@@ -192,15 +192,20 @@ public class H4Group extends Group
    // To do: implementing DataFormat
     public void removeMetadata(Object info) throws HDFException {;}
 
+    // implementing DataFormat
+    public void updateMetadata(Object info) throws Exception {
+        log.trace("updateMetadata(): disabled");
+    }
+
    // Implementing HObject
     @Override
-    public int open()
+    public long open()
     {
         int vgid = -1;
 
         // try to open with write permission
         try {
-            vgid = HDFLibrary.Vattach(getFID(), (int)oid[1], "w");
+            vgid = HDFLibrary.Vattach((int) getFID(), (int)oid[1], "w");
         } 
         catch (HDFException ex) {
             vgid = -1;
@@ -209,7 +214,7 @@ public class H4Group extends Group
         // try to open with read-only permission
         if (vgid < 0) {
             try {
-                vgid = HDFLibrary.Vattach(getFID(), (int)oid[1], "r");
+                vgid = HDFLibrary.Vattach((int) getFID(), (int)oid[1], "r");
             } 
             catch (HDFException ex) {
                 vgid = -1;
@@ -221,10 +226,10 @@ public class H4Group extends Group
 
     /** close group access. */
     @Override
-    public void close(int vgid)
+    public void close(long vgid)
     {
         try { 
-        	HDFLibrary.Vdetach(vgid); 
+        	HDFLibrary.Vdetach((int) vgid); 
         }
         catch (Exception ex) {
         	log.debug("close.Vdetach:", ex);
@@ -256,7 +261,7 @@ public class H4Group extends Group
         if (!pgroup.isRoot()) {
             path = pgroup.getPath()+pgroup.getName()+HObject.separator;
         }
-        int fileid = file.open();
+        int fileid = (int) file.open();
         if (fileid < 0) {
             return null;
         }
@@ -272,7 +277,7 @@ public class H4Group extends Group
 
         if (!pgroup.isRoot()) {
             // add the dataset to the parent group
-            int pid = pgroup.open();
+            int pid = (int) pgroup.open();
             if (pid < 0) {
                 throw (new HDFException("Unable to open the parent group."));
             }

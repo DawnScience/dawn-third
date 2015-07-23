@@ -46,6 +46,8 @@ public abstract class Datatype extends HObject {
      */
     private static final long serialVersionUID = -581324710549963177L;
 
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Datatype.class);
+
     /**
      * The default definition for datatype size, order, and sign.
      */
@@ -306,6 +308,7 @@ public abstract class Datatype extends HObject {
         enumMembers = null;
         baseType = tbase;
         dims = null;
+        log.trace("datatypeClass={} datatypeSize={} datatypeOrder={} datatypeSign={} baseType={}", datatypeClass, datatypeSize, datatypeOrder, datatypeSign, baseType);
     }
 
     /**
@@ -327,7 +330,7 @@ public abstract class Datatype extends HObject {
      * @param type
      *            the native datatype identifier.
      */
-    public Datatype(int type) {
+    public Datatype(long type) {
         this(CLASS_NO_CLASS, NATIVE, NATIVE, NATIVE);
     }
 
@@ -391,7 +394,7 @@ public abstract class Datatype extends HObject {
     /**
      * Returns the datatype of array element for ARRAY datatype.
      * <p>
-     * For example, a dataset set of ARRAY of inteter, The datatype of the
+     * For example, a dataset set of ARRAY of integer, The datatype of the
      * dataset is ARRAY. The datatype of the base type is integer.
      * 
      * @return the the datatype of array element for ARRAY datatype.
@@ -462,7 +465,7 @@ public abstract class Datatype extends HObject {
      * 
      * @return the identifier of the native datatype.
      */
-    public abstract int toNative();
+    public abstract long toNative();
 
     /**
      * Set datatype characteristics (class, size, byte order and sign) from a
@@ -486,7 +489,7 @@ public abstract class Datatype extends HObject {
      * @param nativeID
      *            the datatype identifier.
      */
-    public abstract void fromNative(int nativeID);
+    public abstract void fromNative(long nativeID);
 
     /**
      * Returns a short text description of this datatype.
@@ -520,7 +523,7 @@ public abstract class Datatype extends HObject {
             description = "Bitfield";
             break;
         case CLASS_ENUM:
-            description = "enum";
+            description = String.valueOf(datatypeSize * 8) + "-bit enum";
             break;
         case CLASS_ARRAY:
             description = "Array";
@@ -536,6 +539,7 @@ public abstract class Datatype extends HObject {
             break;
         }
 
+        log.trace("description={}", description);
         return description;
     }
 
@@ -556,7 +560,7 @@ public abstract class Datatype extends HObject {
      *         value.
      */
     @Override
-    public int open() {
+    public long open() {
         return -1;
     }
 
@@ -569,12 +573,12 @@ public abstract class Datatype extends HObject {
      *            the datatype identifier to close.
      */
     @Override
-    public abstract void close(int id);
+    public abstract void close(long id);
 
     /*
      * (non-Javadoc)
      * 
-     * @see ncsa.hdf.object.DataFormat#getMetadata()
+     * @see hdf.object.DataFormat#getMetadata()
      */
     public List getMetadata() throws Exception {
         return null;
@@ -583,7 +587,7 @@ public abstract class Datatype extends HObject {
     /*
      * (non-Javadoc)
      * 
-     * @see ncsa.hdf.object.DataFormat#writeMetadata(java.lang.Object)
+     * @see hdf.object.DataFormat#writeMetadata(java.lang.Object)
      */
     public void writeMetadata(Object info) throws Exception {
         ;
@@ -592,9 +596,18 @@ public abstract class Datatype extends HObject {
     /*
      * (non-Javadoc)
      * 
-     * @see ncsa.hdf.object.DataFormat#removeMetadata(java.lang.Object)
+     * @see hdf.object.DataFormat#removeMetadata(java.lang.Object)
      */
     public void removeMetadata(Object info) throws Exception {
+        ;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see hdf.object.DataFormat#updateMetadata(java.lang.Object)
+     */
+    public void updateMetadata(Object info) throws Exception {
         ;
     }
 }

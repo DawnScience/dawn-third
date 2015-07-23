@@ -67,7 +67,7 @@ public class FitsDatatype extends Datatype
 
     /*
      * (non-Javadoc)
-     * @see ncsa.hdf.object.DataFormat#hasAttribute()
+     * @see hdf.object.DataFormat#hasAttribute()
      */
     public boolean hasAttribute () { return false; }
 
@@ -125,9 +125,9 @@ public class FitsDatatype extends Datatype
      * @param nativeID the fits native datatype.
      */
     @Override
-    public void fromNative(int dtype)
+    public void fromNative(long dtype)
     {
-        switch (dtype) {
+        switch ((int) dtype) {
             case BasicHDU.BITPIX_BYTE:
                 datatypeClass = CLASS_INTEGER;
                 datatypeSize = 1;
@@ -206,7 +206,7 @@ public class FitsDatatype extends Datatype
 
     // implementing Datatype
     @Override
-    public int toNative() {
+    public long toNative() {
         if (datatypeClass == CLASS_INTEGER) {
             if (datatypeSize == 1) {
                 nativeType = BasicHDU.BITPIX_BYTE;
@@ -235,10 +235,10 @@ public class FitsDatatype extends Datatype
 
     /*
      * (non-Javadoc)
-     * @see ncsa.hdf.object.Datatype#close(int)
+     * @see hdf.object.Datatype#close(int)
      */
     @Override
-    public void close(int id) {;}
+    public void close(long id) {;}
 
   //Implementing DataFormat
     public List getMetadata(int... attrPropList) throws Exception {

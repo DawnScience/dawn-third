@@ -22,7 +22,7 @@ import java.util.List;
  * writing data content or data attribute from memory into file.
  * <p>
  * 
- * @see ncsa.hdf.object.HObject
+ * @see hdf.object.HObject
  * 
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
@@ -71,6 +71,14 @@ public interface DataFormat {
      *            the metadata to delete.
      */
     public abstract void removeMetadata(Object info) throws Exception;
+
+    /**
+     * Updates an existing metadata from this data object.
+     * 
+     * @param info
+     *            the metadata to update.
+     */
+    public abstract void updateMetadata(Object info) throws Exception;
 
     /**
      * Check if the object has any attributes attached.

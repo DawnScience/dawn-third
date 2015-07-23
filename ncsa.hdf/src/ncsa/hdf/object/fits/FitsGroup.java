@@ -63,7 +63,7 @@ public class FitsGroup extends Group
 
     /*
      * (non-Javadoc)
-     * @see ncsa.hdf.object.DataFormat#hasAttribute()
+     * @see hdf.object.DataFormat#hasAttribute()
      */
     public boolean hasAttribute () { return false; }
 
@@ -102,16 +102,25 @@ public class FitsGroup extends Group
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
+    /*
+     * (non-Javadoc)
+     * @see hdf.object.DataFormat#updateMetadata(java.lang.Object)
+     */
+    public void updateMetadata(Object info) throws Exception {
+        // not supported
+        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
+    }
+
     // Implementing DataFormat
     @Override
-    public int open() {
+    public long open() {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }
 
     /** close group access */
     @Override
-    public void close(int gid) {
+    public void close(long gid) {
         // not supported
         throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
     }

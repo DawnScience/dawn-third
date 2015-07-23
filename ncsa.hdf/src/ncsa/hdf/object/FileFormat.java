@@ -143,7 +143,7 @@ public abstract class FileFormat extends File {
     /**
      * A separator that separates file name and object name.
      * 
-     * @see ncsa.hdf.object.FileFormat#getHObject(String)
+     * @see hdf.object.FileFormat#getHObject(String)
      */
     public static final String                   FILE_OBJ_SEP       = "://";
 
@@ -189,7 +189,7 @@ public abstract class FileFormat extends File {
     /**
      * File identifier. -1 indicates the file is not open.
      */
-    protected int                                fid                = -1;
+    protected long                                fid                = -1;
 
     /**
      * The absolute pathname (path+name) of the file.
@@ -213,10 +213,11 @@ public abstract class FileFormat extends File {
         // add HDF4 to default modules
         if (FileFormat.getFileFormat(FILE_TYPE_HDF4) == null) {
             try {
-                Class fileclass = Class.forName("ncsa.hdf.object.h4.H4File");
+                Class fileclass = Class.forName("hdf.object.h4.H4File");
                 FileFormat fileformat = (FileFormat) fileclass.newInstance();
                 if (fileformat != null) {
                     FileFormat.addFileFormat(FILE_TYPE_HDF4, fileformat);
+                    log.debug("FILE_TYPE_HDF4 file format added");
                 }
             }
             catch (Throwable err) {
@@ -224,13 +225,14 @@ public abstract class FileFormat extends File {
             }
         }
 
-        // add HDF4 to default modules
+        // add HDF5 to default modules
         if (FileFormat.getFileFormat(FILE_TYPE_HDF5) == null) {
             try {
-                Class fileclass = Class.forName("ncsa.hdf.object.h5.H5File");
+                Class fileclass = Class.forName("hdf.object.h5.H5File");
                 FileFormat fileformat = (FileFormat) fileclass.newInstance();
                 if (fileformat != null) {
                     FileFormat.addFileFormat(FILE_TYPE_HDF5, fileformat);
+                    log.debug("FILE_TYPE_HDF5 file format added");
                 }
             }
             catch (Throwable err) {
@@ -241,10 +243,11 @@ public abstract class FileFormat extends File {
         // add NetCDF to default modules
         if (FileFormat.getFileFormat("NetCDF") == null) {
             try {
-                Class fileclass = Class.forName("ncsa.hdf.object.nc2.NC2File");
+                Class fileclass = Class.forName("hdf.object.nc2.NC2File");
                 FileFormat fileformat = (FileFormat) fileclass.newInstance();
                 if (fileformat != null) {
                     FileFormat.addFileFormat("NetCDF", fileformat);
+                    log.debug("NetCDF file format added");
                 }
             }
             catch (Throwable err) {
@@ -255,10 +258,11 @@ public abstract class FileFormat extends File {
         // add Fits to default modules
         if (FileFormat.getFileFormat("Fits") == null) {
             try {
-                Class fileclass = Class.forName("ncsa.hdf.object.fits.FitsFile");
+                Class fileclass = Class.forName("hdf.object.fits.FitsFile");
                 FileFormat fileformat = (FileFormat) fileclass.newInstance();
                 if (fileformat != null) {
                     FileFormat.addFileFormat("Fits", fileformat);
+                    log.debug("Fits file format added");
                 }
             }
             catch (Throwable err) {
@@ -816,7 +820,7 @@ public abstract class FileFormat extends File {
      * 
      * @return The file identifer, or -1 if there is no file open.
      */
-    public final int getFID() {
+    public final long getFID() {
         return fid;
     }
 
@@ -982,7 +986,7 @@ public abstract class FileFormat extends File {
      * @see #getInstance(String)
      * @see #getRootNode()
      */
-    public abstract int open() throws Exception;
+    public abstract long open() throws Exception;
 
     /**
      * Closes file associated with this instance.
@@ -1888,7 +1892,7 @@ public abstract class FileFormat extends File {
      * @throws Exception
      * 
      */
-    public int open(int... propList) throws Exception {
+    public long open(int... propList) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
     }
 
@@ -1915,7 +1919,7 @@ public abstract class FileFormat extends File {
      * @return The new group if successful; otherwise returns null.
      * @throws Exception
      */
-    public Group createGroup(String name, Group pgroup, int... gplist) throws Exception {
+    public Group createGroup(String name, Group pgroup, long... gplist) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
     }
 
@@ -1937,7 +1941,7 @@ public abstract class FileFormat extends File {
      * @return The gcpl identifier.
      * @throws Exception
      */
-    public int createGcpl(int creationorder, int maxcompact, int mindense) throws Exception {
+    public long createGcpl(int creationorder, int maxcompact, int mindense) throws Exception {
         throw new UnsupportedOperationException("Unsupported operation. Subclasses must implement it.");
     }
 

@@ -69,7 +69,7 @@ public class NC2Group extends Group {
     /*
      * (non-Javadoc)
      * 
-     * @see ncsa.hdf.object.DataFormat#hasAttribute()
+     * @see hdf.object.DataFormat#hasAttribute()
      */
     public boolean hasAttribute() {
         return false;
@@ -133,9 +133,15 @@ public class NC2Group extends Group {
                 "Unsupported operation for NetCDF.");
     }
 
+    // implementing DataFormat
+    public void updateMetadata(Object info) throws Exception {
+        // not supported
+        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
+    }
+
     // Implementing DataFormat
     @Override
-    public int open() {
+    public long open() {
         // not supported
         throw new UnsupportedOperationException(
                 "Unsupported operation for NetCDF.");
@@ -143,7 +149,7 @@ public class NC2Group extends Group {
 
     /** close group access */
     @Override
-    public void close(int gid) {
+    public void close(long gid) {
         // not supported
         throw new UnsupportedOperationException(
                 "Unsupported operation for NetCDF.");

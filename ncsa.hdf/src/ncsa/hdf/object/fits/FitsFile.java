@@ -177,7 +177,7 @@ public class FitsFile extends FileFormat
      * Regardless of specified access, the FitsFile implementation uses
      * READ.
      *
-     * @see ncsa.hdf.object.FileFormat@createInstance(java.lang.String, int)
+     * @see hdf.object.FileFormat@createInstance(java.lang.String, int)
      */
     @Override
     public FileFormat createInstance(String filename, int access) 
@@ -188,7 +188,7 @@ public class FitsFile extends FileFormat
 
     // Implementing FileFormat
     @Override
-    public int open() throws Exception {
+    public long open() throws Exception {
         if (!isFileOpen) {
             isFileOpen = true;
             rootNode = loadTree();

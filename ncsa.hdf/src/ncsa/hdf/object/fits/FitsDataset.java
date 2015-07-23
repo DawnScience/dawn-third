@@ -75,13 +75,13 @@ public class FitsDataset extends ScalarDS
     
     /*
      * (non-Javadoc)
-     * @see ncsa.hdf.object.DataFormat#hasAttribute()
+     * @see hdf.object.DataFormat#hasAttribute()
      */
     public boolean hasAttribute () { return false; }
 
     /*
      * (non-Javadoc)
-     * @see ncsa.hdf.object.Dataset#copy(ncsa.hdf.object.Group, java.lang.String, long[], java.lang.Object)
+     * @see hdf.object.Dataset#copy(hdf.object.Group, java.lang.String, long[], java.lang.Object)
      */
     @Override
     public Dataset copy(Group pgroup, String dstName, long[] dims, Object buff)
@@ -92,7 +92,7 @@ public class FitsDataset extends ScalarDS
 
     /*
      * (non-Javadoc)
-     * @see ncsa.hdf.object.Dataset#readBytes()
+     * @see hdf.object.Dataset#readBytes()
      */
     @Override
     public byte[] readBytes() throws Exception {
@@ -102,7 +102,7 @@ public class FitsDataset extends ScalarDS
 
     /*
      * (non-Javadoc)
-     * @see ncsa.hdf.object.Dataset#read()
+     * @see hdf.object.Dataset#read()
      */
     @Override
     public Object read() throws Exception {
@@ -132,7 +132,7 @@ public class FitsDataset extends ScalarDS
 
     /*
      * (non-Javadoc)
-     * @see ncsa.hdf.object.Dataset#write(java.lang.Object)
+     * @see hdf.object.Dataset#write(java.lang.Object)
      */
     @Override
     public void write(Object buf) throws Exception {
@@ -142,7 +142,7 @@ public class FitsDataset extends ScalarDS
 
     /*
      * (non-Javadoc)
-     * @see ncsa.hdf.object.DataFormat#getMetadata()
+     * @see hdf.object.DataFormat#getMetadata()
      */
     public List getMetadata() throws Exception {
         if (attributeList != null) {
@@ -186,7 +186,7 @@ public class FitsDataset extends ScalarDS
 
     /*
      * (non-Javadoc)
-     * @see ncsa.hdf.object.DataFormat#writeMetadata(java.lang.Object)
+     * @see hdf.object.DataFormat#writeMetadata(java.lang.Object)
      */
     public void writeMetadata(Object info) throws Exception {
         // not supported
@@ -195,7 +195,7 @@ public class FitsDataset extends ScalarDS
 
     /*
      * (non-Javadoc)
-     * @see ncsa.hdf.object.DataFormat#removeMetadata(java.lang.Object)
+     * @see hdf.object.DataFormat#removeMetadata(java.lang.Object)
      */
     public void removeMetadata(Object info) throws Exception {
         // not supported
@@ -204,21 +204,30 @@ public class FitsDataset extends ScalarDS
 
     /*
      * (non-Javadoc)
-     * @see ncsa.hdf.object.HObject#open()
+     * @see hdf.object.DataFormat#updateMetadata(java.lang.Object)
      */
-    @Override
-    public int open() { return -1;}
+    public void updateMetadata(Object info) throws Exception {
+        // not supported
+        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
+    }
 
     /*
      * (non-Javadoc)
-     * @see ncsa.hdf.object.HObject#close(int)
+     * @see hdf.object.HObject#open()
      */
     @Override
-    public void close(int did) {}
+    public long open() { return -1;}
 
     /*
      * (non-Javadoc)
-     * @see ncsa.hdf.object.Dataset#init()
+     * @see hdf.object.HObject#close(int)
+     */
+    @Override
+    public void close(long did) {}
+
+    /*
+     * (non-Javadoc)
+     * @see hdf.object.Dataset#init()
      */
     @Override
     public void init() {
@@ -289,7 +298,7 @@ public class FitsDataset extends ScalarDS
 
     /*
      * (non-Javadoc)
-     * @see ncsa.hdf.object.ScalarDS#getPalette()
+     * @see hdf.object.ScalarDS#getPalette()
      */
     @Override
     public byte[][] getPalette()
@@ -303,7 +312,7 @@ public class FitsDataset extends ScalarDS
 
     /*
      * (non-Javadoc)
-     * @see ncsa.hdf.object.ScalarDS#readPalette(int)
+     * @see hdf.object.ScalarDS#readPalette(int)
      */
     @Override
     public byte[][] readPalette(int idx) {
@@ -337,7 +346,7 @@ public class FitsDataset extends ScalarDS
 
     /*
      * (non-Javadoc)
-     * @see ncsa.hdf.object.ScalarDS#getPaletteRefs()
+     * @see hdf.object.ScalarDS#getPaletteRefs()
      */
     @Override
     public byte[] getPaletteRefs() {
@@ -346,7 +355,7 @@ public class FitsDataset extends ScalarDS
 
     /*
      * (non-Javadoc)
-     * @see ncsa.hdf.object.Dataset#getDatatype()
+     * @see hdf.object.Dataset#getDatatype()
      */
     @Override
     public Datatype getDatatype() {
@@ -360,7 +369,7 @@ public class FitsDataset extends ScalarDS
 
     /*
      * (non-Javadoc)
-     * @see ncsa.hdf.object.HObject#setName(java.lang.String)
+     * @see hdf.object.HObject#setName(java.lang.String)
      */
     @Override
     public void setName (String newName) throws Exception {

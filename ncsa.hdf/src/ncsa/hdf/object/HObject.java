@@ -72,7 +72,7 @@ import java.io.Serializable;
  * 
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
- * @see <a href="DataFormat.html">ncsa.hdf.object.DataFormat</a>
+ * @see <a href="DataFormat.html">hdf.object.DataFormat</a>
  */
 public abstract class HObject implements Serializable, DataFormat {
     /**
@@ -374,16 +374,16 @@ public abstract class HObject implements Serializable, DataFormat {
      * The return value is an object identifier obtained by implementing classes
      * such as H5.H5Dopen(). This function is needed to allow other objects to
      * be able to access the object. For instance, H5File class uses the open()
-     * function to obtain object identifier for copyAttributes(int src_id, int
+     * function to obtain object identifier for copyAttributes(long src_id, long
      * dst_id) and other purposes. The open() function should be used in pair
-     * with close(int) function.
+     * with close(long) function.
      * 
-     * @see ncsa.hdf.object.HObject#close(int)
+     * @see hdf.object.HObject#close(int)
      * 
      * @return the object identifier if successful; otherwise returns a negative
      *         value.
      */
-    public abstract int open();
+    public abstract long open();
 
     /**
      * Closes access to the object.
@@ -391,20 +391,20 @@ public abstract class HObject implements Serializable, DataFormat {
      * Sub-classes must implement this interface because different data objects
      * have their own ways of how the data resources are closed.
      * <p>
-     * For example, H5Group.close() calls the ncsa.hdf.hdf5lib.H5.H5Gclose()
+     * For example, H5Group.close() calls the hdf.hdf5lib.H5.H5Gclose()
      * method and closes the group resource specified by the group id.
      * 
      * @param id
      *            The object identifier.
      */
-    public abstract void close(int id);
+    public abstract void close(long id);
 
     /**
      * Returns the file identifier of of the file containing the object.
      * 
      * @return the file identifier of of the file containing the object.
      */
-    public final int getFID() {
+    public final long getFID() {
         if (fileFormat != null) {
             return fileFormat.getFID();
         }
@@ -484,7 +484,7 @@ public abstract class HObject implements Serializable, DataFormat {
      * HObject instead of the name of the class.
      * <p>
      * For example, toString() returns "Raster Image #2" instead of
-     * "ncsa.hdf.object.h4.H4SDS".
+     * "hdf.object.h4.H4SDS".
      * 
      * @return The name of the object.
      */

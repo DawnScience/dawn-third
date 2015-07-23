@@ -52,10 +52,10 @@ import java.util.Map;
  * // Set the attribute value
  * dataRange.setValue(value);
  * // See FileFormat.writeAttribute() for how to attach an attribute to an object, 
- * @see ncsa.hdf.object.FileFormat#writeAttribute(HObject, Attribute, boolean)
+ * @see hdf.object.FileFormat#writeAttribute(HObject, Attribute, boolean)
  * </pre>
  * 
- * @see ncsa.hdf.object.Datatype
+ * @see hdf.object.Datatype
  * 
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
@@ -117,7 +117,7 @@ public class Attribute implements Metadata {
      *            the dimension sizes of the attribute, null for scalar
      *            attribute
      * 
-     * @see ncsa.hdf.object.Datatype
+     * @see hdf.object.Datatype
      */
     public Attribute(String attrName, Datatype attrType, long[] attrDims) {
         this(attrName, attrType, attrDims, null);
@@ -160,7 +160,7 @@ public class Attribute implements Metadata {
      * @param attrValue
      *            the value of the attribute, null if no value
      * 
-     * @see ncsa.hdf.object.Datatype
+     * @see hdf.object.Datatype
      */
     public Attribute(String attrName, Datatype attrType, long[] attrDims, Object attrValue) {
         name = attrName;
@@ -169,6 +169,7 @@ public class Attribute implements Metadata {
         value = null;
         properties = new HashMap();
         rank = 0;
+        log.trace("Attribute: {}, attrValue={}", attrName, attrValue);
 
         if (dims != null) {
             rank = dims.length;
@@ -183,6 +184,7 @@ public class Attribute implements Metadata {
         }
 
         isUnsigned = (type.getDatatypeSign() == Datatype.SIGN_NONE);
+        log.trace("Attribute: finish");
     }
 
     /**
@@ -337,10 +339,12 @@ public class Attribute implements Metadata {
         int n = Array.getLength(value);
 
         boolean is_unsigned = (this.getType().getDatatypeSign() == Datatype.SIGN_NONE);
+        boolean is_enum = (this.getType().getDatatypeClass() == Datatype.CLASS_ENUM);
+        log.trace("toString: is_enum={} is_unsigned={} Array.getLength={}", is_enum, is_unsigned, n);
         if (is_unsigned) {
             String cname = valClass.getName();
             char dname = cname.charAt(cname.lastIndexOf("[") + 1);
-        	log.debug("toString: is_unsigned with cname={} dname={}", cname, dname);
+            log.trace("toString: is_unsigned with cname={} dname={}", cname, dname);
 
             switch (dname) {
                 case 'B':
@@ -415,6 +419,111 @@ public class Attribute implements Metadata {
                             theValue = big.toString();
                         }
                         sb.append(theValue);
+                    }
+                    break;
+                default:
+                    sb.append(Array.get(value, 0));
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        sb.append(Array.get(value, i));
+                    }
+                    break;
+            }
+        }
+        else if(is_enum) {
+            String cname = valClass.getName();
+            char dname = cname.charAt(cname.lastIndexOf("[") + 1);
+            log.trace("toString: is_enum with cname={} dname={}", cname, dname);
+
+            String enum_members = this.getType().getEnumMembers();
+            log.trace("toString: is_enum enum_members={}", enum_members);
+            Map<String,String> map = new HashMap<String,String>();
+            String[] entries = enum_members.split(",");
+            for (String entry : entries) {
+                String[] keyValue = entry.split("=");
+                map.put(keyValue[1],keyValue[0]);
+                log.trace("toString: is_enum value={} name={}", keyValue[1],keyValue[0]);
+            }
+            String theValue = null;
+            switch (dname) {
+                case 'B':
+                    byte[] barray = (byte[]) value;
+                    short sValue = barray[0];
+                    theValue = String.valueOf(sValue);
+                    if (map.containsKey(theValue)) {
+                        sb.append(map.get(theValue));
+                    }
+                    else
+                        sb.append(sValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        sValue = barray[i];
+                        theValue = String.valueOf(sValue);
+                        if (map.containsKey(theValue)) {
+                            sb.append(map.get(theValue));
+                        }
+                        else
+                            sb.append(sValue);
+                    }
+                    break;
+                case 'S':
+                    short[] sarray = (short[]) value;
+                    int iValue = sarray[0];
+                    theValue = String.valueOf(iValue);
+                    if (map.containsKey(theValue)) {
+                        sb.append(map.get(theValue));
+                    }
+                    else
+                        sb.append(iValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        iValue = sarray[i];
+                        theValue = String.valueOf(iValue);
+                        if (map.containsKey(theValue)) {
+                            sb.append(map.get(theValue));
+                        }
+                        else
+                            sb.append(iValue);
+                    }
+                    break;
+                case 'I':
+                    int[] iarray = (int[]) value;
+                    long lValue = iarray[0];
+                    theValue = String.valueOf(lValue);
+                    if (map.containsKey(theValue)) {
+                        sb.append(map.get(theValue));
+                    }
+                    else
+                        sb.append(lValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        lValue = iarray[i];
+                        theValue = String.valueOf(lValue);
+                        if (map.containsKey(theValue)) {
+                            sb.append(map.get(theValue));
+                        }
+                        else
+                            sb.append(lValue);
+                    }
+                    break;
+                case 'J':
+                    long[] larray = (long[]) value;
+                    Long l = (Long) larray[0];
+                    theValue = Long.toString(l);
+                    if (map.containsKey(theValue)) {
+                        sb.append(map.get(theValue));
+                    }
+                    else
+                        sb.append(theValue);
+                    for (int i = 1; i < n; i++) {
+                        sb.append(delimiter);
+                        l = (Long) larray[i];
+                        theValue = Long.toString(l);
+                        if (map.containsKey(theValue)) {
+                            sb.append(map.get(theValue));
+                        }
+                        else
+                            sb.append(theValue);
                     }
                     break;
                 default:

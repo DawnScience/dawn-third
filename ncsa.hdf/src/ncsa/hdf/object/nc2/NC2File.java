@@ -171,7 +171,7 @@ public class NC2File extends FileFormat {
      * <p>
      * Regardless of specified access, the NC2File implementation uses READ.
      * 
-     * @see ncsa.hdf.object.FileFormat#createInstance(java.lang.String, int)
+     * @see hdf.object.FileFormat#createInstance(java.lang.String, int)
      */
     @Override
     public FileFormat createInstance(String filename, int access)
@@ -181,7 +181,7 @@ public class NC2File extends FileFormat {
 
     // Implementing FileFormat
     @Override
-    public int open() throws Exception {
+    public long open() throws Exception {
         if (!isFileOpen) {
             isFileOpen = true;
             rootNode = loadTree();
@@ -364,10 +364,10 @@ public class NC2File extends FileFormat {
         throw new UnsupportedOperationException("Unsupported operation.");
     }
 
-    /** converts a ucar.nc2.Attribute into an ncsa.hdf.object.Attribute */
+    /** converts a ucar.nc2.Attribute into an hdf.object.Attribute */
     public static ncsa.hdf.object.Attribute convertAttribute(
             ucar.nc2.Attribute netcdfAttr) {
-        ncsa.hdf.object.Attribute ncsaAttr = null;
+    	ncsa.hdf.object.Attribute ncsaAttr = null;
 
         if (netcdfAttr == null) {
             return null;

@@ -159,14 +159,14 @@ public class H4GRImage extends ScalarDS
     
     /*
      * (non-Javadoc)
-     * @see ncsa.hdf.object.DataFormat#hasAttribute()
+     * @see hdf.object.DataFormat#hasAttribute()
      */
     public boolean hasAttribute () 
     { 
         if (nAttributes < 0) {
             grid = ((H4File)getFileFormat()).getGRAccessID();
 
-            int id = open();
+            int id = (int) open();
             String[] objName = {""};
             int[] grInfo = new int[4]; //ncomp, data_type, interlace, and num_attrs
             int[] idims = new int[2];
@@ -203,7 +203,7 @@ public class H4GRImage extends ScalarDS
             path = pgroup.getPath()+pgroup.getName()+HObject.separator;
         }
 
-        srcdid = open();
+        srcdid = (int) open();
         if (srcdid < 0) {
             return null;
         }
@@ -240,7 +240,7 @@ public class H4GRImage extends ScalarDS
 
         int ref = HDFLibrary.GRidtoref(dstdid);
         if (!pgroup.isRoot()) {
-            int vgid = pgroup.open();
+            int vgid = (int) pgroup.open();
             HDFLibrary.Vaddtagref(vgid, HDFConstants.DFTAG_RIG, ref);
             pgroup.close(vgid);
         }
@@ -315,7 +315,7 @@ public class H4GRImage extends ScalarDS
             init();
         }
 
-        int id = open();
+        int id = (int) open();
         if (id < 0) {
             return null;
         }
@@ -356,7 +356,7 @@ public class H4GRImage extends ScalarDS
             init();
         }
 
-        int id = open();
+        int id = (int) open();
         if (id < 0) {
             return null;
         }
@@ -406,7 +406,7 @@ public class H4GRImage extends ScalarDS
             return;
         }
 
-        int id = open();
+        int id = (int) open();
         if (id < 0) {
             return;
         }
@@ -449,7 +449,7 @@ public class H4GRImage extends ScalarDS
             return attributeList;
         }
 
-        int id = open();
+        int id = (int) open();
         String[] objName = {""};
         int[] grInfo = new int[4]; //ncomp, data_type, interlace, and num_attrs
         int[] idims = new int[2];
@@ -531,9 +531,14 @@ public class H4GRImage extends ScalarDS
     // ***** need to implement from DataFormat *****
     public void removeMetadata(Object info) throws HDFException {;}
 
+    // implementing DataFormat
+    public void updateMetadata(Object info) throws Exception {
+        log.trace("updateMetadata(): disabled");
+    }
+
     // Implementing HObject.
     @Override
-    public int open()
+    public long open()
     {
 
         int id = -1;
@@ -550,9 +555,9 @@ public class H4GRImage extends ScalarDS
 
     // Implementing HObject.
     @Override
-    public void close(int grid)
+    public void close(long grid)
     {
-        try { HDFLibrary.GRendaccess(grid); }
+        try { HDFLibrary.GRendaccess((int) grid); }
         catch (HDFException ex) {;}
     }
 
@@ -564,7 +569,7 @@ public class H4GRImage extends ScalarDS
             return; // already called. Initialize only once
         }
 
-        int id = open();
+        int id = (int) open();
         String[] objName = {""};
         int[] grInfo = new int[4]; //ncomp, data_type, interlace and num_attrs
         int[] idims = new int[2];
@@ -663,7 +668,7 @@ public class H4GRImage extends ScalarDS
             return palette;
         }
 
-        int id = open();
+        int id = (int) open();
         if (id < 0) {
             return null;
         }
@@ -812,7 +817,7 @@ public class H4GRImage extends ScalarDS
         int grid = -1;
         int vgid = -1;
         int gid = (file).getGRAccessID();
-        int tid = type.toNative();
+        int tid = (int) type.toNative();
 
         if(tid >= 0) {
 	        try {
@@ -849,7 +854,7 @@ public class H4GRImage extends ScalarDS
 
         if (!pgroup.isRoot()) {
             // add the dataset to the parent group
-            vgid = pgroup.open();
+            vgid = (int) pgroup.open();
             if (vgid < 0) {
                 if (grid > 0) {
                     HDFLibrary.GRendaccess(grid);

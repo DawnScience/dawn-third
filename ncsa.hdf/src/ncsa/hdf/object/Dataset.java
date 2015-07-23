@@ -26,8 +26,8 @@ import java.util.Vector;
  * library APIs directly. The read() and write functions hide all the details of
  * these calls from users.
  * 
- * @see ncsa.hdf.object.ScalarDS
- * @see ncsa.hdf.object.CompoundDS
+ * @see hdf.object.ScalarDS
+ * @see hdf.object.CompoundDS
  * 
  * @version 1.1 9/4/2007
  * @author Peter X. Cao
@@ -130,10 +130,15 @@ public abstract class Dataset extends HObject {
      */
     protected long[]          chunkSize;
 
-    /**
-     * The GZIP compression level.
-     */
+    /** The compression information. */
     protected String          compression;
+    public final static String          compression_gzip_txt = "GZIP: level = ";
+
+    /** The filters information. */
+    protected String          filters;
+
+    /** The storage information. */
+    protected String          storage;
 
     /** The datatype object of the dataset. */
     protected Datatype        datatype;
@@ -206,6 +211,8 @@ public abstract class Dataset extends HObject {
         selectedStride = null;
         chunkSize = null;
         compression = "NONE";
+        filters = "NONE";
+        storage = "NONE";
         dimNames = null;
 
         selectedIndex = new int[3];
@@ -679,7 +686,7 @@ public abstract class Dataset extends HObject {
      * short, int, float, double or String type based on the datatype of the
      * dataset.
      * <p>
-     * For CompoundDS, the meory data object is an java.util.List object. Each
+     * For CompoundDS, the memory data object is an java.util.List object. Each
      * element of the list is a data array that corresponds to a compound field.
      * <p>
      * For example, if compound dataset "comp" has the following nested
@@ -881,6 +888,28 @@ public abstract class Dataset extends HObject {
     }
 
     /**
+     * Returns the string representation of filter information.
+     * 
+     * @return the string representation of filter information.
+     */
+    public final String getFilters() {
+        if (rank < 0) init();
+
+        return filters;
+    }
+
+    /**
+     * Returns the string representation of storage information.
+     * 
+     * @return the string representation of storage information.
+     */
+    public final String getStorage() {
+        if (rank < 0) init();
+
+        return storage;
+    }
+
+    /**
      * Returns the array that contains the dimension sizes of the chunk of the
      * dataset. Returns null if the dataset is not chunked.
      * 
@@ -974,7 +1003,7 @@ public abstract class Dataset extends HObject {
         String cname = data_class.getName();
         char dname = cname.charAt(cname.lastIndexOf("[") + 1);
         int size = Array.getLength(data_in);
-        log.debug("convertFromUnsignedC: cname={} dname={} size={}", cname, dname, size);
+        log.trace("convertFromUnsignedC: cname={} dname={} size={}", cname, dname, size);
 
         if (dname == 'B') {
             short[] sdata = null;
@@ -1078,7 +1107,7 @@ public abstract class Dataset extends HObject {
         String cname = data_class.getName();
         char dname = cname.charAt(cname.lastIndexOf("[") + 1);
         int size = Array.getLength(data_in);
-        log.debug("convertToUnsignedC: cname={} dname={} size={}", cname, dname, size);
+        log.trace("convertToUnsignedC: cname={} dname={} size={}", cname, dname, size);
 
         if (dname == 'S') {
             byte[] bdata = null;
@@ -1164,7 +1193,7 @@ public abstract class Dataset extends HObject {
         }
 
         int n = bytes.length / length;
-        log.debug("byteToString: n={} from length of {}", n, length);
+        log.trace("byteToString: n={} from length of {}", n, length);
         // String bigstr = new String(bytes);
         String[] strArray = new String[n];
         String str = null;
@@ -1172,7 +1201,7 @@ public abstract class Dataset extends HObject {
         for (int i = 0; i < n; i++) {
             str = new String(bytes, i * length, length);
             // bigstr.substring uses less memory space
-            // NOTE: bigstr does not work on linus if bytes.length is very large
+            // NOTE: bigstr does not work on linux if bytes.length is very large
             // see bug 1091
             // offset = i*length;
             // str = bigstr.substring(offset, offset+length);
@@ -1220,7 +1249,7 @@ public abstract class Dataset extends HObject {
 
         int size = strings.length;
         byte[] bytes = new byte[size * length];
-        log.debug("stringToByte: size={} length={}", size, length);
+        log.trace("stringToByte: size={} length={}", size, length);
         StringBuffer strBuff = new StringBuffer(length);
         for (int i = 0; i < size; i++) {
             // initialize the string with spaces
@@ -1265,7 +1294,7 @@ public abstract class Dataset extends HObject {
      * 
      * @return true if the datatype is a string; otherwise returns false.
      */
-    public boolean isString(int tid) {
+    public boolean isString(long tid) {
         return false;
     }
 
@@ -1278,7 +1307,7 @@ public abstract class Dataset extends HObject {
      * 
      * @return The size of the datatype
      */
-    public int getSize(int tid) {
+    public long getSize(long tid) {
         return -1;
     }
 

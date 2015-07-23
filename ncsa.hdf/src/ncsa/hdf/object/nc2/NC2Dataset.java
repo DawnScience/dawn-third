@@ -70,7 +70,7 @@ public class NC2Dataset extends ScalarDS {
     /*
      * (non-Javadoc)
      * 
-     * @see ncsa.hdf.object.DataFormat#hasAttribute()
+     * @see hdf.object.DataFormat#hasAttribute()
      */
     public boolean hasAttribute() {
         return false;
@@ -194,15 +194,21 @@ public class NC2Dataset extends ScalarDS {
                 "Unsupported operation for NetCDF.");
     }
 
+    // implementing DataFormat
+    public void updateMetadata(Object info) throws Exception {
+        // not supported
+        throw new UnsupportedOperationException("Unsupported operation for NetCDF.");
+    }
+
     // Implementing HObject
     @Override
-    public int open() {
+    public long open() {
         return -1;
     }
 
     // Implementing HObject
     @Override
-    public void close(int did) {
+    public void close(long did) {
     }
 
     /**

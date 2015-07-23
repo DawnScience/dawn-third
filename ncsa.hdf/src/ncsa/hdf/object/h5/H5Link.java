@@ -65,11 +65,11 @@ public class H5Link extends HObject {
     }
     
     @Override
-    public void close(int id) {        
+    public void close(long id) {        
     }
 
     @Override
-    public int open() {
+    public long open() {
         return 0;
     }
 
@@ -93,6 +93,9 @@ public class H5Link extends HObject {
     public void writeMetadata(Object info) throws Exception {
     }
 
+    public void updateMetadata(Object info) throws Exception {
+    }
+
     public List getMetadata(int... attrPropList) throws Exception {
         return null;
     }
@@ -100,7 +103,7 @@ public class H5Link extends HObject {
     /*
      * (non-Javadoc)
      * 
-     * @see ncsa.hdf.object.HObject#setName(java.lang.String)
+     * @see hdf.object.HObject#setName(java.lang.String)
      */
     @Override
     public void setName(String newName) throws Exception {
