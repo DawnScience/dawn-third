@@ -1,6 +1,8 @@
 hdf5-1.9.222-swmr0 (20150715),
 hdf-java-svn (http://svn.hdfgroup.uiuc.edu/hdf-java/trunk, r2855, 20150713), 
 hdfview2-svn (http://svn.hdfgroup.uiuc.edu/hdfview/branches/hdfview-2, r59, 20150702)
+lz4 (https://github.com/Cyan4973/lz4, r131, 20150629)
+Dectris HDF5 plugin (https://github.com/dectris/HDF5Plugin, 20130903)
 
 (Note linux 32, windows 32/64 and macosx still to do...)
 
