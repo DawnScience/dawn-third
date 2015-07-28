@@ -25,8 +25,7 @@ Export-Package: ncsa.hdf.hdf5lib,
  ncsa.hdf.object,
  ncsa.hdf.object.fits,
  ncsa.hdf.object.h4,
- ncsa.hdf.object.h5,
- ncsa.hdf.view
+ ncsa.hdf.object.h5
 Bundle-ClassPath: fits.jar,
  netcdf.jar,
  .
