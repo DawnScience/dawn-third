@@ -1,7 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: HDF
+Bundle-Name: hdf
 Bundle-SymbolicName: ncsa.hdf;singleton:=true
+Bundle-Vendor: The HDF Group
 Bundle-Version: 2.9.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-NativeCode: lib/linux-x86/libjhdf.so; lib/linux-x86/libjhdf5.so;
