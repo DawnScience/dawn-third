@@ -213,7 +213,7 @@ public abstract class FileFormat extends File {
         // add HDF4 to default modules
         if (FileFormat.getFileFormat(FILE_TYPE_HDF4) == null) {
             try {
-                Class fileclass = Class.forName("hdf.object.h4.H4File");
+                Class fileclass = Class.forName("ncsa.hdf.object.h4.H4File");
                 FileFormat fileformat = (FileFormat) fileclass.newInstance();
                 if (fileformat != null) {
                     FileFormat.addFileFormat(FILE_TYPE_HDF4, fileformat);
@@ -228,7 +228,7 @@ public abstract class FileFormat extends File {
         // add HDF5 to default modules
         if (FileFormat.getFileFormat(FILE_TYPE_HDF5) == null) {
             try {
-                Class fileclass = Class.forName("hdf.object.h5.H5File");
+                Class fileclass = Class.forName("ncsa.hdf.object.h5.H5File");
                 FileFormat fileformat = (FileFormat) fileclass.newInstance();
                 if (fileformat != null) {
                     FileFormat.addFileFormat(FILE_TYPE_HDF5, fileformat);
@@ -243,7 +243,7 @@ public abstract class FileFormat extends File {
         // add NetCDF to default modules
         if (FileFormat.getFileFormat("NetCDF") == null) {
             try {
-                Class fileclass = Class.forName("hdf.object.nc2.NC2File");
+                Class fileclass = Class.forName("ncsa.hdf.object.nc2.NC2File");
                 FileFormat fileformat = (FileFormat) fileclass.newInstance();
                 if (fileformat != null) {
                     FileFormat.addFileFormat("NetCDF", fileformat);
@@ -258,7 +258,7 @@ public abstract class FileFormat extends File {
         // add Fits to default modules
         if (FileFormat.getFileFormat("Fits") == null) {
             try {
-                Class fileclass = Class.forName("hdf.object.fits.FitsFile");
+                Class fileclass = Class.forName("ncsa.hdf.object.fits.FitsFile");
                 FileFormat fileformat = (FileFormat) fileclass.newInstance();
                 if (fileformat != null) {
                     FileFormat.addFileFormat("Fits", fileformat);
