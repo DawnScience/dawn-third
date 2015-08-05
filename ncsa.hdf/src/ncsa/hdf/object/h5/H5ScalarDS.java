@@ -146,7 +146,7 @@ public class H5ScalarDS extends ScalarDS {
             did = -1;
         }
 
-        return (int) did;
+        return did;
     }
 
     /*
