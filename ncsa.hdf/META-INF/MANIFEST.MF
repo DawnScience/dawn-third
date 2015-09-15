@@ -22,12 +22,10 @@ Export-Package: ncsa.hdf.hdf5lib,
  ncsa.hdf.hdf5lib.callbacks,
  ncsa.hdf.hdf5lib.exceptions,
  ncsa.hdf.hdf5lib.structs,
- ncsa.hdf.hdflib,
  ncsa.hdf.object,
- ncsa.hdf.object.fits,
- ncsa.hdf.object.h4,
  ncsa.hdf.object.h5
-Bundle-ClassPath: .,
- jars/fits.jar,
- jars/netcdf.jar
-Import-Package: org.slf4j;version="[1.7.6,1.7.7)"
+Bundle-ClassPath: .
+Import-Package: org.hamcrest.core;version="1.1.0",
+ org.junit;version="[4.10.0,5.0.0)",
+ org.slf4j;version="[1.7.6,1.7.7)"
+
