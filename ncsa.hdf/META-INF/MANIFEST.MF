@@ -5,17 +5,17 @@ Bundle-SymbolicName: ncsa.hdf;singleton:=true
 Bundle-Vendor: The HDF Group
 Bundle-Version: 2.9.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-NativeCode: lib/linux-x86/libjhdf.so; lib/linux-x86/libjhdf5.so;
+Bundle-NativeCode: lib/linux-x86/libjhdf5.so;
  osname=Linux; processor=x86,
- lib/linux-x86_64/libjhdf.so; lib/linux-x86_64/libjhdf5.so;
+ lib/linux-x86_64/libjhdf5.so;
  osname=Linux; processor=x86_64,
- lib/win32-x86/jhdf.dll; lib/win32-x86/jhdf5.dll;
+ lib/win32-x86/jhdf5.dll;
  osname=Win32; processor=x86,
- lib/win32-x86_64/jhdf.dll; lib/win32-x86_64/jhdf5.dll;
+ lib/win32-x86_64/jhdf5.dll;
  osname=Win32; processor=x86_64,
- lib/mac-x86/libjhdf.jnilib; lib/mac-x86/libjhdf5.jnilib;
+ lib/mac-x86/libjhdf5.jnilib;
  osname=macosx; osname=Mac OS X;  osname=MacOS; processor=x86,
- lib/mac-x86_64/libjhdf.jnilib; lib/mac-x86_64/libjhdf5.jnilib;
+ lib/mac-x86_64/libjhdf5.jnilib;
  osname=macosx; osname=Mac OS X;  osname=MacOS; processor=x86_64,
  *
 Export-Package: ncsa.hdf.hdf5lib,
