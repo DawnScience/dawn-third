@@ -274,7 +274,13 @@ public class H5 implements java.io.Serializable {
         // Make sure that the library is loaded only once
         if (isLibraryLoaded)
             return;
-        
+
+		try {
+			System.loadLibrary("libwinpthread-1");
+		} catch (UnsatisfiedLinkError e) {
+			// do nothing as only in Windows (so much for write once...)
+		}
+
         // first try loading library by name from user supplied library path
         s_libraryName = System.getProperty(H5_LIBRARY_NAME_PROPERTY_KEY, null);
         String mappedName = null;
