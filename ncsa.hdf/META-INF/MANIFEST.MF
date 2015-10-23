@@ -11,7 +11,7 @@ Bundle-NativeCode: lib/linux-x86/libjhdf5.so;
  osname=Linux; processor=x86_64,
  lib/win32-x86/jhdf5.dll;
  osname=Win32; processor=x86,
- lib/win32-x86_64/jhdf5.dll;
+ lib/win32-x86_64/jhdf5.dll; lib/win32-x86_64/libwinpthread-1.dll;
  osname=Win32; processor=x86_64,
  lib/mac-x86/libjhdf5.jnilib;
  osname=macosx; osname=Mac OS X;  osname=MacOS; processor=x86,
