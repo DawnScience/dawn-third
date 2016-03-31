@@ -382,7 +382,7 @@ public class H5Datatype extends Datatype {
         else {
             try {
                 tclass = H5.H5Tget_class(tid);
-                tsize = H5.H5Tget_size(tid);
+                tsize = (int) H5.H5Tget_size(tid);
                 torder = H5.H5Tget_order(tid);
                 isVLEN = (tclass == HDF5Constants.H5T_VLEN);
             }
@@ -474,7 +474,7 @@ public class H5Datatype extends Datatype {
                         name = H5.H5Tget_member_name(tid, i);
                         H5.H5Tget_member_value(tid, i, val);
                         enumStr += name + "=";
-                        switch (H5.H5Tget_size(tid)) {
+                        switch ((int) H5.H5Tget_size(tid)) {
                         case 1:
                             enumStr += (HDFNativeData.byteToByte(val[0]))[0];
                             break;
@@ -750,7 +750,7 @@ public class H5Datatype extends Datatype {
         	long ptid = tid;
             try {
                 tid = H5.H5Tenum_create(ptid);
-                datatypeSize = H5.H5Tget_size(tid);
+                datatypeSize = (int) H5.H5Tget_size(tid);
             }
             catch (Exception ex) {
                 log.debug("toNative create members", ex);
@@ -912,7 +912,7 @@ public class H5Datatype extends Datatype {
 
         try {
             tclass = H5.H5Tget_class(tid);
-            tsize = H5.H5Tget_size(tid);
+            tsize = (int) H5.H5Tget_size(tid);
             log.trace("allocateArray tclass={} : tsize={}", tclass, tsize);
         }
         catch (Exception ex) {
@@ -1044,7 +1044,7 @@ public class H5Datatype extends Datatype {
         int tsize = -1;
 
         try {
-            tsize = H5.H5Tget_size(tid);
+            tsize = (int) H5.H5Tget_size(tid);
         }
         catch (Exception ex) {
             tsize = -1;
@@ -1089,7 +1089,7 @@ public class H5Datatype extends Datatype {
 
         try {
             tclass = H5.H5Tget_class(tid);
-            tsize = H5.H5Tget_size(tid);
+            tsize = (int) H5.H5Tget_size(tid);
         }
         catch (Exception ex) {
             log.debug("getDatatypeDescription Unknown:", ex);
