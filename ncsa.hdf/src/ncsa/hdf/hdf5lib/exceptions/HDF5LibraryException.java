@@ -1,13 +1,17 @@
-/****************************************************************************
- * NCSA HDF5                                                                 *
- * National Comptational Science Alliance                                   *
- * University of Illinois at Urbana-Champaign                               *
- * 605 E. Springfield, Champaign IL 61820                                   *
- *                                                                          *
- * For conditions of distribution and use, see the accompanying             *
- * hdf-java/COPYING file.                                                  *
- *                                                                          *
- ****************************************************************************/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by The HDF Group.                                               *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
+ * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 package ncsa.hdf.hdf5lib.exceptions;
 
@@ -23,7 +27,7 @@ import ncsa.hdf.hdf5lib.HDF5Constants;
  * minor error code from the HDF-5 Library.
  * <p>
  * For major and minor error codes, see <b>H5Epublic.h</b> in the HDF-5 library.
- * <p>
+ *
  */
 
 @SuppressWarnings("serial")
@@ -50,7 +54,7 @@ public class HDF5LibraryException extends HDF5Exception {
     /**
      * Constructs an <code>HDF5LibraryException</code> with the specified detail
      * message.
-     * 
+     *
      * @param s
      *            the detail message.
      */
@@ -69,7 +73,7 @@ public class HDF5LibraryException extends HDF5Exception {
     /**
      * Get the major error number of the first error on the HDF5 library error
      * stack.
-     * 
+     *
      * @return the major error number
      */
     public native long getMajorErrorNumber();
@@ -77,7 +81,7 @@ public class HDF5LibraryException extends HDF5Exception {
     /**
      * Get the minor error number of the first error on the HDF5 library error
      * stack.
-     * 
+     *
      * @return the minor error number
      */
     public native long getMinorErrorNumber();
@@ -86,14 +90,14 @@ public class HDF5LibraryException extends HDF5Exception {
      * Return a error message for the minor error number.
      * <p>
      * These messages come from <b>H5Epublic.h</b>.
-     * 
+     *
      * @param err_code
      *            the error code
-     * 
+     *
      * @return the string of the minor error
      */
     public String getMinorError(long err_code) {
-        if (err_code == HDF5Constants.H5E_NONE_MINOR) {
+        if (err_code == 0) {
             return "special zero no error";
         }
         else if (err_code == HDF5Constants.H5E_UNINITIALIZED) {
@@ -336,7 +340,7 @@ public class HDF5LibraryException extends HDF5Exception {
      * stack, and and the Java stack trace to the standard error stream.
      */
     @Override
-	public void printStackTrace() {
+    public void printStackTrace() {
         System.err.println(this);
         printStackTrace0(null); // the HDF-5 Library error stack
         super.printStackTrace(); // the Java stack trace
@@ -345,7 +349,9 @@ public class HDF5LibraryException extends HDF5Exception {
     /**
      * Prints this <code>HDF5LibraryException</code> the HDF-5 Library error
      * stack, and and the Java stack trace to the specified print stream.
-     * 
+     *
+     * @param f
+     *            the file print stream.
      */
     public void printStackTrace(java.io.File f) {
         if ((f == null) || !f.exists() || f.isDirectory() || !f.canWrite()) {
