@@ -1,15 +1,18 @@
-/****************************************************************************
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
- * This file is part of HDF Java Products. The full HDF Java copyright       *
- * notice, including terms governing use, modification, and redistribution,  *
- * is contained in the file, COPYING.  COPYING can be found at the root of   *
- * the source code distribution tree. You can also access it online  at      *
- * http://www.hdfgroup.org/products/licenses.html.  If you do not have       *
- * access to the file, you may request a copy from help@hdfgroup.org.        *
- ****************************************************************************/
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
+ * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 
 package ncsa.hdf.hdf5lib;
 
@@ -41,12 +44,15 @@ public class HDFArray {
     /**
      * The input must be a Java Array (possibly multidimensional) of primitive
      * numbers or sub-classes of Number.
-     * <P>
+     * <p>
      * The input is analysed to determine the number of dimensions and size of
      * each dimension, as well as the type of the elements.
-     * <P>
+     * <p>
      * The description is saved in private variables, and used to convert data.
-     * 
+     *
+     * @param anArray
+     *            The array object.
+     *
      * @exception ncsa.hdf.hdf5lib.exceptions.HDF5Exception
      *                object is not an array.
      */
@@ -76,15 +82,15 @@ public class HDFArray {
 
     /**
      * Allocate a one-dimensional array of bytes sufficient to store the array.
-     * 
+     *
      * @return A one-D array of bytes, filled with zeroes. The bytes are
      *         sufficient to hold the data of the Array passed to the
      *         constructor.
-     * @exception ncsa.hdf.hdf5lib.exception.HDF5JavaException
+     * @exception ncsa.hdf.hdf5lib.exceptions.HDF5JavaException
      *                Allocation failed.
      */
 
-    public byte[] emptyBytes() throws HDF5Exception {
+    public byte[] emptyBytes() throws HDF5JavaException {
         byte[] b = null;
 
         if ((ArrayDescriptor.dims == 1) && (ArrayDescriptor.NT == 'B')) {
@@ -104,15 +110,13 @@ public class HDFArray {
     /**
      * Given a Java array of numbers, convert it to a one-dimensional array of
      * bytes in correct native order.
-     * 
+     *
      * @return A one-D array of bytes, constructed from the Array passed to the
      *         constructor.
-     * @exception ncsa.hdf.hdf5lib.exception.HDF5Exception
-     *                thrown for errors in HDF5
-     * @exception ncsa.hdf.hdf5lib.exception.HDF5JavaException
+     * @exception ncsa.hdf.hdf5lib.exceptions.HDF5JavaException
      *                the object not an array or other internal error.
      */
-    public byte[] byteify() throws HDF5Exception {
+    public byte[] byteify() throws HDF5JavaException {
 
         if (_barray != null) {
             return _barray;
@@ -368,17 +372,15 @@ public class HDFArray {
     /**
      * Given a one-dimensional array of bytes representing numbers, convert it
      * to a java array of the shape and size passed to the constructor.
-     * 
+     *
      * @param bytes
      *            The bytes to construct the Array.
      * @return An Array (possibly multidimensional) of primitive or number
      *         objects.
-     * @exception ncsa.hdf.hdf5lib.exception.HDF5Exception
-     *                thrown for errors in HDF5
-     * @exception ncsa.hdf.hdf5lib.exception.HDF5JavaException
+     * @exception ncsa.hdf.hdf5lib.exceptions.HDF5JavaException
      *                the object not an array or other internal error.
      */
-    public Object arrayify(byte[] bytes) throws HDF5Exception {
+    public Object arrayify(byte[] bytes) throws HDF5JavaException {
 
         if (_theArray == null) {
             /* exception: not an array */
