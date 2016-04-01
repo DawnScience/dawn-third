@@ -259,7 +259,7 @@ public class H5File extends FileFormat {
      */
     public static final void copyAttributes(long src_id, long dst_id) {
     	long aid_src = -1, aid_dst = -1, atid = -1, asid = -1;
-        String[] aName = { "" };
+        String aName;
         H5O_info_t obj_info = null;
 
         try {
@@ -274,16 +274,14 @@ public class H5File extends FileFormat {
         }
 
         for (int i = 0; i < obj_info.num_attrs; i++) {
-            aName[0] = new String("");
-
             try {
                 aid_src = H5.H5Aopen_by_idx(src_id, ".", HDF5Constants.H5_INDEX_CRT_ORDER, HDF5Constants.H5_ITER_INC,
                         i, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-                H5.H5Aget_name(aid_src, H5File.attrNameLen, aName);
+                aName = H5.H5Aget_name(aid_src);
                 atid = H5.H5Aget_type(aid_src);
                 asid = H5.H5Aget_space(aid_src);
 
-                aid_dst = H5.H5Acreate(dst_id, aName[0], atid, asid, HDF5Constants.H5P_DEFAULT,
+                aid_dst = H5.H5Acreate(dst_id, aName, atid, asid, HDF5Constants.H5P_DEFAULT,
                         HDF5Constants.H5P_DEFAULT);
 
                 // use native data copy
@@ -410,8 +408,7 @@ public class H5File extends FileFormat {
                         lsize *= dims[j];
                     }
                 }
-                String[] nameA = { "" };
-                H5.H5Aget_name(aid, H5File.attrNameLen, nameA);
+                String nameA = H5.H5Aget_name(aid);
                 log.trace("getAttribute: attribute[{}] is {}", i, nameA);
 
                 long tmptid = -1;
@@ -429,7 +426,7 @@ public class H5File extends FileFormat {
                     }
                 }
                 Datatype attrType = new H5Datatype(tid);
-                Attribute attr = new Attribute(nameA[0], attrType, dims);
+                Attribute attr = new Attribute(nameA, attrType, dims);
                 attributeList.add(attr);
                 log.trace("getAttribute: attribute[{}] Datatype={}", i, attrType.getDatatypeDescription());
 
@@ -510,7 +507,7 @@ public class H5File extends FileFormat {
 
                     if (tclass == HDF5Constants.H5T_STRING) {
                         log.trace("getAttribute: attribute[{}] byteToString", i);
-                        value = Dataset.byteToString((byte[]) value, H5.H5Tget_size(tid));
+                        value = Dataset.byteToString((byte[]) value, (int) H5.H5Tget_size(tid));
                     }
                     else if (tclass == HDF5Constants.H5T_REFERENCE) {
                         log.trace("getAttribute: attribute[{}] byteToLong", i);
@@ -1022,7 +1019,7 @@ public class H5File extends FileFormat {
         if (rootPath == null) {
             rootPath = System.getProperty("user.dir");
         }
-        H5.H5Dchdir_ext(rootPath);
+        System.setProperty("user.dir", rootPath);//H5.H5Dchdir_ext(rootPath);
 
         // clean up unused objects
         if (rootNode != null) {
@@ -1044,13 +1041,13 @@ public class H5File extends FileFormat {
 
         // Close all open objects associated with this file.
         try {
-            int n = 0;
+            long n = 0;
             long type = -1;
             long oids[];
             n = H5.H5Fget_obj_count(fid, HDF5Constants.H5F_OBJ_ALL);
 
             if (n > 0) {
-                oids = new long[n];
+                oids = new long[(int) n];
                 H5.H5Fget_obj_ids(fid, HDF5Constants.H5F_OBJ_ALL, n, oids);
 
                 for (int i = 0; i < n; i++) {
@@ -1799,9 +1796,9 @@ public class H5File extends FileFormat {
                             log.trace("{} writeAttribute CLASS_REFERENCE", name);
                         }
                         else if (Array.get(attrValue, 0) instanceof String) {
-                            int size = H5.H5Tget_size(tid);
+                            long size = H5.H5Tget_size(tid);
                             int len = ((String[]) attrValue).length;
-                            byte[] bval = Dataset.stringToByte((String[]) attrValue, size);
+                            byte[] bval = Dataset.stringToByte((String[]) attrValue, (int) size);
                             if (bval != null && bval.length == size * len) {
                                 bval[bval.length - 1] = 0;
                                 attrValue = bval;
@@ -1932,7 +1929,7 @@ public class H5File extends FileFormat {
         if (rootPath == null) {
             rootPath = System.getProperty("user.dir");
         }
-        H5.H5Dchdir_ext(rootPath);
+        System.setProperty("user.dir", rootPath);//H5.H5Dchdir_ext(rootPath);
 
         // check for valid file access permission
         if (flag < 0) {
@@ -2849,7 +2846,7 @@ public class H5File extends FileFormat {
         if (link_info != null) {
             if ((link_info.type == HDF5Constants.H5L_TYPE_SOFT) || (link_info.type == HDF5Constants.H5L_TYPE_EXTERNAL)) {
                 try {
-                    H5.H5Lget_val(obj.getFID(), obj.getFullName(), link_value, HDF5Constants.H5P_DEFAULT);
+                    H5.H5Lget_value(obj.getFID(), obj.getFullName(), link_value, HDF5Constants.H5P_DEFAULT);
                 }
                 catch (Exception ex) {
                     log.debug("H5Lget_val {} failure: ", obj.getFullName(), ex);
