@@ -7,7 +7,9 @@ Bundle-Version: 2.9.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-NativeCode: lib/linux-x86/libjhdf5.so;
  osname=Linux; processor=x86,
- lib/linux-x86_64/libhdf5.so; lib/linux-x86_64/libhdf5_java.so;
+ lib/linux-x86_64/libh5zlz4.so;
+ lib/linux-x86_64/libhdf5_java.so;
+ lib/linux-x86_64/libhdf5.so;
  osname=Linux; processor=x86_64,
  lib/win32-x86/jhdf5.dll;
  osname=Win32; processor=x86,
