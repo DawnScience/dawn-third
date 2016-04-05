@@ -262,12 +262,6 @@ public class H5 implements java.io.Serializable {
         if (isLibraryLoaded)
             return;
 
-        try {
-            System.loadLibrary("libwinpthread-1");
-        } catch (UnsatisfiedLinkError e) {
-            // do nothing as only in Windows (so much for write once...)
-        }
-
         // first try loading library by name from user supplied library path
         s_libraryName = System.getProperty(H5_LIBRARY_NAME_PROPERTY_KEY, null);
         String mappedName = null;
@@ -317,13 +311,27 @@ public class H5 implements java.io.Serializable {
 
         // else load standard library
         if (!isLibraryLoaded) {
+        	
+            boolean isWindows = System.getProperty("os.name").startsWith("Windows");
+
+            if (isWindows) {
+            	try {
+	                System.loadLibrary("libwinpthread-1");
+	                System.loadLibrary("zlib1");
+            	} catch (UnsatisfiedLinkError e) {
+                    isLibraryLoaded = false;
+                    throw new UnsatisfiedLinkError("Could not load Windows-specific dependencies");
+            	}
+            }
+            
+            String libNameFormat = isWindows ?  "lib%s-100" : "%s"; // need to do this to minimise build differences
             try {
                 // to need to preload dependent library (as its internal link is wrong most of the time)  
-                System.loadLibrary("hdf5");
+                System.loadLibrary(String.format(libNameFormat, "hdf5"));
 
-                s_libraryName = "hdf5_java";
+                s_libraryName = String.format(libNameFormat, "hdf5_java");
                 mappedName = System.mapLibraryName(s_libraryName);
-                System.loadLibrary("hdf5_java");
+                System.loadLibrary(s_libraryName);
                 isLibraryLoaded = true;
             }
             catch (Throwable err) {
