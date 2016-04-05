@@ -5,8 +5,9 @@ Bundle-SymbolicName: ncsa.hdf;singleton:=true
 Bundle-Vendor: The HDF Group
 Bundle-Version: 2.9.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-NativeCode: lib/linux-x86_64/libhdf5.so;
+Bundle-NativeCode: lib/linux-x86_64/libh5zlz4.so;
  lib/linux-x86_64/libhdf5_java.so;
+ lib/linux-x86_64/libhdf5.so;
  osname=Linux; processor=x86_64,
  lib/win32-x86_64/libhdf5_java-100.dll; lib/win32-x86_64/libhdf5-100.dll;
  lib/win32-x86_64/zlib1.dll; lib/win32-x86_64/libwinpthread-1.dll;
