@@ -12,7 +12,7 @@ Bundle-NativeCode: lib/linux-x86_64/libh5zlz4.so;
  lib/win32-x86_64/libhdf5_java-100.dll; lib/win32-x86_64/libhdf5-100.dll;
  lib/win32-x86_64/zlib1.dll; lib/win32-x86_64/libwinpthread-1.dll;
  osname=Win32; processor=x86_64,
- lib/mac-x86_64/libjhdf5.jnilib;
+ lib/macosx-x86_64/libjhdf5.jnilib;
  osname=macosx; osname=Mac OS X;  osname=MacOS; processor=x86_64,
  *
 Export-Package: ncsa.hdf.hdf5lib,
