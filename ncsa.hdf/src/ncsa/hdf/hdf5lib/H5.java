@@ -311,20 +311,20 @@ public class H5 implements java.io.Serializable {
 
         // else load standard library
         if (!isLibraryLoaded) {
-        	
-            boolean isWindows = System.getProperty("os.name").startsWith("Windows");
+            String osName = System.getProperty("os.name");
+            boolean isWindows = osName.startsWith("Windows");
 
             if (isWindows) {
-            	try {
+                try {
 	                System.loadLibrary("libwinpthread-1");
 	                System.loadLibrary("zlib1");
-            	} catch (UnsatisfiedLinkError e) {
+                } catch (UnsatisfiedLinkError e) {
                     isLibraryLoaded = false;
                     throw new UnsatisfiedLinkError("Could not load Windows-specific dependencies");
-            	}
+                }
             }
             
-            String libNameFormat = isWindows ?  "lib%s-100" : "%s"; // need to do this to minimise build differences
+            String libNameFormat = isWindows ?  "lib%s-100" : (osName.startsWith("Mac OS X") ? "%s.100" : "%s"); // need to do this to minimise build differences
             try {
                 // to need to preload dependent library (as its internal link is wrong most of the time)  
                 System.loadLibrary(String.format(libNameFormat, "hdf5"));
@@ -335,8 +335,15 @@ public class H5 implements java.io.Serializable {
                 isLibraryLoaded = true;
             }
             catch (Throwable err) {
-                err.printStackTrace();
-                isLibraryLoaded = false;
+                try { // final attempt for legacy stuff TODO remove
+                    s_libraryName = "jhdf5";
+                    mappedName = System.mapLibraryName(s_libraryName);
+                    System.loadLibrary(s_libraryName);
+                    isLibraryLoaded = true;
+                } catch (Throwable t) {
+                    err.printStackTrace();
+                    isLibraryLoaded = false;
+                }
             }
             finally {
                 log.info("HDF5 library: " + s_libraryName);
