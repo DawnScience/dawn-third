@@ -17,7 +17,6 @@ import java.awt.im.InputContext;
 import java.io.*;
 import java.util.*;
 import javax.swing.*;
-import javax.swing.text.*;
 
 /**
  * The DropFileTransferHandler can be used to add drag and drop

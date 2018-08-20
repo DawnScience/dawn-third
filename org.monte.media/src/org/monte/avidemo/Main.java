@@ -11,7 +11,6 @@
 package org.monte.avidemo;
 
 import org.monte.media.avi.AVIReader;
-import org.monte.media.Buffer;
 import org.monte.media.math.Rational;
 import org.monte.media.avi.AVIWriter;
 import org.monte.media.Format;

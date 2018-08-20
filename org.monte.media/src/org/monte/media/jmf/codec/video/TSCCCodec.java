@@ -15,7 +15,6 @@ import org.monte.media.io.SeekableByteArrayOutputStream;
 import com.sun.media.format.AviVideoFormat;
 import java.awt.Dimension;
 import java.io.IOException;
-import java.util.Arrays;
 import javax.media.Buffer;
 import javax.media.Format;
 import javax.media.ResourceUnavailableException;

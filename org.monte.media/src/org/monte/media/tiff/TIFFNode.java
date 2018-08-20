@@ -11,12 +11,10 @@
 package org.monte.media.tiff;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Stack;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  * TIFFNode.

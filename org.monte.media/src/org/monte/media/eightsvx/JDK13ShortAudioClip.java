@@ -11,7 +11,6 @@
 
 package org.monte.media.eightsvx;
 
-import java.applet.*;
 import javax.sound.sampled.*;
 /**
  * JDK13ShortAudioClip.

@@ -10,8 +10,6 @@
  */
 package org.monte.media.tiff;
 
-import java.awt.image.BufferedImage;
-
 /**
  * A field in a {@link TIFFDirectory}.
  *

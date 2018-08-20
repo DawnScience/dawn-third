@@ -12,7 +12,6 @@
 package org.monte.media.gui.datatransfer;
 
 import java.awt.datatransfer.*;
-import java.io.*;
 
 /**
  * Base class for transferable objects.

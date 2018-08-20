@@ -13,7 +13,6 @@
  */
 package org.monte.media.jpeg;
 
-import org.monte.media.io.ByteArrayImageInputStream;
 import java.awt.color.ColorSpace;
 import java.awt.color.ICC_ColorSpace;
 import java.awt.color.ICC_Profile;

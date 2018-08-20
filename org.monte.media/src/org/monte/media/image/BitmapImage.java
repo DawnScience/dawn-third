@@ -17,8 +17,6 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.IndexColorModel;
 import java.awt.image.DirectColorModel;
 import java.awt.image.Raster;
-import java.util.zip.Adler32;
-import javax.swing.JFrame;
 
 /**
  * A BitmapImage is comprised of a ColorModel and an accessible byte array of

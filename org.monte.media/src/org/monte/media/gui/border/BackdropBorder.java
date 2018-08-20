@@ -12,7 +12,6 @@
 package org.monte.media.gui.border;
 
 import java.awt.*;
-import javax.swing.*;
 import javax.swing.border.*;
 /**
  * BackdropBorder has a foreground border and a background border.

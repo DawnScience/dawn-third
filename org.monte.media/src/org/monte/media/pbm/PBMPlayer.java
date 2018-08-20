@@ -18,7 +18,6 @@ import org.monte.media.MovieControl;
 import org.monte.media.ColorCyclePlayer;
 import org.monte.media.ilbm.ColorCyclingMemoryImageSource;
 import java.awt.Component;
-import java.awt.image.ColorModel;
 import java.awt.image.ImageProducer;
 import java.io.IOException;
 import java.io.InputStream;

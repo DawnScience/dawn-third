@@ -11,7 +11,6 @@
 package org.monte.media.anim;
 
 import org.monte.media.seq.SEQMovieTrack;
-import org.monte.media.seq.*;
 import org.monte.media.image.BitmapImage;
 import java.io.BufferedInputStream;
 import java.io.File;

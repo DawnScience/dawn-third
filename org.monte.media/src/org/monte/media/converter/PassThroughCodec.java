@@ -12,9 +12,7 @@ package org.monte.media.converter;
 
 import org.monte.media.AbstractCodec;
 import org.monte.media.Buffer;
-import org.monte.media.BufferFlag;
 import org.monte.media.Format;
-import org.monte.media.math.Rational;
 
 /**
  * {@code PassThroughCodec} passes through all buffers.

@@ -11,18 +11,14 @@
 package org.monte.media.avi;
 
 import org.monte.media.riff.RIFFChunk;
-import java.util.Map;
 import org.monte.media.Buffer;
 import org.monte.media.Codec;
 import org.monte.media.Format;
-import org.monte.media.io.SubImageOutputStream;
 import java.awt.Dimension;
 import java.awt.image.IndexColorModel;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import javax.imageio.stream.ImageOutputStream;
 import static org.monte.media.VideoFormatKeys.*;

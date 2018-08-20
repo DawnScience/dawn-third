@@ -10,7 +10,6 @@
  */
 package org.monte.media.image;
 
-import java.util.Arrays;
 import org.monte.media.math.LinearEquations;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;

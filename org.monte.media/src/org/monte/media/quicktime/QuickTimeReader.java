@@ -19,7 +19,6 @@ import org.monte.media.Format;
 import org.monte.media.MovieReader;
 import org.monte.media.math.Rational;
 import static org.monte.media.FormatKeys.*;
-import static org.monte.media.AudioFormatKeys.*;
 import static org.monte.media.VideoFormatKeys.*;
 import org.monte.media.Codec;
 import org.monte.media.Registry;

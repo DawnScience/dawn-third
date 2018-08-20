@@ -11,7 +11,6 @@
 
 package org.monte.media.anim;
 
-import java.util.EnumSet;
 import org.monte.media.Buffer;
 import org.monte.media.Track;
 import org.monte.media.image.BitmapImage;

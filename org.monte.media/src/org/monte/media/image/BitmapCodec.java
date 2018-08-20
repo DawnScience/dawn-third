@@ -12,7 +12,6 @@ package org.monte.media.image;
 
 import org.monte.media.AbstractVideoCodec;
 import org.monte.media.Buffer;
-import org.monte.media.Codec;
 import org.monte.media.Format;
 import org.monte.media.ilbm.ColorCyclingMemoryImageSource;
 import org.monte.media.ilbm.ILBMDecoder;

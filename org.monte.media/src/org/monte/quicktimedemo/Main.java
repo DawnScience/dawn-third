@@ -10,9 +10,7 @@
  */
 package org.monte.quicktimedemo;
 
-import org.monte.quicktimedemo.*;
 import org.monte.media.quicktime.QuickTimeReader;
-import org.monte.media.Buffer;
 import org.monte.media.math.Rational;
 import org.monte.media.quicktime.QuickTimeWriter;
 import org.monte.media.Format;

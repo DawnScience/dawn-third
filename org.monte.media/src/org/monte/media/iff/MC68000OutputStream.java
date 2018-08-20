@@ -11,7 +11,6 @@
 package org.monte.media.iff;
 
 import java.io.*;
-import java.util.Arrays;
 
 /**
  * MC68000OutputStream.

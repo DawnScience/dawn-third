@@ -16,7 +16,6 @@ import org.monte.media.Track;
 import org.monte.media.Format;
 import org.monte.media.image.BitmapImage;
 import org.monte.media.math.Rational;
-import java.io.IOException;
 import static org.monte.media.VideoFormatKeys.*;
 import static org.monte.media.BufferFlag.*;
 

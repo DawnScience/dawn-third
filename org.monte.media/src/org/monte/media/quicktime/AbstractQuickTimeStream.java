@@ -10,7 +10,6 @@
  */
 package org.monte.media.quicktime;
 
-import java.io.UnsupportedEncodingException;
 import org.monte.media.Buffer;
 import org.monte.media.Codec;
 import org.monte.media.Format;

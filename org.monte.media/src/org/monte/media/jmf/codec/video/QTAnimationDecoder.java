@@ -10,13 +10,8 @@
  */
 package org.monte.media.jmf.codec.video;
 
-import org.monte.media.quicktime.AnimationCodec;
-import java.awt.image.BufferedImage;
 import javax.media.Buffer;
 import javax.media.Format;
-import javax.media.ResourceUnavailableException;
-import javax.media.format.RGBFormat;
-import javax.media.format.VideoFormat;
 
 /**
  * {@code QTAnimationDecoder}.

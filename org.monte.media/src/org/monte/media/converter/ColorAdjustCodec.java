@@ -12,7 +12,6 @@ package org.monte.media.converter;
 
 import org.monte.media.BezierInterpolator;
 import org.monte.media.SplineInterpolator;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import org.monte.media.AbstractVideoCodec;
 import org.monte.media.Buffer;

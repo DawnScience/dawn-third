@@ -12,7 +12,6 @@ package org.monte.media.avi;
 
 import org.monte.media.Codec;
 import java.awt.image.BufferedImage;
-import java.awt.image.IndexColorModel;
 import java.util.EnumSet;
 import org.monte.media.math.Rational;
 import org.monte.media.Format;

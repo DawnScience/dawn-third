@@ -67,7 +67,6 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.TargetDataLine;
-import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 
 /**

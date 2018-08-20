@@ -17,7 +17,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import static org.monte.media.FormatKeys.*;
-import static org.monte.media.AudioFormatKeys.*;
 import static org.monte.media.anim.AmigaVideoFormatKeys.*;
 
 /**

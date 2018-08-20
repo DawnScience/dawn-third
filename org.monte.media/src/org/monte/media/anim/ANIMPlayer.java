@@ -15,7 +15,6 @@ import org.monte.media.ColorCyclePlayer;
 import org.monte.media.AbstractPlayer;
 import org.monte.media.gui.JMovieControlAqua;
 import org.monte.media.image.BitmapImage;
-import org.monte.media.*;
 import org.monte.media.gui.ImagePanel;
 import org.monte.media.io.BoundedRangeInputStream;
 import org.monte.media.ilbm.ColorCycle;

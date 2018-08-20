@@ -14,7 +14,6 @@ package org.monte.media.io;
 
 import java.io.OutputStream;
 import javax.imageio.stream.ImageOutputStreamImpl;
-import java.io.ByteArrayOutputStream;
 import javax.imageio.stream.ImageOutputStream;
 import java.io.IOException;
 import java.util.Arrays;

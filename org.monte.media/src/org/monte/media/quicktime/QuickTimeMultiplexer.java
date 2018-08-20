@@ -11,12 +11,9 @@
 
 package org.monte.media.quicktime;
 
-import org.monte.media.Buffer;
 import org.monte.media.Multiplexer;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import javax.imageio.stream.ImageOutputStream;
 
 /**

@@ -10,9 +10,7 @@
  */
 package org.monte.media;
 
-import java.awt.geom.Point2D.Float;
 import java.util.Comparator;
-import java.util.ArrayList;
 import java.awt.geom.Point2D;
 import java.util.Arrays;
 import static java.lang.Math.*;

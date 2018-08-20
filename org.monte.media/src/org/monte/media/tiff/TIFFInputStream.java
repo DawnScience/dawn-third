@@ -11,9 +11,7 @@
 package org.monte.media.tiff;
 
 import org.monte.media.math.Rational;
-import java.io.DataInputStream;
 import java.io.EOFException;
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteOrder;

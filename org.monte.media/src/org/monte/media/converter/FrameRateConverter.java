@@ -16,7 +16,6 @@ import org.monte.media.Format;
 import java.util.ArrayList;
 import org.monte.media.math.Rational;
 import java.awt.image.BufferedImage;
-import static java.lang.Math.*;
 import static org.monte.media.VideoFormatKeys.*;
 import static org.monte.media.BufferFlag.*;
 

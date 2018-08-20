@@ -15,8 +15,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.awt.image.ImageObserver;
 import java.awt.image.WritableRaster;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Scales an image down and applies Subpixel antialiasing to it.

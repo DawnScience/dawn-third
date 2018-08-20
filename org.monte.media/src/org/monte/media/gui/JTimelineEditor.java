@@ -39,7 +39,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import javax.swing.SwingUtilities;
-import static java.lang.Math.*;
 
 /**
  * JTimelineEditor visualizes the movie timeline, an insertion point and

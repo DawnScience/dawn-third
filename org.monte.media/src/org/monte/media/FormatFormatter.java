@@ -6,7 +6,6 @@ package org.monte.media;
 
 import java.nio.ByteOrder;
 import static org.monte.media.AudioFormatKeys.*;
-import static org.monte.media.FormatKeys.*;
 import org.monte.media.FormatKeys.MediaType;
 import static org.monte.media.VideoFormatKeys.*;
 import org.monte.media.math.Rational;

@@ -11,7 +11,6 @@
 package org.monte.media.quicktime;
 
 import java.awt.image.ColorModel;
-import java.util.Arrays;
 import org.monte.media.Format;
 import org.monte.media.io.ImageOutputStreamAdapter;
 import org.monte.media.math.Rational;

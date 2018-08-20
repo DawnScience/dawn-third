@@ -20,7 +20,6 @@ import org.monte.media.tiff.TIFFDirectory;
 import org.monte.media.tiff.TIFFField;
 import org.monte.media.tiff.TIFFNode;
 import org.monte.media.tiff.TIFFTag;
-import com.sun.imageio.plugins.jpeg.JPEGImageReader;
 import java.awt.image.BufferedImage;
 import java.awt.image.DirectColorModel;
 import java.io.IOException;
