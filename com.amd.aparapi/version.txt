@@ -1,3 +1,0 @@
-Version taken from binary at https://code.google.com/p/aparapi/downloads
-
-Date of binary Jan 23
