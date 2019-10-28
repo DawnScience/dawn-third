@@ -1,0 +1,42 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<modelVersion>4.0.0</modelVersion>
+<groupId>uk.ac.diamond</groupId>
+<artifactId>dawn-third</artifactId>
+<version>1.0.0-SNAPSHOT</version>
+<packaging>pom</packaging>
+
+<parent>
+<groupId>uk.ac.diamond</groupId>
+<artifactId>uk.ac.diamond.aggregator</artifactId>
+<version>1.0.0-SNAPSHOT</version>
+</parent>
+
+<modules>
+<!--
+<module>ncsa.hdf.targetplatform</module>-->
+<module>org.dawb.apache.feature</module>
+<module>org.dawb.eclipse.feature</module>
+<module>org.dawb.eclipse.nano.feature</module>
+<module>org.dawb.jlchart</module>
+<module>org.dawb.jmol</module>
+<module>org.dawb.misc.feature</module>
+<module>org.dawb.wst.feature</module>
+<!-- 
+<module>org.dawnsci.usagedata.feature</module>
+<module>org.dawnsci.usagedata.gathering</module>
+<module>org.dawnsci.usagedata.gathering.tests</module>
+<module>org.dawnsci.usagedata.recording</module>
+<module>org.dawnsci.usagedata.recording.tests</module>
+<module>org.dawnsci.usagedata.tests</module>
+<module>org.dawnsci.usagedata.tests.feature</module>
+<module>org.dawnsci.usagedata.ui</module>
+<module>org.dawnsci.usagedata.ui.tests</module>
+ -->
+<module>org.freehep.j3d</module>
+<module>org.monte.media</module>
+
+</modules>
+</project>
+
