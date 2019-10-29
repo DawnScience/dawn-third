@@ -407,12 +407,4 @@ org.apache.commons.math.random:
       <import plugin="jcl.over.slf4j"/>
    </requires>
 
-
-   <plugin
-         id="net.sourceforge.nattable.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
 </feature>
