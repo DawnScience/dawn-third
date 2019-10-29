@@ -408,12 +408,6 @@ org.apache.commons.math.random:
    </requires>
 
    <plugin
-         id="nu.psnet.quickimage"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
          id="net.sourceforge.csveditor"
          download-size="0"
          install-size="0"
